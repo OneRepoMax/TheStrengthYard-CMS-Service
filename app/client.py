@@ -35,9 +35,9 @@ class Client(db.Model):
 #         }
 
 
-# @app.route("/staff/test")
-# def testStaff():
-#     return "staff route is working"
+@app.route("/client/test")
+def testStaff():
+    return "client route is working"
 
 
 # @app.route("/staff")
