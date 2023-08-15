@@ -5,22 +5,22 @@ SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
 -- -----------------------------------------------------
--- Schema mydb
+-- Schema tsy_db
 -- -----------------------------------------------------
-DROP SCHEMA IF EXISTS `mydb` ;
+DROP SCHEMA IF EXISTS `tsy_db` ;
 
 -- -----------------------------------------------------
--- Schema mydb
+-- Schema tsy_db
 -- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
-USE `mydb` ;
+CREATE SCHEMA IF NOT EXISTS `tsy_db` DEFAULT CHARACTER SET utf8 ;
+USE `tsy_db` ;
 
 -- -----------------------------------------------------
--- Table `mydb`.`User`
+-- Table `tsy_db`.`User`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`User` ;
+DROP TABLE IF EXISTS `tsy_db`.`User` ;
 
-CREATE TABLE IF NOT EXISTS `mydb`.`User` (
+CREATE TABLE IF NOT EXISTS `tsy_db`.`User` (
   `UserId` INT NOT NULL AUTO_INCREMENT,
   `EmailAddress` VARCHAR(255) NOT NULL,
   `First Name` LONGTEXT NOT NULL,
@@ -41,11 +41,11 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`Memberships`
+-- Table `tsy_db`.`Memberships`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`Memberships` ;
+DROP TABLE IF EXISTS `tsy_db`.`Memberships` ;
 
-CREATE TABLE IF NOT EXISTS `mydb`.`Memberships` (
+CREATE TABLE IF NOT EXISTS `tsy_db`.`Memberships` (
   `MembershipTypeId` INT NOT NULL AUTO_INCREMENT,
   `Type` VARCHAR(255) NOT NULL,
   `BaseFee` DOUBLE NOT NULL,
@@ -55,11 +55,11 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`MembershipRecord`
+-- Table `tsy_db`.`MembershipRecord`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`MembershipRecord` ;
+DROP TABLE IF EXISTS `tsy_db`.`MembershipRecord` ;
 
-CREATE TABLE IF NOT EXISTS `mydb`.`MembershipRecord` (
+CREATE TABLE IF NOT EXISTS `tsy_db`.`MembershipRecord` (
   `MembershipRecordId` INT NOT NULL AUTO_INCREMENT,
   `UserId` INT NOT NULL,
   `MembershipTypeId` INT NOT NULL,
@@ -70,23 +70,23 @@ CREATE TABLE IF NOT EXISTS `mydb`.`MembershipRecord` (
   INDEX `UserFK_idx` (`UserId` ASC) VISIBLE,
   CONSTRAINT `MembershipTypeFK`
     FOREIGN KEY (`MembershipTypeId`)
-    REFERENCES `mydb`.`Memberships` (`MembershipTypeId`)
+    REFERENCES `tsy_db`.`Memberships` (`MembershipTypeId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `UserFK`
     FOREIGN KEY (`UserId`)
-    REFERENCES `mydb`.`User` (`UserId`)
+    REFERENCES `tsy_db`.`User` (`UserId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`Payment`
+-- Table `tsy_db`.`Payment`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`Payment` ;
+DROP TABLE IF EXISTS `tsy_db`.`Payment` ;
 
-CREATE TABLE IF NOT EXISTS `mydb`.`Payment` (
+CREATE TABLE IF NOT EXISTS `tsy_db`.`Payment` (
   `PaymentId` INT NOT NULL AUTO_INCREMENT,
   `PayPalId` VARCHAR(255) NULL,
   `MembershipRecordId` INT NOT NULL,
@@ -99,18 +99,18 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Payment` (
   UNIQUE INDEX `MembershipRecordId_UNIQUE` (`MembershipRecordId` ASC) VISIBLE,
   CONSTRAINT `MembershipRecordFK`
     FOREIGN KEY (`MembershipRecordId`)
-    REFERENCES `mydb`.`MembershipRecord` (`MembershipRecordId`)
+    REFERENCES `tsy_db`.`MembershipRecord` (`MembershipRecordId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`Class`
+-- Table `tsy_db`.`Class`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`Class` ;
+DROP TABLE IF EXISTS `tsy_db`.`Class` ;
 
-CREATE TABLE IF NOT EXISTS `mydb`.`Class` (
+CREATE TABLE IF NOT EXISTS `tsy_db`.`Class` (
   `ClassId` INT NOT NULL AUTO_INCREMENT,
   `ClassName` VARCHAR(45) NOT NULL,
   `Description` LONGTEXT NOT NULL,
@@ -121,11 +121,11 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`ClassSlot`
+-- Table `tsy_db`.`ClassSlot`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`ClassSlot` ;
+DROP TABLE IF EXISTS `tsy_db`.`ClassSlot` ;
 
-CREATE TABLE IF NOT EXISTS `mydb`.`ClassSlot` (
+CREATE TABLE IF NOT EXISTS `tsy_db`.`ClassSlot` (
   `ClassSlotId` INT NOT NULL,
   `Day` VARCHAR(45) NOT NULL,
   `StartTime` TIMESTAMP NOT NULL,
@@ -135,18 +135,18 @@ CREATE TABLE IF NOT EXISTS `mydb`.`ClassSlot` (
   INDEX `fk_ClassSlot_Class1_idx` (`ClassId` ASC) VISIBLE,
   CONSTRAINT `fk_ClassSlot_Class1`
     FOREIGN KEY (`ClassId`)
-    REFERENCES `mydb`.`Class` (`ClassId`)
+    REFERENCES `tsy_db`.`Class` (`ClassId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`Booking`
+-- Table `tsy_db`.`Booking`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`Booking` ;
+DROP TABLE IF EXISTS `tsy_db`.`Booking` ;
 
-CREATE TABLE IF NOT EXISTS `mydb`.`Booking` (
+CREATE TABLE IF NOT EXISTS `tsy_db`.`Booking` (
   `BookingDate` DATE NOT NULL,
   `ClassDate` DATE NOT NULL,
   `User_UserId` INT NOT NULL,
@@ -156,23 +156,23 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Booking` (
   INDEX `fk_Booking_ClassSlot1_idx` (`ClassSlot_ClassSlotId` ASC, `ClassSlot_Class_ClassId` ASC) VISIBLE,
   CONSTRAINT `fk_Booking_User1`
     FOREIGN KEY (`User_UserId`)
-    REFERENCES `mydb`.`User` (`UserId`)
+    REFERENCES `tsy_db`.`User` (`UserId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_Booking_ClassSlot1`
     FOREIGN KEY (`ClassSlot_ClassSlotId` , `ClassSlot_Class_ClassId`)
-    REFERENCES `mydb`.`ClassSlot` (`ClassSlotId` , `ClassId`)
+    REFERENCES `tsy_db`.`ClassSlot` (`ClassSlotId` , `ClassId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`BlockedDate`
+-- Table `tsy_db`.`BlockedDate`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`BlockedDate` ;
+DROP TABLE IF EXISTS `tsy_db`.`BlockedDate` ;
 
-CREATE TABLE IF NOT EXISTS `mydb`.`BlockedDate` (
+CREATE TABLE IF NOT EXISTS `tsy_db`.`BlockedDate` (
   `BlockedDateID` INT NOT NULL AUTO_INCREMENT,
   `Date` DATE NULL,
   `StartTime` DATETIME NULL,
@@ -182,11 +182,11 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`MembershipLog`
+-- Table `tsy_db`.`MembershipLog`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`MembershipLog` ;
+DROP TABLE IF EXISTS `tsy_db`.`MembershipLog` ;
 
-CREATE TABLE IF NOT EXISTS `mydb`.`MembershipLog` (
+CREATE TABLE IF NOT EXISTS `tsy_db`.`MembershipLog` (
   `MembershipLogId` INT NOT NULL AUTO_INCREMENT,
   `Date` DATE NULL,
   `ActionType` VARCHAR(255) NULL,
@@ -196,7 +196,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`MembershipLog` (
   INDEX `fk_MembershipLog_MembershipRecord1_idx` (`MembershipRecordId` ASC) VISIBLE,
   CONSTRAINT `fk_MembershipLog_MembershipRecord1`
     FOREIGN KEY (`MembershipRecordId`)
-    REFERENCES `mydb`.`MembershipRecord` (`MembershipRecordId`)
+    REFERENCES `tsy_db`.`MembershipRecord` (`MembershipRecordId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
