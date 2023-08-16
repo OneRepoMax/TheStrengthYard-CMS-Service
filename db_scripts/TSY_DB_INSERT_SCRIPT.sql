@@ -23,8 +23,8 @@ DROP TABLE IF EXISTS `tsy_db`.`User` ;
 CREATE TABLE IF NOT EXISTS `tsy_db`.`User` (
   `UserId` INT NOT NULL AUTO_INCREMENT,
   `EmailAddress` VARCHAR(255) NOT NULL,
-  `First Name` LONGTEXT NOT NULL,
-  `Last Name` LONGTEXT NOT NULL,
+  `FirstName` LONGTEXT NOT NULL,
+  `LastName` LONGTEXT NOT NULL,
   `Gender` CHAR(1) NOT NULL,
   `DateOfBirth` DATE NOT NULL,
   `HomeAddress` VARCHAR(45) NOT NULL,
@@ -37,8 +37,13 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`User` (
   `MembershipStatus` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`UserId`),
   UNIQUE INDEX `EmailAddress_UNIQUE` (`EmailAddress` ASC) VISIBLE)
-ENGINE = InnoDB;
+ENGINE = InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb3;
 
+-- -----------------------------------------------------
+-- Inserting Sample Data into Table `tsy_db`.`User`
+-- -----------------------------------------------------
+INSERT INTO `User` VALUES (1, 'mukminpitoyo@gmail.com', 'Mukmin', 'Pitoyo', 'M', '1997-05-29', 'Sample Address', 123456, '12345678', 'mukminpitoyo', '12345678', 'C', '2023-08-16', 'Active'),
+(2, 'sample@gmail.com', 'Sarah', 'Tan', 'F', '2003-01-01', 'Sample Address', 123456, '12345678', 'sarahtan', '12345678', 'C', '2023-08-16', 'Active');
 
 -- -----------------------------------------------------
 -- Table `tsy_db`.`Memberships`
