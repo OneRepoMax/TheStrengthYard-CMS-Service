@@ -25,3 +25,4 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_recycle': 299}
 db = SQLAlchemy(app)
 
 from .user import User
+from .membership import Memberships

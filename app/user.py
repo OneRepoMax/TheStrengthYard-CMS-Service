@@ -5,7 +5,6 @@ from flask import jsonify, request
 class User(db.Model):
     __tablename__ = 'User'
 
-# TO DO
     UserId = db.Column(db.Integer, primary_key=True)
     EmailAddress = db.Column(db.String)
     FirstName = db.Column(db.String)
@@ -18,8 +17,7 @@ class User(db.Model):
     Username = db.Column(db.String)
     Password = db.Column(db.String)
     UserType = db.Column(db.String)
-    MemberJoinDate = db.Column(db.Date)
-    MembershipStatus = db.Column(db.String)
+    AccountCreationDate = db.Column(db.Date)
     # Role_ID = db.Column(db.Integer, db.ForeignKey('Access_Role.Role_ID'))
     # LearningJourney = db.relationship('LearningJourney', backref='Staff')
     # Registrations = db.relationship('Registration', backref='Staff')
@@ -38,8 +36,7 @@ class User(db.Model):
             "Username": self.Username,
             "Password": self.Password,
             "UserType": self.UserType,
-            "MemberJoinDate": self.MemberJoinDate,
-            "MembershipStatus": self.MembershipStatus
+            "AccountCreationDate": self.AccountCreationDate
         }
 
 #     def jsonWithAccessRole(self):
@@ -54,7 +51,7 @@ class User(db.Model):
 
 
 @app.route("/user/test")
-def testStaff():
+def testUser():
     return "user route is working"
 
 # Function and Route for getting All Users in the DB
@@ -116,8 +113,7 @@ def createUser():
         "Username": "kaowoofwoof",
         "Password": "iactuallylovecats",
         "UserType": "C",
-        "MemberJoinDate": "2023-01-01",
-        "MembershipStatus": "Active"
+        "AccountCreationDate": "2023-01-01"
     }
     """
     data = request.get_json()

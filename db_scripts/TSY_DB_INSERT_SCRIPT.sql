@@ -33,8 +33,7 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`User` (
   `Username` VARCHAR(45) NOT NULL,
   `Password` LONGTEXT NOT NULL,
   `UserType` CHAR(1) NOT NULL,
-  `MemberJoinDate` DATE NOT NULL,
-  `MembershipStatus` VARCHAR(45) NOT NULL,
+  `AccountCreationDate` DATE NOT NULL,
   PRIMARY KEY (`UserId`),
   UNIQUE INDEX `EmailAddress_UNIQUE` (`EmailAddress` ASC) VISIBLE)
 ENGINE = InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb3;
@@ -42,8 +41,9 @@ ENGINE = InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb3;
 -- -----------------------------------------------------
 -- Inserting Sample Data into Table `tsy_db`.`User`
 -- -----------------------------------------------------
-INSERT INTO `User` VALUES (1, 'mukminpitoyo@gmail.com', 'Mukmin', 'Pitoyo', 'M', '1997-05-29', 'Sample Address', 123456, '12345678', 'mukminpitoyo', '12345678', 'C', '2023-08-16', 'Active'),
-(2, 'sample@gmail.com', 'Sarah', 'Tan', 'F', '2003-01-01', 'Sample Address', 123456, '12345678', 'sarahtan', '12345678', 'C', '2023-08-16', 'Active');
+INSERT INTO `User` VALUES 
+(100, 'mukminpitoyo@gmail.com', 'Mukmin', 'Pitoyo', 'M', '1997-05-29', 'Sample Address', 123456, '12345678', 'mukminpitoyo', '12345678', 'C', '2023-08-16'),
+(101, 'sample@gmail.com', 'Sarah', 'Tan', 'F', '2003-01-01', 'Sample Address', 123456, '12345678', 'sarahtan', '12345678', 'C', '2023-08-16');
 
 -- -----------------------------------------------------
 -- Table `tsy_db`.`Memberships`
@@ -58,6 +58,18 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`Memberships` (
   PRIMARY KEY (`MembershipTypeId`))
 ENGINE = InnoDB;
 
+-- -----------------------------------------------------
+-- Inserting Sample Data into Table `tsy_db`.`Memberships`
+-- -----------------------------------------------------
+INSERT INTO `Memberships` VALUES 
+(1, 'Monthly', 250, 'Progressive Strength Class Membership (Standard)'),
+(2, 'Yearly', 2400, 'Progressive Strength Class Membership (Standard)'),
+(3, 'Monthly', 200, 'Progressive Strength Class Membership (Student)'),
+(4, 'Yearly', 1800, 'Progressive Strength Class Membership (Student)'),
+(5, 'Monthly', 90, 'Open Gym Membership'),
+(6, 'Yearly', 900, 'Open Gym Membership'),
+(7, 'One-Time', 260, 'Beginner Olympic Weightlifting Course'),
+(8, 'One-Time', 150, 'Barbell Fundamentals Course');
 
 -- -----------------------------------------------------
 -- Table `tsy_db`.`MembershipRecord`
@@ -85,6 +97,12 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`MembershipRecord` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+-- -----------------------------------------------------
+-- Inserting Sample Data into Table `tsy_db`.`MembershipRecord`
+-- -----------------------------------------------------
+INSERT INTO `MembershipRecord` VALUES 
+(1, 100, 5, '2023-01-01', '2023-05-01'),
+(2, 101, 2, '2023-01-01', '2024-01-01');
 
 -- -----------------------------------------------------
 -- Table `tsy_db`.`Payment`
