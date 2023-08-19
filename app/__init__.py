@@ -12,13 +12,13 @@ password = environ.get('password') or "placeholderpassword"
 DB_HOSTNAME = environ.get('DB_HOSTNAME')
 DB_USERNAME = environ.get('DB_USERNAME')
 DB_PASSWORD = environ.get('DB_PASSWORD')
+DB_PORT = environ.get("DB_PORT")
 DB_NAME = environ.get('DB_NAME')
 
 app = Flask(__name__)
 
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+mysqlconnector://" + \
-    DB_USERNAME + ":" + DB_PASSWORD + "@" + DB_HOSTNAME + ":3306/" + DB_NAME
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+mysqlconnector://" + DB_USERNAME + ":" + DB_PASSWORD + "@" + DB_HOSTNAME + ":" + DB_PORT + "/" + DB_NAME
 # print
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_recycle': 299}
