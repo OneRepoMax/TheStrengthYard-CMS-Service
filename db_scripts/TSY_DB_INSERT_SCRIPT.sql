@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`MembershipRecord` (
   `MembershipTypeId` INT NOT NULL,
   `StartDate` DATE NOT NULL,
   `EndDate` DATE NOT NULL,
+  `ActiveStatus` BOOLEAN NOT NULL DEFAULT TRUE,
   INDEX `MembershipTypeFK_idx` (`MembershipTypeId` ASC) VISIBLE,
   PRIMARY KEY (`MembershipRecordId`),
   INDEX `UserFK_idx` (`UserId` ASC) VISIBLE,
@@ -102,8 +103,8 @@ ENGINE = InnoDB;
 -- Inserting Sample Data into Table `tsy_db`.`MembershipRecord`
 -- -----------------------------------------------------
 INSERT INTO `MembershipRecord` VALUES 
-(1, 100, 5, '2023-01-01', '2023-05-01'),
-(2, 101, 2, '2023-01-01', '2024-01-01');
+(1, 100, 5, '2023-01-01', '2023-05-01', TRUE),
+(2, 101, 2, '2023-01-01', '2024-01-01', TRUE);
 
 -- -----------------------------------------------------
 -- Table `tsy_db`.`Payment`
@@ -223,7 +224,7 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`MembershipLog` (
     REFERENCES `tsy_db`.`MembershipRecord` (`MembershipRecordId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+ENGINE = InnoDB AUTO_INCREMENT=900 DEFAULT CHARSET=utf8mb3;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

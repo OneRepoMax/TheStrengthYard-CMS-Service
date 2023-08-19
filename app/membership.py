@@ -35,6 +35,7 @@ class MembershipRecord(db.Model):
     MembershipTypeId = db.Column(db.Integer, db.ForeignKey('Memberships.MembershipTypeId'), primary_key=True)
     StartDate = db.Column(db.Date)
     EndDate = db.Column(db.Date)
+    ActiveStatus = db.Column(db.Boolean, default=True)
     User = db.relationship('User', backref=db.backref('memberships', cascade='all, delete-orphan'))
     Membership = db.relationship('Memberships', backref=db.backref('memberships', cascade='all, delete-orphan'))
 
@@ -44,7 +45,8 @@ class MembershipRecord(db.Model):
             "UserId": self.UserId,
             "MembershipTypeId": self.MembershipTypeId,
             "StartDate": self.StartDate,
-            "EndDate": self.EndDate
+            "EndDate": self.EndDate,
+            "ActiveStatus": self.ActiveStatus
         }
 
     def jsonWithUserAndMembership(self):
@@ -54,11 +56,28 @@ class MembershipRecord(db.Model):
             "MembershipTypeId": self.MembershipTypeId,
             "StartDate": self.StartDate,
             "EndDate": self.EndDate,
+            "ActiveStatus": self.ActiveStatus,
             "User": self.User.json(),
             "Membership": self.Membership.json()
         }
     
+class MembershipLog(db.Model):
+    __tablename__ = 'MembershipLog'
 
+    MembershipLogId = db.Column(db.Integer, primary_key=True)
+    Date = db.Column(db.Date)
+    ActionType = db.Column(db.String)
+    Description = db.Column(db.String)
+    MembershipRecordId = db.Column(db.Integer, db.ForeignKey('MembershipRecord.MembershipRecordId'))
+
+    def json(self):
+        return {
+            "MembershipLogId": self.MembershipLogId,
+            "Date": self.Date,
+            "ActionType": self.ActionType,
+            "Description": self.Description,
+            "MembershipRecordId": self.MembershipRecordId
+        }
     
 @app.route("/memberships/test")
 def testMembership():
@@ -451,3 +470,4 @@ def deleteMembershipRecord(id: int):
                 "message": "An error occurred while deleting the Membership Record. " + str(e)
             }
         ), 406
+    
