@@ -18,9 +18,6 @@ class User(db.Model):
     Password = db.Column(db.String)
     UserType = db.Column(db.String)
     AccountCreationDate = db.Column(db.Date)
-    # Role_ID = db.Column(db.Integer, db.ForeignKey('Access_Role.Role_ID'))
-    # LearningJourney = db.relationship('LearningJourney', backref='Staff')
-    # Registrations = db.relationship('Registration', backref='Staff')
 
     def json(self):
         return {
@@ -38,17 +35,6 @@ class User(db.Model):
             "UserType": self.UserType,
             "AccountCreationDate": self.AccountCreationDate
         }
-
-#     def jsonWithAccessRole(self):
-#         return {
-#             "Staff_ID": self.Staff_ID,
-#             "Staff_FName": self.Staff_FName,
-#             "Staff_LName": self.Staff_LName,
-#             "Dept": self.Dept,
-#             "Email": self.Email,
-#             "Access_Role": self.Access_Role.json()
-#         }
-
 
 @app.route("/user/test")
 def testUser():
