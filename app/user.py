@@ -188,7 +188,7 @@ def registerUser():
             FirstName = ' ',
             LastName = ' ',
             Gender = ' ',
-            DateOfBirth = datetime.today(),#.strftime('%Y-%m-%d')
+            DateOfBirth = datetime(1, 1, 1, 0, 0),#.strftime('%Y-%m-%d')
             HomeAddress = '',
             PostalCode = '',
             ContactNo = '',
