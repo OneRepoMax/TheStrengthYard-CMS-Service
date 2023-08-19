@@ -193,7 +193,7 @@ def updateMembership(id: int):
             }
         ), 406
 
-#Function and Route to Delete a User by ID
+#Function and Route to Delete a Membership by ID
 @app.route("/memberships/<int:id>", methods=['DELETE'])
 def deleteMembership(id: int):
     try:
@@ -288,6 +288,27 @@ def getMembershipRecordsByMembershipID(id: int):
         }
     ), 406
 
+# Function and Route to get a specific Membership Record by MembershipRecordId
+@app.route("/membershiprecord/record/<int:id>")
+def getMembershipRecordByRecordID(id: int):
+    membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=id).first()
+    if membershipRecord:
+        return jsonify(
+            {
+                "code": 200,
+                "error": False,
+                "data": membershipRecord.jsonWithUserAndMembership()
+            }
+        ), 200
+    return jsonify(
+        {
+            "code": 406,
+            "error": False,
+            "message": "There are no such membership record with ID: " + str(id),
+            "data": []
+        }
+    ), 406
+
 #Function and Route to create a new Membership Record
 @app.route("/membershiprecord", methods=['POST'])
 def createMembershipRecord():
@@ -354,3 +375,79 @@ def createMembershipRecord():
                 "data": data
             }
         ), 410
+    
+# Function and Route to Update a Membership Record by ID
+@app.route("/membershiprecord/<int:id>", methods=['PUT'])
+def updateMembershipRecord(id: int):
+    """
+    Sample Request
+    {
+        "MembershipRecordId": 1,
+        "StartDate": "2021-01-01",
+        "EndDate": "2023-12-31"
+    }
+    """
+    data = request.get_json()
+    try:
+        membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=id).first()
+        if membershipRecord:
+            for key, value in data.items():
+                setattr(membershipRecord, key, value)
+            db.session.commit()
+            return jsonify(
+                {
+                    "code": 200,
+                    "error": False,
+                    "data": membershipRecord.jsonWithUserAndMembership()
+                }
+            ), 200
+        return jsonify(
+            {
+                "code": 406,
+                "error": False,
+                "message": "There are no such membership record with ID: " + str(id),
+                "data": []
+            }
+        ), 406
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(
+            {
+                "code": 406,
+                "error": True,
+                "message": "An error occurred while updating the Membership Record. " + str(e),
+                "data": data
+            }
+        ), 406
+    
+# Function and Route to Delete a Membership Record by ID
+@app.route("/membershiprecord/<int:id>", methods=['DELETE'])
+def deleteMembershipRecord(id: int):
+    try:
+        membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=id).first()
+        if membershipRecord:
+            db.session.delete(membershipRecord)
+            db.session.commit()
+            return jsonify(
+                {
+                    "code": 200,
+                    "error": False,
+                    "message": "Membership Record with ID: " + str(id) + " has been deleted."
+                }
+            ), 200
+        return jsonify(
+            {
+                "code": 406,
+                "error": False,
+                "message": "There are no such membership record with ID: " + str(id)
+            }
+        ), 406
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(
+            {
+                "code": 406,
+                "error": True,
+                "message": "An error occurred while deleting the Membership Record. " + str(e)
+            }
+        ), 406
