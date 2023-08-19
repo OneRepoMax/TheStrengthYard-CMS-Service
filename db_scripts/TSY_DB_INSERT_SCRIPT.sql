@@ -33,8 +33,7 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`User` (
   `Username` VARCHAR(45) NOT NULL,
   `Password` LONGTEXT NOT NULL,
   `UserType` CHAR(1) NOT NULL,
-  `MemberJoinDate` DATE NOT NULL,
-  `MembershipStatus` VARCHAR(45) NOT NULL,
+  `RegistrationDate` DATE NOT NULL,
   PRIMARY KEY (`UserId`),
   UNIQUE INDEX `EmailAddress_UNIQUE` (`EmailAddress` ASC) VISIBLE)
 ENGINE = InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb3;
@@ -70,6 +69,7 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`MembershipRecord` (
   `MembershipTypeId` INT NOT NULL,
   `StartDate` DATE NOT NULL,
   `EndDate` DATE NOT NULL,
+  `MembershipStatus` VARCHAR(45) NOT NULL,
   INDEX `MembershipTypeFK_idx` (`MembershipTypeId` ASC) VISIBLE,
   PRIMARY KEY (`MembershipRecordId`),
   INDEX `UserFK_idx` (`UserId` ASC) VISIBLE,
