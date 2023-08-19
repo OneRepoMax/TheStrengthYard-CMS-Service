@@ -42,7 +42,7 @@ ENGINE = InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb3;
 -- Inserting Sample Data into Table `tsy_db`.`User`
 -- -----------------------------------------------------
 INSERT INTO `User` VALUES 
-(1, 'testuser@tsy.com', 'John', 'Doe', 'M', '1997-05-29', 'Sample Address', 123456, '12345678', 'johndoe', '12345678', 'C', '2023-08-16'),
+(1, 'testuser@tsy.com', 'John', 'Doe', 'M', '1997-05-29', 'Sample Address', 123456, 'pbkdf2:sha256:260000$hJm022YX$5cdc10522fe8bdca504ffceff61f8a7822eb3de05b3e29efee100e246c8e804d', 'johndoe', '12345678', 'C', '2023-08-16'),
 (100, 'mukminpitoyo@gmail.com', 'Mukmin', 'Pitoyo', 'M', '1997-05-29', 'Sample Address', 123456, '12345678', 'mukminpitoyo', '12345678', 'C', '2023-08-16'),
 (101, 'sample@gmail.com', 'Sarah', 'Tan', 'F', '2003-01-01', 'Sample Address', 123456, '12345678', 'sarahtan', '12345678', 'C', '2023-08-16');
 

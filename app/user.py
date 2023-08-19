@@ -103,7 +103,12 @@ def createUser():
         if userExists:
             return "An error occured while creating new user: User already exists. Check by email address", 409
         
+        # Hash password
+        hashed_password = generate_password_hash(data.get("Password"), method='pbkdf2:sha256', salt_length=8)
+        data["Password"] = hashed_password
+
         user = User(**data)
+
         db.session.add(user)
         db.session.commit()
         return jsonify(user.json()), 200
@@ -156,53 +161,3 @@ def deleteUser(id: int):
     except Exception as e:
         db.session.rollback()
         return "An error occurred while deleting the User. " + str(e), 406
-
-@app.route("/registeruser", methods=['POST'])
-def registerUser():
-    """
-    Sample Request
-    {
-        "EmailAddress": "tanahkao@gmail.com",
-        "Username": "kaowoofwoof",
-        "Password": "iactuallylovecats",
-    }
-    """
-
-    data = request.get_json()
-    EmailAddress = data.get("EmailAddress")
-    password = data.get("Password")
-    username = data.get("Username")
-
-    try:
-        userExists = User.query.filter_by(
-            EmailAddress=EmailAddress).first()
-        if userExists:
-            return "An error occured while creating new user: User already exists. Check by email address", 409
-        
-        hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
-        print(hashed_password)
-
-        newUser = User(
-            UserId = 0,
-            EmailAddress = EmailAddress,
-            FirstName = ' ',
-            LastName = ' ',
-            Gender = ' ',
-            DateOfBirth = datetime(1, 1, 1, 0, 0),#.strftime('%Y-%m-%d')
-            HomeAddress = '',
-            PostalCode = '',
-            ContactNo = '',
-            Username = username,
-            Password = hashed_password,
-            UserType = 'Inactive',
-            AccountCreationDate = datetime.today()#.strftime('%Y-%m-%d')
-        )
-        
-        # Store the hashed password and salt in your user database
-
-        db.session.add(newUser)
-        db.session.commit()
-        return "Registration Successful", 200
-    except Exception as e:
-        db.session.rollback()
-        return "An error occurred while updating the User. " + str(e), 406
