@@ -1,5 +1,7 @@
 from app import app, db
 from flask import jsonify, request
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
 class User(db.Model):
     __tablename__ = 'User'
@@ -32,7 +34,7 @@ class User(db.Model):
             "Username": self.Username,
             "Password": self.Password,
             "UserType": self.UserType,
-            "AccountCreationDate": self.AccountCreationDate
+            "MemberJoinDate": self.MemberJoinDate
         }
 
 @app.route("/user/test")
@@ -153,4 +155,97 @@ def deleteUser(id: int):
         return "User not found", 404
     except Exception as e:
         db.session.rollback()
+        
+        return jsonify(
+            {
+                "code": 406,
+                "error": True,
+                "message": "An error occurred while deleting the User. " + str(e),
+                "data": {}
+            }
+        ), 406
+
+@app.route("/registeruser", methods=['POST'])
+def registerUser():
+    """
+    Sample Request
+    {
+        "EmailAddress": "tanahkao@gmail.com",
+        "Username": "kaowoofwoof",
+        "Password": "iactuallylovecats",
+    }
+    """
+
+    EmailAddress = request.form['EmailAddress']
+    try:
+        userExists = User.query.filter_by(
+            EmailAddress=EmailAddress).first()
+        if userExists:
+            return jsonify(
+                {
+                    "code": 409,
+                    "error": True,
+                    "message": "An error occured while creating new user: User already exists. Check by email address",
+                    "data": userExists.json()
+                }
+            ), 409
+        
+        username = request.form['username']
+        password = request.form['password']
+        
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
+        print(hashed_password)
+
+        newUser = User(
+            UserId = 0,
+            EmailAddress = EmailAddress,
+            FirstName = ' ',
+            LastName = ' ',
+            Gender = ' ',
+            DateOfBirth = datetime.today(),#.strftime('%Y-%m-%d')
+            HomeAddress = '',
+            PostalCode = '',
+            ContactNo = '',
+            Username = username,
+            Password = hashed_password,
+            UserType = 'Inactive',
+            MemberJoinDate = datetime.today()#.strftime('%Y-%m-%d')
+        )
+        
+        # Store the hashed password and salt in your user database
+
+        db.session.add(newUser)
+        db.session.commit()
+        return jsonify(
+            {
+                "code": 200,
+                "error": False,
+                # "data": {
+                #     "UserId": newUser.json()
+                # }
+            }
+        ), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(
+            {
+                "code": 406,
+                "error": True,
+                "message": "An error occurred while creating the new User. " + str(e),
+            }
+        ), 406
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        userExists = User.query.filter_by(Username=username).first()
+        if userExists and check_password_hash(userExists.json()['Password'], password):
+            return("Login Success")
+
+        error_message = 'Invalid credentials. Please try again.'
+    return(error_message)
+
         return "An error occurred while deleting the User. " + str(e), 406
