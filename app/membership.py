@@ -404,7 +404,8 @@ def updateMembershipRecord(id: int):
     {
         "MembershipRecordId": 1,
         "StartDate": "2021-01-01",
-        "EndDate": "2023-12-31"
+        "EndDate": "2023-12-31",
+        "ActiveStatus": true
     }
     """
     data = request.get_json()
@@ -638,3 +639,78 @@ def createMembershipLog():
                 "data": data
             }
         ), 410
+    
+# Function and Route to get all Membership Logs by Membership Record ID
+@app.route("/membershiplog/<int:id>")
+def getMembershipLogsByMembershipRecordID(id: int):
+    membershipLogList = MembershipLog.query.filter_by(MembershipRecordId=id).all()
+    if len(membershipLogList):
+        return jsonify(
+            {
+                "code": 200,
+                "error": False,
+                "data": [membershipLog.json() for membershipLog in membershipLogList]
+            }
+        ), 200
+    return jsonify(
+        {
+            "code": 406,
+            "error": False,
+            "message": "There are no existing membership logs with Membership Record ID: " + str(id),
+            "data": []
+        }
+    ), 406
+
+# Function and Route to get a specific Membership Log by MembershipLogId
+@app.route("/membershiplog/log/<int:id>")
+def getMembershipLogByLogID(id: int):
+    membershipLog = MembershipLog.query.filter_by(MembershipLogId=id).first()
+    if membershipLog:
+        return jsonify(
+            {
+                "code": 200,
+                "error": False,
+                "data": membershipLog.json()
+            }
+        ), 200
+    return jsonify(
+        {
+            "code": 406,
+            "error": False,
+            "message": "There are no such membership log with ID: " + str(id),
+            "data": []
+        }
+    ), 406
+
+# Function and Route to Delete a specific Membership Log by MembershipLogId
+@app.route("/membershiplog/<int:id>", methods=['DELETE'])
+def deleteMembershipLog(id: int):
+    try:
+        membershipLog = MembershipLog.query.filter_by(MembershipLogId=id).first()
+        if membershipLog:
+            db.session.delete(membershipLog)
+            db.session.commit()
+            return jsonify(
+                {
+                    "code": 200,
+                    "error": False,
+                    "message": "Membership Log with ID: " + str(id) + " has been deleted."
+                }
+            ), 200
+        return jsonify(
+            {
+                "code": 406,
+                "error": False,
+                "message": "There are no such membership log with ID: " + str(id)
+            }
+        ), 406
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(
+            {
+                "code": 406,
+                "error": True,
+                "message": "An error occurred while deleting the Membership Log. " + str(e)
+            }
+        ), 406
+        
