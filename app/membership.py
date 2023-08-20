@@ -1,6 +1,7 @@
 from app import app, db
 from flask import jsonify, request
 from app.user import User
+from datetime import datetime
 
 class Memberships(db.Model):
     __tablename__ = 'Memberships'
@@ -471,3 +472,169 @@ def deleteMembershipRecord(id: int):
             }
         ), 406
     
+# Function and Route to create a new Membership Log
+@app.route("/membershiplog", methods=['POST'])
+def createMembershipLog():
+    """
+    Sample PAUSE Request
+    {
+        "Date": "2023-01-01",
+        "ActionType": "Pause",
+        "Description": "Paused Membership as User is going overseas for 3 months.",
+        "MembershipRecordId": 1
+    }
+    Sample RESUME Request
+    {
+        "Date": "2023-05-01",
+        "ActionType": "Resume",
+        "Description": "Resumed Membership as User has returned from overseas trip.",
+        "MembershipRecordId": 1
+    }
+    Sample TERMINATE Request
+    {
+        "Date": "2023-06-01",
+        "ActionType": "Terminate",
+        "Description": "Terminated Membership as User has left the gym.",
+        "MembershipRecordId": 1
+    }
+    """
+    data = request.get_json()
+    try:
+        # Check if the MembershipRecordId exists first
+        SelectedMembershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=data["MembershipRecordId"]).first()
+        if not SelectedMembershipRecord:
+            return jsonify(
+                {
+                    "code": 406,
+                    "error": True,
+                    "message": "Membership Record with ID: " + str(data["MembershipRecordId"]) + " does not exist."
+                }
+            ), 406
+        # Check for Action Type. If it is "Pause", then check if there is an existing "Pause" Membership Log
+        if data["ActionType"] == "Pause":
+            ExistingPauseLog = MembershipLog.query.filter_by(MembershipRecordId=data["MembershipRecordId"], ActionType="Pause").first()
+            if ExistingPauseLog:
+                return jsonify(
+                    {
+                        "code": 409,
+                        "error": True,
+                        "message": "Membership with ID: " + str(data["MembershipRecordId"]) + " already has an existing Pause Log."
+                    }
+                ), 409
+            # If there is no existing "Pause" Membership Log, then using the SelectedMembershipRecord, update it and change the ActiveStatus column to False
+            SelectedMembershipRecord.ActiveStatus = False
+            db.session.commit()
+            # Create the new Membership Log and add into the DB
+            membershipLog = MembershipLog(**data)
+            db.session.add(membershipLog)
+            db.session.commit()
+            return jsonify(
+                {
+                    "code": 200,
+                    "error": False,
+                    "message": "Membership with ID: " + str(data["MembershipRecordId"]) + " has been paused.",
+                    "data": data
+                }
+            ), 200
+        # Check for Action Type. If it is "Resume", then check if there is an existing "Resume" Membership Log
+        elif data["ActionType"] == "Resume":
+            ExistingResumeLog = MembershipLog.query.filter_by(MembershipRecordId=data["MembershipRecordId"], ActionType="Resume").first()
+            if ExistingResumeLog:
+                return jsonify(
+                    {
+                        "code": 409,
+                        "error": True,
+                        "message": "Membership with ID: " + str(data["MembershipRecordId"]) + " already has an existing Resume Log."
+                    }
+                ), 409
+            # If there is no existing "Resume" Membership Log, then using the SelectedMembershipRecord, update it and change the ActiveStatus column to True. Once done, use the given Date and check for the previous log's Pause Date. If the given Date is after the Pause Date, then compute the difference and update the MembershipRecord's EndDate accordingly. If the given Date is before the Pause Date, then return an error.
+            SelectedMembershipRecord.ActiveStatus = True
+            db.session.commit()
+            # Get the previous Pause Log
+            PreviousPauseLog = MembershipLog.query.filter_by(MembershipRecordId=data["MembershipRecordId"], ActionType="Pause").first()
+            #  If there is no previous Pause Log, return an error and rollback, specifying the reason that there was no previous Pause Log to compute the difference in dates from.
+            if not PreviousPauseLog:
+                db.session.rollback()
+                return jsonify(
+                    {
+                        "code": 411,
+                        "error": True,
+                        "message": "There is no previous Pause Log to compute the difference in dates from."
+                    }
+                ), 411
+            # If there is a previous Pause Log, then check if the given Date is after the Pause Date. If it is, then compute the difference in dates and update the MembershipRecord's EndDate accordingly. If it is not, then return an error and rollback, specifying the reason that the given Date is before the Pause Date.
+            
+            date_string = data["Date"]
+            date_object = datetime.strptime(date_string, "%Y-%m-%d").date()
+            
+            if date_object > PreviousPauseLog.Date:
+                difference = date_object - PreviousPauseLog.Date
+                SelectedMembershipRecord.EndDate = SelectedMembershipRecord.EndDate + difference
+                db.session.commit()
+            else:
+                db.session.rollback()
+                return jsonify(
+                    {
+                        "code": 412,
+                        "error": True,
+                        "message": "The given Date is before the Pause Date."
+                    }
+                ), 412
+            # Create the new Membership Log and add into the DB
+            membershipLog = MembershipLog(**data)
+            db.session.add(membershipLog)
+            db.session.commit()
+            return jsonify(
+                {
+                    "code": 200,
+                    "error": False,
+                    "message": "Membership with ID: " + str(data["MembershipRecordId"]) + " has been resumed.",
+                    "data": data
+                }
+            ), 200
+        # Check for Action Type. If it is "Terminate", then check if there is an existing "Terminate" Membership Log. If not, then using the SelectedMembershipRecord, update it and change the ActiveStatus column to False. Once done, use the given Date and replace the SelectedMembershipRecord's EndDate with the given Date to show that Membership has been terminated.
+        elif data["ActionType"] == "Terminate":
+            ExistingTerminateLog = MembershipLog.query.filter_by(MembershipRecordId=data["MembershipRecordId"], ActionType="Terminate").first()
+            if ExistingTerminateLog:
+                return jsonify(
+                    {
+                        "code": 409,
+                        "error": True,
+                        "message": "Membership with ID: " + str(data["MembershipRecordId"]) + " already has an existing Terminate Log."
+                    }
+                ), 409
+            SelectedMembershipRecord.ActiveStatus = False
+            SelectedMembershipRecord.EndDate = data["Date"]
+            db.session.commit()
+            # Create the new Membership Log and add into the DB
+            membershipLog = MembershipLog(**data)
+            db.session.add(membershipLog)
+            db.session.commit()
+            return jsonify(
+                {
+                    "code": 200,
+                    "error": False,
+                    "message": "Membership with ID: " + str(data["MembershipRecordId"]) + " has been terminated.",
+                    "data": data
+                }
+            ), 200
+        # If the Action Type is not "Pause", "Resume" or "Terminate", then return an error and rollback, specifying the reason that the Action Type is invalid.
+        else:
+            db.session.rollback()
+            return jsonify(
+                {
+                    "code": 413,
+                    "error": True,
+                    "message": "Invalid Action Type."
+                }
+            ), 413
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(
+            {
+                "code": 410,
+                "error": True,
+                "message": "An error occurred while creating the new Membership Log. " + str(e),
+                "data": data
+            }
+        ), 410
