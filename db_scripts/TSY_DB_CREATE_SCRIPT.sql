@@ -5,9 +5,11 @@ SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
 -- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+-- -----------------------------------------------------
 -- Schema tsy_db
 -- -----------------------------------------------------
-DROP SCHEMA IF EXISTS `tsy_db` ;
 
 -- -----------------------------------------------------
 -- Schema tsy_db
@@ -36,15 +38,10 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`User` (
   `AccountCreationDate` DATE NOT NULL,
   PRIMARY KEY (`UserId`),
   UNIQUE INDEX `EmailAddress_UNIQUE` (`EmailAddress` ASC) VISIBLE)
-ENGINE = InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb3;
+ENGINE = InnoDB
+AUTO_INCREMENT = 100
+DEFAULT CHARACTER SET = utf8mb3;
 
--- -----------------------------------------------------
--- Inserting Sample Data into Table `tsy_db`.`User`
--- -----------------------------------------------------
-INSERT INTO `User` VALUES 
-(1, 'testuser@tsy.com', 'John', 'Doe', 'M', '1997-05-29', 'Sample Address', 123456, 'pbkdf2:sha256:260000$hJm022YX$5cdc10522fe8bdca504ffceff61f8a7822eb3de05b3e29efee100e246c8e804d', 'johndoe', '12345678', 'C', '2023-08-16'),
-(100, 'mukminpitoyo@gmail.com', 'Mukmin', 'Pitoyo', 'M', '1997-05-29', 'Sample Address', 123456, '12345678', 'mukminpitoyo', '12345678', 'C', '2023-08-16'),
-(101, 'sample@gmail.com', 'Sarah', 'Tan', 'F', '2003-01-01', 'Sample Address', 123456, '12345678', 'sarahtan', '12345678', 'C', '2023-08-16');
 
 -- -----------------------------------------------------
 -- Table `tsy_db`.`Memberships`
@@ -55,22 +52,10 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`Memberships` (
   `MembershipTypeId` INT NOT NULL AUTO_INCREMENT,
   `Type` VARCHAR(255) NOT NULL,
   `BaseFee` DOUBLE NOT NULL,
-  `Description` VARCHAR(255) NULL,
+  `Description` VARCHAR(255) NULL DEFAULT NULL,
   PRIMARY KEY (`MembershipTypeId`))
 ENGINE = InnoDB;
 
--- -----------------------------------------------------
--- Inserting Sample Data into Table `tsy_db`.`Memberships`
--- -----------------------------------------------------
-INSERT INTO `Memberships` VALUES 
-(1, 'Monthly', 250, 'Progressive Strength Class Membership (Standard)'),
-(2, 'Yearly', 2400, 'Progressive Strength Class Membership (Standard)'),
-(3, 'Monthly', 200, 'Progressive Strength Class Membership (Student)'),
-(4, 'Yearly', 1800, 'Progressive Strength Class Membership (Student)'),
-(5, 'Monthly', 90, 'Open Gym Membership'),
-(6, 'Yearly', 900, 'Open Gym Membership'),
-(7, 'One-Time', 260, 'Beginner Olympic Weightlifting Course'),
-(8, 'One-Time', 150, 'Barbell Fundamentals Course');
 
 -- -----------------------------------------------------
 -- Table `tsy_db`.`MembershipRecord`
@@ -83,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`MembershipRecord` (
   `MembershipTypeId` INT NOT NULL,
   `StartDate` DATE NOT NULL,
   `EndDate` DATE NOT NULL,
-  `ActiveStatus` BOOLEAN NOT NULL DEFAULT TRUE,
+  `ActiveStatus` TINYINT NOT NULL DEFAULT TRUE,
   INDEX `MembershipTypeFK_idx` (`MembershipTypeId` ASC) VISIBLE,
   PRIMARY KEY (`MembershipRecordId`),
   INDEX `UserFK_idx` (`UserId` ASC) VISIBLE,
@@ -99,12 +84,6 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`MembershipRecord` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
--- -----------------------------------------------------
--- Inserting Sample Data into Table `tsy_db`.`MembershipRecord`
--- -----------------------------------------------------
-INSERT INTO `MembershipRecord` VALUES 
-(1, 100, 5, '2023-01-01', '2023-05-01', TRUE),
-(2, 101, 2, '2023-01-01', '2024-01-01', TRUE);
 
 -- -----------------------------------------------------
 -- Table `tsy_db`.`Payment`
@@ -113,11 +92,11 @@ DROP TABLE IF EXISTS `tsy_db`.`Payment` ;
 
 CREATE TABLE IF NOT EXISTS `tsy_db`.`Payment` (
   `PaymentId` INT NOT NULL AUTO_INCREMENT,
-  `PayPalId` VARCHAR(255) NULL,
+  `PayPalId` VARCHAR(255) NULL DEFAULT NULL,
   `MembershipRecordId` INT NOT NULL,
   `TransactionDate` DATE NOT NULL,
   `Amount` DOUBLE NOT NULL,
-  `Discount` DOUBLE NULL,
+  `Discount` DOUBLE NULL DEFAULT NULL,
   `PaymentMode` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`PaymentId`),
   INDEX `MembershipRecordFK_idx` (`MembershipRecordId` ASC) VISIBLE,
@@ -199,9 +178,9 @@ DROP TABLE IF EXISTS `tsy_db`.`BlockedDate` ;
 
 CREATE TABLE IF NOT EXISTS `tsy_db`.`BlockedDate` (
   `BlockedDateID` INT NOT NULL AUTO_INCREMENT,
-  `Date` DATE NULL,
-  `StartTime` DATETIME NULL,
-  `StopTime` DATETIME NULL,
+  `Date` DATE NULL DEFAULT NULL,
+  `StartTime` DATETIME NULL DEFAULT NULL,
+  `StopTime` DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (`BlockedDateID`))
 ENGINE = InnoDB;
 
@@ -213,9 +192,9 @@ DROP TABLE IF EXISTS `tsy_db`.`MembershipLog` ;
 
 CREATE TABLE IF NOT EXISTS `tsy_db`.`MembershipLog` (
   `MembershipLogId` INT NOT NULL AUTO_INCREMENT,
-  `Date` DATE NULL,
-  `ActionType` VARCHAR(255) NULL,
-  `Description` LONGTEXT NULL,
+  `Date` DATE NULL DEFAULT NULL,
+  `ActionType` VARCHAR(255) NULL DEFAULT NULL,
+  `Description` LONGTEXT NULL DEFAULT NULL,
   `MembershipRecordId` INT NOT NULL,
   PRIMARY KEY (`MembershipLogId`, `MembershipRecordId`),
   INDEX `fk_MembershipLog_MembershipRecord1_idx` (`MembershipRecordId` ASC) VISIBLE,
@@ -224,7 +203,10 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`MembershipLog` (
     REFERENCES `tsy_db`.`MembershipRecord` (`MembershipRecordId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB AUTO_INCREMENT=900 DEFAULT CHARSET=utf8mb3;
+ENGINE = InnoDB
+AUTO_INCREMENT = 900
+DEFAULT CHARACTER SET = utf8mb3;
+
 
 -- -----------------------------------------------------
 -- Table `tsy_db`.`IndemnityForm`
@@ -238,15 +220,16 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`IndemnityForm` (
   `MedicalRemarks` LONGTEXT NULL,
   `AcknowledgementTnC` TINYINT NULL,
   `AcknowledgementOpenGymRules` TINYINT NULL,
-  `UserId` INT NOT NULL,
-  PRIMARY KEY (`IndemnityFormId`, `UserId`),
-  INDEX `fk_IndemnityForm_User1_idx` (`UserId` ASC) VISIBLE,
+  `User_UserId` INT NOT NULL,
+  PRIMARY KEY (`IndemnityFormId`, `User_UserId`),
+  INDEX `fk_IndemnityForm_User1_idx` (`User_UserId` ASC) VISIBLE,
   CONSTRAINT `fk_IndemnityForm_User1`
-    FOREIGN KEY (`UserId`)
+    FOREIGN KEY (`User_UserId`)
     REFERENCES `tsy_db`.`User` (`UserId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
+
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
