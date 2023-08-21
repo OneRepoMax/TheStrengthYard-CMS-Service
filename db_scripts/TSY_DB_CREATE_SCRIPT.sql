@@ -215,7 +215,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 DROP TABLE IF EXISTS `tsy_db`.`IndemnityForm` ;
 
 CREATE TABLE IF NOT EXISTS `tsy_db`.`IndemnityForm` (
-  `IndemnityFormId` INT NOT NULL,
+  `IndemnityFormId` INT NOT NULL AUTO_INCREMENT,
   `FeedbackDiscover` LONGTEXT NULL,
   `MedicalHistory` LONGTEXT NULL,
   `MedicalRemarks` LONGTEXT NULL,
@@ -229,7 +229,7 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`IndemnityForm` (
     REFERENCES `tsy_db`.`User` (`UserId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+ENGINE = InnoDB AUTO_INCREMENT = 300 DEFAULT CHARACTER SET = utf8mb3;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

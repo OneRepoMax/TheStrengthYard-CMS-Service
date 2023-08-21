@@ -26,3 +26,4 @@ db = SQLAlchemy(app)
 
 from .user import User
 from .membership import Memberships
+from .registration import IndemnityForm
