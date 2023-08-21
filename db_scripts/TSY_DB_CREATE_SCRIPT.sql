@@ -221,11 +221,11 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`IndemnityForm` (
   `MedicalRemarks` LONGTEXT NULL,
   `AcknowledgementTnC` TINYINT NULL,
   `AcknowledgementOpenGymRules` TINYINT NULL,
-  `User_UserId` INT NOT NULL,
-  PRIMARY KEY (`IndemnityFormId`, `User_UserId`),
-  INDEX `fk_IndemnityForm_User1_idx` (`User_UserId` ASC) VISIBLE,
+  `UserId` INT NOT NULL,
+  PRIMARY KEY (`IndemnityFormId`, `UserId`),
+  INDEX `fk_IndemnityForm_User1_idx` (`UserId` ASC) VISIBLE,
   CONSTRAINT `fk_IndemnityForm_User1`
-    FOREIGN KEY (`User_UserId`)
+    FOREIGN KEY (`UserId`)
     REFERENCES `tsy_db`.`User` (`UserId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
