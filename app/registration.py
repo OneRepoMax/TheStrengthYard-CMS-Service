@@ -137,7 +137,14 @@ def getIndemnityForm(UserId: int):
     try:
         indemnityForm = IndemnityForm.query.filter_by(UserId=UserId).first()
         if indemnityForm:
-            return jsonify(indemnityForm.json()), 200
+            return jsonify(
+                {
+                    "code": 200,
+                    "data": [
+                        indemnityForm.json()
+                        ]
+                }
+                ), 200
         return jsonify(
             {
                 "code": 404,
