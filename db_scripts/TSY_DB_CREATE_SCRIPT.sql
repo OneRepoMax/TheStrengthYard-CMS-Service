@@ -32,10 +32,11 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`User` (
   `HomeAddress` VARCHAR(45) NOT NULL,
   `PostalCode` INT NOT NULL,
   `ContactNo` VARCHAR(100) NOT NULL,
-  `Username` VARCHAR(45) NOT NULL,
   `Password` LONGTEXT NOT NULL,
   `UserType` CHAR(1) NOT NULL,
   `AccountCreationDate` DATE NOT NULL,
+  `DisplayPicture` LONGTEXT,
+  `verified` TINYINT NOT NULL,
   PRIMARY KEY (`UserId`),
   UNIQUE INDEX `EmailAddress_UNIQUE` (`EmailAddress` ASC) VISIBLE)
 ENGINE = InnoDB

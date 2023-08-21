@@ -15,10 +15,11 @@ class User(db.Model):
     HomeAddress = db.Column(db.String)
     PostalCode = db.Column(db.Integer)
     ContactNo = db.Column(db.String)
-    Username = db.Column(db.String)
     Password = db.Column(db.String)
     UserType = db.Column(db.String)
     AccountCreationDate = db.Column(db.Date)
+    DisplayPicture = db.Column(db.String)
+    Verified = db.Column(db.String)
 
     def json(self):
         return {
@@ -31,10 +32,11 @@ class User(db.Model):
             "HomeAddress": self.HomeAddress,
             "PostalCode": self.PostalCode,
             "ContactNo": self.ContactNo,
-            "Username": self.Username,
             "Password": self.Password,
             "UserType": self.UserType,
-            "AccountCreationDate": self.AccountCreationDate
+            "AccountCreationDate": self.AccountCreationDate,
+            "DisplayPicture": self.DisplayPicture,
+            "Verified": self.Verified
         }
 
 @app.route("/user/test")
@@ -90,10 +92,11 @@ def createUser():
         "HomeAddress": "Geylang Lorong 23",
         "PostalCode": 670123,
         "ContactNo": "91234567",
-        "Username": "kaowoofwoof",
         "Password": "iactuallylovecats",
         "UserType": "C",
-        "AccountCreationDate": "2023-01-01"
+        "DisplayPicture": "sample.jpg",
+        "AccountCreationDate": "2023-01-01",
+        "Verified": false
     }
     """
     data = request.get_json()
