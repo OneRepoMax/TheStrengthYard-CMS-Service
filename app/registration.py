@@ -3,6 +3,7 @@ from flask import jsonify, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from app.user import User
+from app.passwordchecker import is_strong_password
 
 class IndemnityForm(db.Model):
     __tablename__ = 'IndemnityForm'
@@ -19,6 +20,7 @@ class IndemnityForm(db.Model):
         return {
             "IndemnityFormId": self.IndemnityFormId,
             "UserId": self.UserId,
+            "FeedbackDiscover": self.FeedbackDiscover,
             "MedicalHistory": self.MedicalHistory,
             "MedicalRemarks": self.MedicalRemarks,
             "AcknowledgementTnC": self.AcknowledgementTnC,
@@ -62,6 +64,16 @@ def register():
                     "message": "An error occured while creating a new User. User with ID " + str(userExists.UserId) + " already exists. Check that email address is unique."
                 }
             ), 409
+        
+        # Check if password is strong
+        if not is_strong_password(data.get("Password")):
+            return jsonify(
+                {
+                    "code": 400,
+                    "error": True,
+                    "message": "An error occured while creating a new User. Password is not strong enough or does not meet the requirements."
+                }
+            ), 400
         
         # Hash password
         hashed_password = generate_password_hash(data.get("Password"), method='pbkdf2:sha256', salt_length=8)
@@ -119,4 +131,26 @@ def register():
             }
         ), 406
 
-
+# Function and Route to get Indemnity Form details by UserId
+@app.route("/indemnityform/<int:UserId>", methods=['GET'])
+def getIndemnityForm(UserId: int):
+    try:
+        indemnityForm = IndemnityForm.query.filter_by(UserId=UserId).first()
+        if indemnityForm:
+            return jsonify(indemnityForm.json()), 200
+        return jsonify(
+            {
+                "code": 404,
+                "error": True,
+                "message": "Indemnity Form not found",
+                "data": {}
+            }
+        ), 404
+    except Exception as e:
+        return jsonify(
+            {
+                "code": 404,
+                "error": True,
+                "message": "An error occurred while retrieving the Indemnity Form. " + str(e)
+            }
+        ), 404
