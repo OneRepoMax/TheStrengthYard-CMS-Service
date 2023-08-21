@@ -1,7 +1,9 @@
 from app import app, db
-from flask import jsonify, request
+from flask import jsonify, request, url_for, render_template
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from app.token import confirm_token, generate_token
+from app.email import send_email
 
 class User(db.Model):
     __tablename__ = 'User'
@@ -114,10 +116,31 @@ def createUser():
 
         db.session.add(user)
         db.session.commit()
-        return jsonify(user.json()), 200
+
+        token = generate_token(user.EmailAddress)
+        confirm_url = url_for("verifyEmail", token=token, _external=True)
+        html = render_template("/confirm_email.html", confirm_url=confirm_url)
+        subject = "Please confirm your email"
+        send_email(user.EmailAddress, subject, html)
+
+        return ("User registered"), 200
     except Exception as e:
         db.session.rollback()
         return "An error occurred while creating the new User. " + str(e), 406
+
+@app.route("/verify/<token>", methods=['GET'])
+def verifyEmail(token):
+    email = confirm_token(token)
+    user = User.query.filter_by(EmailAddress=email).first()
+    if user.email == email:
+        user.Verified = 1
+        db.session.add(user)
+        db.session.commit()
+        return("You have confirmed your account. Thanks!")
+    else:
+        return("The confirmation link is invalid or has expired.")
+    
+    return redirect(url_for("core.home"))
     
 # Function and Route to Update a User by ID
 @app.route("/user/<int:id>", methods=['PUT'])
