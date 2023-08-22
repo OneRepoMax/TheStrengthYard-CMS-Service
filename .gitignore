@@ -8,3 +8,4 @@ tests/selenium/chrome_driver/**
 .DS_Store
 .DS_Store
 summary.json
+**/__pycache__

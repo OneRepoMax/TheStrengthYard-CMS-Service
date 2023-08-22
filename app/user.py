@@ -1,11 +1,11 @@
 from app import app, db
 from flask import jsonify, request
-
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
 class User(db.Model):
     __tablename__ = 'User'
 
-# TO DO
     UserId = db.Column(db.Integer, primary_key=True)
     EmailAddress = db.Column(db.String)
     FirstName = db.Column(db.String)
@@ -15,14 +15,11 @@ class User(db.Model):
     HomeAddress = db.Column(db.String)
     PostalCode = db.Column(db.Integer)
     ContactNo = db.Column(db.String)
-    Username = db.Column(db.String)
     Password = db.Column(db.String)
     UserType = db.Column(db.String)
-    MemberJoinDate = db.Column(db.Date)
-    MembershipStatus = db.Column(db.String)
-    # Role_ID = db.Column(db.Integer, db.ForeignKey('Access_Role.Role_ID'))
-    # LearningJourney = db.relationship('LearningJourney', backref='Staff')
-    # Registrations = db.relationship('Registration', backref='Staff')
+    AccountCreationDate = db.Column(db.Date)
+    DisplayPicture = db.Column(db.String)
+    Verified = db.Column(db.String)
 
     def json(self):
         return {
@@ -35,48 +32,41 @@ class User(db.Model):
             "HomeAddress": self.HomeAddress,
             "PostalCode": self.PostalCode,
             "ContactNo": self.ContactNo,
-            "Username": self.Username,
             "Password": self.Password,
             "UserType": self.UserType,
-            "MemberJoinDate": self.MemberJoinDate,
-            "MembershipStatus": self.MembershipStatus
+            "AccountCreationDate": self.AccountCreationDate,
+            "DisplayPicture": self.DisplayPicture,
+            "Verified": self.Verified
         }
 
-#     def jsonWithAccessRole(self):
-#         return {
-#             "Staff_ID": self.Staff_ID,
-#             "Staff_FName": self.Staff_FName,
-#             "Staff_LName": self.Staff_LName,
-#             "Dept": self.Dept,
-#             "Email": self.Email,
-#             "Access_Role": self.Access_Role.json()
-#         }
-
-
 @app.route("/user/test")
-def testStaff():
+def testUser():
     return "user route is working"
+
+# Function and Route for user login
+@app.route("/login", methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get("EmailAddress")
+    password = data.get("Password")
+
+    if not email or not password:
+        return "Invalid user credentials", 400
+
+    user = User.query.filter_by(EmailAddress=email).first()
+
+    if user and check_password_hash(user.Password, password):
+        return jsonify(user.json()), 200
+    else:
+        return "Invalid user credentials", 401
 
 # Function and Route for getting All Users in the DB
 @app.route("/user")
 def getAllUser():
     userList = User.query.all()
-    if len(userList):
-        return jsonify(
-            {
-                "code": 200,
-                "data": [user.json() for user in userList],
-                "error": False
-            }
-        )
-    return jsonify(
-        {
-            "code": 200,
-            "data": [],
-            "message": "There are no Users.",
-            "error": False
-        }
-    ), 200
+    
+    return jsonify([user.json() for user in userList],200)
+    
 
 # Function and Route for getting a User by ID
 @app.route("/user/<int:id>")
@@ -84,22 +74,11 @@ def getUserByID(id: int):
     userList = User.query.filter_by(UserId=id).all()
     if len(userList):
         return jsonify(
-            {
-                "code": 200,
-                "error": False,
-                "data": [user.json() for user in userList]
-            }
+            [user.json() for user in userList]
         ), 200
-    return jsonify(
-        {
-            "code": 406,
-            "error": False,
-            "message": "There are no such user with ID: " + str(id),
-            "data": []
-        }
-    ), 406
+    return "There are no such user with ID: " + str(id), 406
 
-# Function and Route to Create a new User
+# Function and Route to Create a new User (USE THIS FOR STAFF REGISTRATION that does not need indemnity form)
 @app.route("/user", methods=['POST'])
 def createUser():
     """
@@ -113,11 +92,11 @@ def createUser():
         "HomeAddress": "Geylang Lorong 23",
         "PostalCode": 670123,
         "ContactNo": "91234567",
-        "Username": "kaowoofwoof",
         "Password": "iactuallylovecats",
         "UserType": "C",
-        "MemberJoinDate": "2023-01-01",
-        "MembershipStatus": "Active"
+        "DisplayPicture": "sample.jpg",
+        "AccountCreationDate": "2023-01-01",
+        "Verified": false
     }
     """
     data = request.get_json()
@@ -125,37 +104,20 @@ def createUser():
         userExists = User.query.filter_by(
             EmailAddress=data["EmailAddress"]).first()
         if userExists:
-            return jsonify(
-                {
-                    "code": 409,
-                    "error": True,
-                    "message": "An error occured while creating new user: User already exists. Check by email address",
-                    "data": userExists.json()
-                }
-            ), 409
+            return "An error occured while creating new user: User already exists. Check by email address", 409
         
+        # Hash password
+        hashed_password = generate_password_hash(data.get("Password"), method='pbkdf2:sha256', salt_length=8)
+        data["Password"] = hashed_password
+
         user = User(**data)
+
         db.session.add(user)
         db.session.commit()
-        return jsonify(
-            {
-                "code": 200,
-                "error": False,
-                "data": {
-                    "UserId": user.json()
-                }
-            }
-        ), 200
+        return jsonify(user.json()), 200
     except Exception as e:
         db.session.rollback()
-        return jsonify(
-            {
-                "code": 406,
-                "error": True,
-                "message": "An error occurred while creating the new User. " + str(e),
-                "data": data
-            }
-        ), 406
+        return "An error occurred while creating the new User. " + str(e), 406
     
 # Function and Route to Update a User by ID
 @app.route("/user/<int:id>", methods=['PUT'])
@@ -176,14 +138,7 @@ def updateUser(id: int):
             for key, value in data.items():
                 setattr(user, key, value)
             db.session.commit()
-            return jsonify(
-                {
-                    "code": 200,
-                    "error": False,
-                    "message": "User Updated Successfully",
-                    "data": user.json()
-                }
-            ), 200
+            return jsonify(user.json()), 200
         return jsonify(
             {
                 "code": 404,
@@ -194,14 +149,7 @@ def updateUser(id: int):
         ), 404
     except Exception as e:
         db.session.rollback()
-        return jsonify(
-            {
-                "code": 406,
-                "error": True,
-                "message": "An error occurred while updating the User. " + str(e),
-                "data": {}
-            }
-        ), 406
+        return "An error occurred while updating the User. " + str(e), 406
     
 #Function and Route to Delete a User by ID
 @app.route("/user/<int:id>", methods=['DELETE'])
@@ -211,29 +159,8 @@ def deleteUser(id: int):
         if user:
             db.session.delete(user)
             db.session.commit()
-            return jsonify(
-                {
-                    "code": 200,
-                    "error": False,
-                    "message": "User Deleted Successfully of ID: " + str(id) + ".",
-                    "data": {}
-                }
-            ), 200
-        return jsonify(
-            {
-                "code": 404,
-                "error": True,
-                "message": "User not found",
-                "data": {}
-            }
-        ), 404
+            return "User Deleted Successfully of ID: " + str(id) + ".", 200
+        return "User not found", 404
     except Exception as e:
         db.session.rollback()
-        return jsonify(
-            {
-                "code": 406,
-                "error": True,
-                "message": "An error occurred while deleting the User. " + str(e),
-                "data": {}
-            }
-        ), 406
+        return "An error occurred while deleting the User. " + str(e), 406
