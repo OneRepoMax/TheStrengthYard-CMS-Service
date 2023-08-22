@@ -131,8 +131,9 @@ def createUser():
 @app.route("/verify/<token>", methods=['GET'])
 def verifyEmail(token):
     email = confirm_token(token)
+    print(email)
     user = User.query.filter_by(EmailAddress=email).first()
-    if user.email == email:
+    if user.EmailAddress == email:
         user.Verified = 1
         db.session.add(user)
         db.session.commit()
