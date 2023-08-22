@@ -1,9 +1,12 @@
 from app import app, db
-from flask import jsonify, request
+from flask import jsonify, request, url_for, render_template
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from app.user import User
 from app.passwordchecker import is_strong_password
+from app.token import confirm_token, generate_token
+from app.email import send_email
+from app.user import verifyEmail
 
 class IndemnityForm(db.Model):
     __tablename__ = 'IndemnityForm'
@@ -112,13 +115,19 @@ def register():
         db.session.add(newIndemnityForm)
         db.session.commit()
 
+        token = generate_token(newUser.EmailAddress)
+        confirm_url = url_for("verifyEmail", token=token, _external=True)
+        html = render_template("/confirm_email.html", confirm_url=confirm_url)
+        subject = "Please confirm your email"
+        send_email(newUser.EmailAddress, subject, html)
+
         return jsonify(
             {
                 "code": 201,
                 "data": [
                     newUser.json()
                     ],
-                "message": "User created successfully."
+                "message": "User registered successfully."
             }
         ), 201
     except Exception as e:
@@ -161,3 +170,49 @@ def getIndemnityForm(UserId: int):
                 "message": "An error occurred while retrieving the Indemnity Form. " + str(e)
             }
         ), 404
+    
+# Function and Route to Reset Password by EmailAddress Part 1
+@app.route("/resetpassword", methods=['POST'])
+def resetPassword():
+    """
+    Sample Request
+    {
+        "EmailAddress": "tsy.fyp.2023@gmail.com"
+    }
+    """
+    data = request.get_json()
+    try:
+        user = User.query.filter_by(EmailAddress=data["EmailAddress"]).first()
+        if user:
+            token = generate_token(user.EmailAddress)
+            confirm_url = url_for("resetPasswordPart2", token=token, _external=True)
+            html = render_template("/reset_password.html", confirm_url=confirm_url)
+            subject = "Reset your password"
+            send_email(user.EmailAddress, subject, html)
+            return jsonify(
+                {
+                    "code": 201,
+                    "data": [
+                        user.json()
+                        ],
+                    "message": "Reset password email sent successfully."
+                }
+            ), 201
+        return jsonify(
+            {
+                "code": 404,
+                "error": True,
+                "message": "User with email address " + data["EmailAddress"] + " not found.",
+                "data": {}
+            }
+        ), 404
+    except Exception as e:
+        return jsonify(
+            {
+                "code": 404,
+                "error": True,
+                "message": "An error occurred while resetting the password. " + str(e)
+            }
+        ), 404
+    
+# Function and Route to Reset Password by EmailAddress Part 2
