@@ -122,14 +122,8 @@ def register():
         send_email(newUser.EmailAddress, subject, html)
 
         return jsonify(
-            {
-                "code": 201,
-                "data": [
-                    newUser.json()
-                    ],
-                "message": "User registered successfully."
-            }
-        ), 201
+            newUser.json()       
+        ), 200
     except Exception as e:
         db.session.rollback()
         return jsonify(

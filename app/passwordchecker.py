@@ -1,4 +1,5 @@
 import re
+import string
 
 def is_strong_password(password):
     # Check length
@@ -22,3 +23,4 @@ def is_strong_password(password):
         return False
 
     return True
+
