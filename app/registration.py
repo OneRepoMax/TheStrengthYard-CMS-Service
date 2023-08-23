@@ -62,7 +62,6 @@ def register():
         if userExists:
             return jsonify(
                 {
-                    "code": 409,
                     "error": True,
                     "message": "An error occured while creating a new User. User with ID " + str(userExists.UserId) + " already exists. Check that email address is unique."
                 }
@@ -72,7 +71,6 @@ def register():
         if not is_strong_password(data.get("Password")):
             return jsonify(
                 {
-                    "code": 400,
                     "error": True,
                     "message": "An error occured while creating a new User. Password is not strong enough or does not meet the requirements."
                 }
@@ -128,7 +126,6 @@ def register():
         db.session.rollback()
         return jsonify(
             {
-                "code": 406,
                 "error": True,
                 "message": "An error occurred while creating the new User. " + str(e)
             }
@@ -140,26 +137,16 @@ def getIndemnityForm(UserId: int):
     try:
         indemnityForm = IndemnityForm.query.filter_by(UserId=UserId).first()
         if indemnityForm:
-            return jsonify(
-                {
-                    "code": 200,
-                    "data": [
-                        indemnityForm.json()
-                        ]
-                }
-                ), 200
+            return jsonify(indemnityForm.json()), 200
         return jsonify(
             {
-                "code": 404,
                 "error": True,
                 "message": "Indemnity Form not found",
-                "data": {}
             }
         ), 404
     except Exception as e:
         return jsonify(
             {
-                "code": 404,
                 "error": True,
                 "message": "An error occurred while retrieving the Indemnity Form. " + str(e)
             }
@@ -186,6 +173,7 @@ def resetPassword():
             # Hash password
             hashed_password = generate_password_hash(newPassword, method='pbkdf2:sha256', salt_length=8)
             user.Password = hashed_password
+            
             # Commit hashed password to database
             db.session.commit()
 
@@ -196,24 +184,9 @@ def resetPassword():
             subject = "Reset Your Password"
             send_email(user.EmailAddress, subject, html)
             
-            return jsonify(
-                {
-                    "code": 200,
-                    "data": [
-                        user.json()
-                        ],
-                    "message": "Reset password email sent successfully.",
-                    "newPassword": newPassword
-                }
-            ), 201
-        return jsonify(
-            {
-                "code": 404,
-                "error": True,
-                "message": "User with email address " + data["EmailAddress"] + " not found.",
-                "data": {}
-            }
-        ), 404
+            return jsonify(user.json()), 200
+        
+        return "User with email address " + data["EmailAddress"] + " not found.", 404
     except Exception as e:
         return jsonify(
             {
