@@ -156,6 +156,11 @@ def updateUser(id: int):
     """
     UserId=id
     data = request.get_json()
+
+    # Hash password
+    hashed_password = generate_password_hash(data.get("Password"), method='pbkdf2:sha256', salt_length=8)
+    data["Password"] = hashed_password
+        
     try:
         user = User.query.filter_by(UserId=UserId).first()
         if user:
