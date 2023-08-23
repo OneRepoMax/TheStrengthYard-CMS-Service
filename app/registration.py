@@ -3,7 +3,7 @@ from flask import jsonify, request, url_for, render_template
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from app.user import User
-from app.passwordchecker import is_strong_password
+from app.passwordchecker import is_strong_password, generate_strong_password
 from app.token import confirm_token, generate_token
 from app.email import send_email
 from app.user import verifyEmail
@@ -178,18 +178,32 @@ def resetPassword():
     try:
         user = User.query.filter_by(EmailAddress=data["EmailAddress"]).first()
         if user:
+            
+            # Generate random password
+            newPassword = generate_strong_password()
+            print("\nThe new password is: " + f"{newPassword}")
+
+            # Hash password
+            hashed_password = generate_password_hash(newPassword, method='pbkdf2:sha256', salt_length=8)
+            user.Password = hashed_password
+            # Commit hashed password to database
+            db.session.commit()
+
+            # Send email with new password and a link to reset password
             token = generate_token(user.EmailAddress)
-            confirm_url = url_for("resetPasswordPart2", token=token, _external=True)
-            html = render_template("/reset_password.html", confirm_url=confirm_url)
-            subject = "Reset your password"
+            reset_url = url_for("resetPassword2", token=token, _external=True)
+            html = render_template("/reset_password.html", reset_url=reset_url, newPassword=newPassword)
+            subject = "Reset Your Password"
             send_email(user.EmailAddress, subject, html)
+            
             return jsonify(
                 {
-                    "code": 201,
+                    "code": 200,
                     "data": [
                         user.json()
                         ],
-                    "message": "Reset password email sent successfully."
+                    "message": "Reset password email sent successfully.",
+                    "newPassword": newPassword
                 }
             ), 201
         return jsonify(
@@ -210,3 +224,14 @@ def resetPassword():
         ), 404
     
 # Function and Route to Reset Password by EmailAddress Part 2
+@app.route("/resetpassword/<token>", methods=['GET'])
+def resetPassword2(token):
+    email = confirm_token(token)
+    user = User.query.filter_by(EmailAddress=email).first()
+    if user.EmailAddress == email:
+        # Route the User to the Reset Password Page
+        return render_template("/reset_password.html")
+    else:
+        return("The confirmation link is invalid or has expired.")
+    
+    return redirect(url_for("core.home"))

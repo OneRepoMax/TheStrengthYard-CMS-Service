@@ -1,5 +1,6 @@
 import re
 import string
+import random
 
 def is_strong_password(password):
     # Check length
@@ -24,3 +25,31 @@ def is_strong_password(password):
 
     return True
 
+def generate_strong_password(length=12):
+    # Define character sets
+    uppercase_letters = string.ascii_uppercase
+    lowercase_letters = string.ascii_lowercase
+    digits = string.digits
+    special_characters = r'$%#*&-.@'
+
+    # Combine character sets
+    all_characters = uppercase_letters + lowercase_letters + digits + special_characters
+
+    # Ensure the password length is at least 8
+    length = max(length, 8)
+
+    # Generate the password
+    password = []
+    password.append(random.choice(uppercase_letters))
+    password.append(random.choice(lowercase_letters))
+    password.append(random.choice(digits))
+    password.append(random.choice(special_characters))
+
+    # Fill the rest of the password with random characters
+    for _ in range(length - 4):
+        password.append(random.choice(all_characters))
+
+    # Shuffle the characters to ensure randomness
+    random.shuffle(password)
+
+    return ''.join(password)
