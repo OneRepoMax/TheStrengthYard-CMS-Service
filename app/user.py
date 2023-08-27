@@ -80,7 +80,7 @@ def getUserByID(id: int):
         ), 200
     return "There are no such user with ID: " + str(id), 406
 
-# Function and Route to Create a new User (USE THIS FOR STAFF REGISTRATION that does not need indemnity form)
+# Function and Route to Create a new User (USE THIS FOR STAFF 1RATION that does not need indemnity form)
 @app.route("/user", methods=['POST'])
 def createUser():
     """

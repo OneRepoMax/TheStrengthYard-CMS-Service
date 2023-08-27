@@ -20,7 +20,7 @@ def is_strong_password(password):
         return False
 
     # Check for special characters
-    if not re.search(r'[$%#*&\-.@]', password):
+    if not re.search(r'[$%#*&\-.@!;]', password):
         return False
 
     return True
