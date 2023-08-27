@@ -2,34 +2,12 @@ from app import app, db
 from flask import jsonify, request, url_for, render_template
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-from app.user import User
+from app.user import User, IndemnityForm
 from app.passwordchecker import is_strong_password, generate_strong_password
 from app.token import confirm_token, generate_token
 from app.email import send_email
 from app.user import verifyEmail
 
-class IndemnityForm(db.Model):
-    __tablename__ = 'IndemnityForm'
-
-    IndemnityFormId = db.Column(db.Integer, primary_key=True)
-    UserId = db.Column(db.Integer, db.ForeignKey('User.UserId'),primary_key=True)
-    FeedbackDiscover = db.Column(db.String)
-    MedicalHistory = db.Column(db.String)
-    MedicalRemarks = db.Column(db.String)
-    AcknowledgementTnC = db.Column(db.Boolean, default=True)
-    AcknowledgementOpenGymRules = db.Column(db.Boolean, default=True)
-
-    def json(self):
-        return {
-            "IndemnityFormId": self.IndemnityFormId,
-            "UserId": self.UserId,
-            "FeedbackDiscover": self.FeedbackDiscover,
-            "MedicalHistory": self.MedicalHistory,
-            "MedicalRemarks": self.MedicalRemarks,
-            "AcknowledgementTnC": self.AcknowledgementTnC,
-            "AcknowledgementOpenGymRules": self.AcknowledgementOpenGymRules
-        }
-    
 # Function and Route to Register a new User with completed Indemnity Form
 @app.route("/register", methods=['POST'])
 def register():
@@ -68,13 +46,13 @@ def register():
             ), 409
         
         # Check if password is strong
-        if not is_strong_password(data.get("Password")):
-            return jsonify(
-                {
-                    "error": True,
-                    "message": "An error occured while creating a new User. Password is not strong enough or does not meet the requirements."
-                }
-            ), 400
+        # if not is_strong_password(data.get("Password")):
+        #     return jsonify(
+        #         {
+        #             "error": True,
+        #             "message": "An error occured while creating a new User. Password is not strong enough or does not meet the requirements."
+        #         }
+        #     ), 400
         
         # Hash password
         hashed_password = generate_password_hash(data.get("Password"), method='pbkdf2:sha256', salt_length=8)
