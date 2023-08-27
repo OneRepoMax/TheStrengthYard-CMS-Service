@@ -146,7 +146,7 @@ def createUser():
         subject = "Please confirm your email"
         send_email(user.EmailAddress, subject, html)
 
-        return ("User registered"), 200
+        return jsonify(user.json()), 200
     except Exception as e:
         db.session.rollback()
         return "An error occurred while creating the new User. " + str(e), 406
@@ -193,14 +193,7 @@ def updateUser(id: int):
                 setattr(user, key, value)
             db.session.commit()
             return jsonify(user.json()), 200
-        return jsonify(
-            {
-                "code": 404,
-                "error": True,
-                "message": "User not found",
-                "data": {}
-            }
-        ), 404
+        return "User not found", 404
     except Exception as e:
         db.session.rollback()
         return "An error occurred while updating the User. " + str(e), 406
