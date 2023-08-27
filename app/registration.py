@@ -14,15 +14,15 @@ def register():
     """
     Sample Request
     {
-        "EmailAddress": "tanahkao@gmail.com",
-        "FirstName": "Ah Kao",
-        "LastName": "Tan",
-        "Gender": "F",
+        "EmailAddress": "tsy.fyp.2023@gmail.com",
+        "FirstName": "OneRepo",
+        "LastName": "Max",
+        "Gender": "O",
         "DateOfBirth": "1945-01-01",
         "HomeAddress": "Geylang Lorong 23",
         "PostalCode": 670123,
         "ContactNo": "91234567",
-        "Password": "iactuallylovecats",
+        "Password": "TSY@FYPi2023",
         "UserType": "C",
         "DisplayPicture": "sample.jpg",
         "Verified": false,
