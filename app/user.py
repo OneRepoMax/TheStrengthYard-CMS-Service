@@ -41,6 +41,28 @@ class User(db.Model):
             "Verified": self.Verified
         }
 
+class IndemnityForm(db.Model):
+    __tablename__ = 'IndemnityForm'
+
+    IndemnityFormId = db.Column(db.Integer, primary_key=True)
+    UserId = db.Column(db.Integer, db.ForeignKey('User.UserId'),primary_key=True)
+    FeedbackDiscover = db.Column(db.String)
+    MedicalHistory = db.Column(db.String)
+    MedicalRemarks = db.Column(db.String)
+    AcknowledgementTnC = db.Column(db.Boolean, default=True)
+    AcknowledgementOpenGymRules = db.Column(db.Boolean, default=True)
+
+    def json(self):
+        return {
+            "IndemnityFormId": self.IndemnityFormId,
+            "UserId": self.UserId,
+            "FeedbackDiscover": self.FeedbackDiscover,
+            "MedicalHistory": self.MedicalHistory,
+            "MedicalRemarks": self.MedicalRemarks,
+            "AcknowledgementTnC": self.AcknowledgementTnC,
+            "AcknowledgementOpenGymRules": self.AcknowledgementOpenGymRules
+        }
+
 @app.route("/user/test")
 def testUser():
     return "user route is working"
@@ -189,6 +211,12 @@ def deleteUser(id: int):
     try:
         user = User.query.filter_by(UserId=id).first()
         if user:
+            # Check if user has any Indemnity Form, and if he/she has, delete it
+            indemnityForm = IndemnityForm.query.filter_by(UserId=id).first()
+            if indemnityForm:
+                db.session.delete(indemnityForm)
+                
+            # Delete the User
             db.session.delete(user)
             db.session.commit()
             return "User Deleted Successfully of ID: " + str(id) + ".", 200
