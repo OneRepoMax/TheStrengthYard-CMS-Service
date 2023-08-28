@@ -151,10 +151,10 @@ def createUser():
         db.session.rollback()
         return "An error occurred while creating the new User. " + str(e), 406
 
+# Function that verifies the user when they click on the verification link
 @app.route("/verify/<token>", methods=['GET'])
 def verifyEmail(token):
     email = confirm_token(token)
-    print(email)
     user = User.query.filter_by(EmailAddress=email).first()
     if user.EmailAddress == email:
         user.Verified = 1
@@ -165,6 +165,38 @@ def verifyEmail(token):
         return("The confirmation link is invalid or has expired.")
     
     return redirect(url_for("core.home"))
+
+# Function to Resend Verification Email after it expires
+@app.route("/verify/resend", methods=['POST'])
+def resendVerifyEmail():
+    """
+    Sample Request
+    {
+        "EmailAddress": "tsy.fyp.2023@gmail.com"
+    }
+    """
+    data = request.get_json()
+
+    try:
+        user = User.query.filter_by(EmailAddress=data["EmailAddress"]).first()
+        if user:
+            token = generate_token(user.EmailAddress)
+            confirm_url = url_for("verifyEmail", token=token, _external=True)
+            html = render_template("/confirm_email.html", confirm_url=confirm_url)
+            subject = "Please confirm your email"
+            send_email(user.EmailAddress, subject, html)
+            
+            return("Verification Email Successfully Sent"), 200
+        
+        return "User with email address " + data["EmailAddress"] + " not found.", 404
+    except Exception as e:
+        return jsonify(
+            {
+                "code": 404,
+                "error": True,
+                "message": "An error occurred while sending verification email. " + str(e)
+            }
+        ), 404
     
 # Function and Route to Update a User by ID
 @app.route("/user/<int:id>", methods=['PUT'])
