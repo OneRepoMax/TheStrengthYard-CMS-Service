@@ -36,7 +36,7 @@ class MembershipRecord(db.Model):
     MembershipTypeId = db.Column(db.Integer, db.ForeignKey('Memberships.MembershipTypeId'), primary_key=True)
     StartDate = db.Column(db.Date)
     EndDate = db.Column(db.Date)
-    ActiveStatus = db.Column(db.Boolean, default=True)
+    ActiveStatus = db.Column(db.String, default='Active')
     User = db.relationship('User', backref=db.backref('memberships', cascade='all, delete-orphan'))
     Membership = db.relationship('Memberships', backref=db.backref('memberships', cascade='all, delete-orphan'))
 
@@ -405,7 +405,7 @@ def updateMembershipRecord(id: int):
         "MembershipRecordId": 1,
         "StartDate": "2021-01-01",
         "EndDate": "2023-12-31",
-        "ActiveStatus": true
+        "ActiveStatus": 'Active'
     }
     """
     data = request.get_json()
@@ -522,8 +522,8 @@ def createMembershipLog():
                         "message": "Membership with ID: " + str(data["MembershipRecordId"]) + " already has an existing Pause Log."
                     }
                 ), 409
-            # If there is no existing "Pause" Membership Log, then using the SelectedMembershipRecord, update it and change the ActiveStatus column to False
-            SelectedMembershipRecord.ActiveStatus = False
+            # If there is no existing "Pause" Membership Log, then using the SelectedMembershipRecord, update it and change the ActiveStatus column to Paused
+            SelectedMembershipRecord.ActiveStatus = 'Paused'
             db.session.commit()
             # Create the new Membership Log and add into the DB
             membershipLog = MembershipLog(**data)
@@ -548,8 +548,8 @@ def createMembershipLog():
                         "message": "Membership with ID: " + str(data["MembershipRecordId"]) + " already has an existing Resume Log."
                     }
                 ), 409
-            # If there is no existing "Resume" Membership Log, then using the SelectedMembershipRecord, update it and change the ActiveStatus column to True. Once done, use the given Date and check for the previous log's Pause Date. If the given Date is after the Pause Date, then compute the difference and update the MembershipRecord's EndDate accordingly. If the given Date is before the Pause Date, then return an error.
-            SelectedMembershipRecord.ActiveStatus = True
+            # If there is no existing "Resume" Membership Log, then using the SelectedMembershipRecord, update it and change the ActiveStatus column to 'Active'. Once done, use the given Date and check for the previous log's Pause Date. If the given Date is after the Pause Date, then compute the difference and update the MembershipRecord's EndDate accordingly. If the given Date is before the Pause Date, then return an error.
+            SelectedMembershipRecord.ActiveStatus = 'Active'
             db.session.commit()
             # Get the previous Pause Log
             PreviousPauseLog = MembershipLog.query.filter_by(MembershipRecordId=data["MembershipRecordId"], ActionType="Pause").first()
@@ -593,7 +593,7 @@ def createMembershipLog():
                     "data": data
                 }
             ), 200
-        # Check for Action Type. If it is "Terminate", then check if there is an existing "Terminate" Membership Log. If not, then using the SelectedMembershipRecord, update it and change the ActiveStatus column to False. Once done, use the given Date and replace the SelectedMembershipRecord's EndDate with the given Date to show that Membership has been terminated.
+        # Check for Action Type. If it is "Terminate", then check if there is an existing "Terminate" Membership Log. If not, then using the SelectedMembershipRecord, update it and change the ActiveStatus column to Terminated. Once done, use the given Date and replace the SelectedMembershipRecord's EndDate with the given Date to show that Membership has been terminated.
         elif data["ActionType"] == "Terminate":
             ExistingTerminateLog = MembershipLog.query.filter_by(MembershipRecordId=data["MembershipRecordId"], ActionType="Terminate").first()
             if ExistingTerminateLog:
@@ -604,7 +604,7 @@ def createMembershipLog():
                         "message": "Membership with ID: " + str(data["MembershipRecordId"]) + " already has an existing Terminate Log."
                     }
                 ), 409
-            SelectedMembershipRecord.ActiveStatus = False
+            SelectedMembershipRecord.ActiveStatus = 'Terminated'
             SelectedMembershipRecord.EndDate = data["Date"]
             db.session.commit()
             # Create the new Membership Log and add into the DB

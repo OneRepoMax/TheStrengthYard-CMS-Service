@@ -24,6 +24,6 @@ INSERT INTO `Memberships` VALUES
 -- Inserting Sample Data into Table `tsy_db`.`MembershipRecord`
 -- -----------------------------------------------------
 INSERT INTO `MembershipRecord` VALUES 
-(1, 100, 5, '2023-01-01', '2023-05-01', TRUE),
-(2, 101, 2, '2023-01-01', '2024-01-01', TRUE);
+(1, 100, 5, '2023-01-01', '2023-05-01', 'Active'),
+(2, 101, 2, '2023-01-01', '2024-01-01', 'Active');
 
