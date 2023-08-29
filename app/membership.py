@@ -90,19 +90,10 @@ def getAllMemberships():
     membershipList = Memberships.query.all()
     if len(membershipList):
         return jsonify(
-            {
-                "code": 200,
-                "data": [membership.json() for membership in membershipList],
-                "error": False
-            }
-        )
+                membership.json() for membership in membershipList    
+        ), 200
     return jsonify(
-        {
-            "code": 200,
-            "data": [],
-            "message": "There are no Memberships.",
-            "error": False
-        }
+             "There are no Memberships."
     ), 200
 
 # Function and Route for getting a Membership by ID
@@ -111,11 +102,7 @@ def getMembershipByID(id: int):
     membershipList = Memberships.query.filter_by(MembershipTypeId=id).all()
     if len(membershipList):
         return jsonify(
-            {
-                "code": 200,
-                "error": False,
-                "data": [membership.json() for membership in membershipList]
-            }
+                membership.json() for membership in membershipList
         ), 200
     return jsonify(
         {
@@ -152,11 +139,7 @@ def createMembership():
         db.session.add(membership)
         db.session.commit()
         return jsonify(
-            {
-                "code": 200,
-                "error": False,
-                "data": membership.json()
-            }
+                membership.json()
         ), 200
     except Exception as e:
         db.session.rollback()
@@ -188,11 +171,7 @@ def updateMembership(id: int):
                 setattr(membership, key, value)
             db.session.commit()
             return jsonify(
-                {
-                    "code": 200,
-                    "error": False,
-                    "data": membership.json()
-                }
+                    membership.json()
             ), 200
         return jsonify(
             {
@@ -222,11 +201,7 @@ def deleteMembership(id: int):
             db.session.delete(membership)
             db.session.commit()
             return jsonify(
-                {
-                    "code": 200,
-                    "error": False,
-                    "message": "Membership with ID: " + str(id) + " has been deleted."
-                }
+                    "Membership with ID: " + str(id) + " has been deleted."
             ), 200
         return jsonify(
             {
@@ -251,11 +226,7 @@ def getAllMembershipRecords():
     membershipRecordList = MembershipRecord.query.all()
     if len(membershipRecordList):
         return jsonify(
-            {
-                "code": 200,
-                "error": False,
-                "data": [membershipRecord.jsonWithUserAndMembership() for membershipRecord in membershipRecordList]
-            }
+                membershipRecord.jsonWithUserAndMembership() for membershipRecord in membershipRecordList
         ), 200
     return jsonify(
         {
@@ -272,11 +243,9 @@ def getMembershipRecordsByID(id: int):
     membershipRecordList = MembershipRecord.query.filter_by(UserId=id).all()
     if len(membershipRecordList):
         return jsonify(
-            {
-                "code": 200,
-                "error": False,
-                "data": [membershipRecord.jsonWithUserAndMembership() for membershipRecord in membershipRecordList]
-            }
+                    [
+                        membershipRecord.jsonWithUserAndMembership() for membershipRecord in membershipRecordList
+                        ]
         ), 200
     return jsonify(
         {
@@ -293,11 +262,9 @@ def getMembershipRecordsByMembershipID(id: int):
     membershipRecordList = MembershipRecord.query.filter_by(MembershipTypeId=id).all()
     if len(membershipRecordList):
         return jsonify(
-            {
-                "code": 200,
-                "error": False,
-                "data": [membershipRecord.jsonWithUserAndMembership() for membershipRecord in membershipRecordList]
-            }
+                [
+                    membershipRecord.jsonWithUserAndMembership() for membershipRecord in membershipRecordList
+                ]
         ), 200
     return jsonify(
         {
@@ -314,11 +281,7 @@ def getMembershipRecordByRecordID(id: int):
     membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=id).first()
     if membershipRecord:
         return jsonify(
-            {
-                "code": 200,
-                "error": False,
-                "data": membershipRecord.jsonWithUserAndMembership()
-            }
+                membershipRecord.jsonWithUserAndMembership()
         ), 200
     return jsonify(
         {
@@ -378,11 +341,7 @@ def createMembershipRecord():
         db.session.add(membershipRecord)
         db.session.commit()
         return jsonify(
-            {
-                "code": 200,
-                "error": False,
-                "data": data
-            }
+            data
         ), 200
     
     except Exception as e:
@@ -415,11 +374,7 @@ def updateMembershipRecord(id: int):
                 setattr(membershipRecord, key, value)
             db.session.commit()
             return jsonify(
-                {
-                    "code": 200,
-                    "error": False,
-                    "data": membershipRecord.jsonWithUserAndMembership()
-                }
+                    membershipRecord.jsonWithUserAndMembership()
             ), 200
         return jsonify(
             {
@@ -449,11 +404,7 @@ def deleteMembershipRecord(id: int):
             db.session.delete(membershipRecord)
             db.session.commit()
             return jsonify(
-                {
-                    "code": 200,
-                    "error": False,
-                    "message": "Membership Record with ID: " + str(id) + " has been deleted."
-                }
+                    "Membership Record with ID: " + str(id) + " has been deleted."
             ), 200
         return jsonify(
             {
@@ -529,12 +480,7 @@ def createMembershipLog():
             db.session.add(membershipLog)
             db.session.commit()
             return jsonify(
-                {
-                    "code": 200,
-                    "error": False,
-                    "message": "Membership with ID: " + str(data["MembershipRecordId"]) + " has been paused.",
-                    "data": data
-                }
+                    "Membership with ID: " + str(data["MembershipRecordId"]) + " has been paused."
             ), 200
         # Check for Action Type. If it is "Resume", then check if there is an existing "Resume" Membership Log
         elif data["ActionType"] == "Resume":
@@ -585,12 +531,7 @@ def createMembershipLog():
             db.session.add(membershipLog)
             db.session.commit()
             return jsonify(
-                {
-                    "code": 200,
-                    "error": False,
-                    "message": "Membership with ID: " + str(data["MembershipRecordId"]) + " has been resumed.",
-                    "data": data
-                }
+                    "Membership with ID: " + str(data["MembershipRecordId"]) + " has been resumed."
             ), 200
         # Check for Action Type. If it is "Terminate", then check if there is an existing "Terminate" Membership Log. If not, then using the SelectedMembershipRecord, update it and change the ActiveStatus column to Terminated. Once done, use the given Date and replace the SelectedMembershipRecord's EndDate with the given Date to show that Membership has been terminated.
         elif data["ActionType"] == "Terminate":
@@ -611,12 +552,7 @@ def createMembershipLog():
             db.session.add(membershipLog)
             db.session.commit()
             return jsonify(
-                {
-                    "code": 200,
-                    "error": False,
-                    "message": "Membership with ID: " + str(data["MembershipRecordId"]) + " has been terminated.",
-                    "data": data
-                }
+                "Membership with ID: " + str(data["MembershipRecordId"]) + " has been terminated."
             ), 200
         # If the Action Type is not "Pause", "Resume" or "Terminate", then return an error and rollback, specifying the reason that the Action Type is invalid.
         else:
@@ -645,11 +581,7 @@ def getMembershipLogsByMembershipRecordID(id: int):
     membershipLogList = MembershipLog.query.filter_by(MembershipRecordId=id).all()
     if len(membershipLogList):
         return jsonify(
-            {
-                "code": 200,
-                "error": False,
-                "data": [membershipLog.json() for membershipLog in membershipLogList]
-            }
+            [membershipLog.json() for membershipLog in membershipLogList]
         ), 200
     return jsonify(
         {
@@ -666,11 +598,7 @@ def getMembershipLogByLogID(id: int):
     membershipLog = MembershipLog.query.filter_by(MembershipLogId=id).first()
     if membershipLog:
         return jsonify(
-            {
-                "code": 200,
-                "error": False,
-                "data": membershipLog.json()
-            }
+            membershipLog.json()
         ), 200
     return jsonify(
         {
@@ -690,11 +618,7 @@ def deleteMembershipLog(id: int):
             db.session.delete(membershipLog)
             db.session.commit()
             return jsonify(
-                {
-                    "code": 200,
-                    "error": False,
-                    "message": "Membership Log with ID: " + str(id) + " has been deleted."
-                }
+                "Membership Log with ID: " + str(id) + " has been deleted."
             ), 200
         return jsonify(
             {
