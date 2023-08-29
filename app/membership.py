@@ -36,7 +36,7 @@ class MembershipRecord(db.Model):
     MembershipTypeId = db.Column(db.Integer, db.ForeignKey('Memberships.MembershipTypeId'), primary_key=True)
     StartDate = db.Column(db.Date)
     EndDate = db.Column(db.Date)
-    ActiveStatus = db.Column(db.String, default='Active')
+    ActiveStatus = db.Column(db.String, default='Inactive')
     User = db.relationship('User', backref=db.backref('memberships', cascade='all, delete-orphan'))
     Membership = db.relationship('Memberships', backref=db.backref('memberships', cascade='all, delete-orphan'))
 
@@ -404,8 +404,7 @@ def updateMembershipRecord(id: int):
     {
         "MembershipRecordId": 1,
         "StartDate": "2021-01-01",
-        "EndDate": "2023-12-31",
-        "ActiveStatus": 'Active'
+        "EndDate": "2023-12-31"
     }
     """
     data = request.get_json()
