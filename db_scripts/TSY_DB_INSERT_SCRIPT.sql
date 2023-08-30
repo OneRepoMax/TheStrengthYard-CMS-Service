@@ -57,7 +57,7 @@ INSERT INTO `MembershipRecord` VALUES
 INSERT INTO `MembershipLog` VALUES 
 (900, '2023-01-01', 'Membership record created', 'Created', 1),
 (901, '2023-01-01', 'Membership record created', 'Created', 2),
-(902, '2023-01-01', 'Membership record created', 'Created', 3);
+(902, '2023-01-01', 'Membership record created', 'Created', 3),
 (903, '2023-01-01', 'Membership record created', 'Created', 4),
 (904, '2023-02-01', 'Membership record created', 'Created', 5),
 (905, '2023-03-01', 'Membership record created', 'Created', 6),
