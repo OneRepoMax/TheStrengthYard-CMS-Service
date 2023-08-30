@@ -224,7 +224,7 @@ def getAllMembershipRecords():
     membershipRecordList = MembershipRecord.query.all()
     if len(membershipRecordList):
         return jsonify(
-                [membershipRecord.jsonWithUserAndMembership() for membershipRecord in membershipRecordList]
+                [membershipRecord.json() for membershipRecord in membershipRecordList]
         ), 200
     return jsonify(
         {
@@ -241,7 +241,7 @@ def getMembershipRecordsByID(id: int):
     membershipRecordList = MembershipRecord.query.filter_by(UserId=id).all()
     if len(membershipRecordList):
         return jsonify(
-                    [membershipRecord.jsonWithUserAndMembership() for membershipRecord in membershipRecordList]
+                    [membershipRecord.json() for membershipRecord in membershipRecordList]
         ), 200
     return jsonify(
         {
@@ -258,7 +258,7 @@ def getMembershipRecordsByMembershipID(id: int):
     membershipRecordList = MembershipRecord.query.filter_by(MembershipTypeId=id).all()
     if len(membershipRecordList):
         return jsonify(
-                [membershipRecord.jsonWithUserAndMembership() for membershipRecord in membershipRecordList]
+                [membershipRecord.json() for membershipRecord in membershipRecordList]
         ), 200
     return jsonify(
         {
@@ -275,7 +275,7 @@ def getMembershipRecordByRecordID(id: int):
     membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=id).first()
     if membershipRecord:
         return jsonify(
-                membershipRecord.jsonWithUserAndMembership()
+                membershipRecord.json()
         ), 200
     return jsonify(
         {
@@ -368,7 +368,7 @@ def updateMembershipRecord(id: int):
                 setattr(membershipRecord, key, value)
             db.session.commit()
             return jsonify(
-                    membershipRecord.jsonWithUserAndMembership()
+                    membershipRecord.json()
             ), 200
         return jsonify(
             {
