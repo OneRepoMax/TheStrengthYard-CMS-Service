@@ -53,7 +53,9 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`Memberships` (
   `MembershipTypeId` INT NOT NULL AUTO_INCREMENT,
   `Type` VARCHAR(255) NOT NULL,
   `BaseFee` DOUBLE NOT NULL,
-  `Description` VARCHAR(255) NULL DEFAULT NULL,
+  `Title` VARCHAR(255) NOT NULL,
+  `Description` LONGTEXT NULL,
+  `Picture` LONGTEXT,
   PRIMARY KEY (`MembershipTypeId`))
 ENGINE = InnoDB;
 

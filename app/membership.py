@@ -9,14 +9,18 @@ class Memberships(db.Model):
     MembershipTypeId = db.Column(db.Integer, primary_key=True)
     Type = db.Column(db.String)
     BaseFee = db.Column(db.Float)
+    Title = db.Column(db.String)
     Description = db.Column(db.String)
+    Picture = db.Column(db.String)
 
     def json(self):
         return {
             "MembershipTypeId": self.MembershipTypeId,
             "Type": self.Type,
             "BaseFee": self.BaseFee,
-            "Description": self.Description
+            "Title": self.Title,
+            "Description": self.Description,
+            "Picture": self.Picture
         }
     
     def jsonWithUser(self):
@@ -24,7 +28,9 @@ class Memberships(db.Model):
             "MembershipTypeId": self.MembershipTypeId,
             "Type": self.Type,
             "BaseFee": self.BaseFee,
+            "Title": self.Title,
             "Description": self.Description,
+            "Picture": self.Picture,
             "User": [user.json() for user in self.User]
         }
     
