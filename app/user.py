@@ -80,7 +80,7 @@ def login():
     user = User.query.filter_by(EmailAddress=email).first()
 
     if user and check_password_hash(user.Password, password):
-        return jsonify(user.json()), 200
+        return jsonify(user.json())
     else:
         return "Invalid user credentials", 401
 
@@ -89,7 +89,7 @@ def login():
 def getAllUser():
     userList = User.query.all()
     
-    return jsonify([user.json() for user in userList],200)
+    return jsonify([user.json() for user in userList]), 200
     
 
 # Function and Route for getting a User by ID
