@@ -90,7 +90,7 @@ def getAllMemberships():
     membershipList = Memberships.query.all()
     if len(membershipList):
         return jsonify(
-                membership.json() for membership in membershipList    
+                [membership.json() for membership in membershipList]    
         ), 200
     return jsonify(
              "There are no Memberships."
@@ -102,14 +102,13 @@ def getMembershipByID(id: int):
     membershipList = Memberships.query.filter_by(MembershipTypeId=id).all()
     if len(membershipList):
         return jsonify(
-                membership.json() for membership in membershipList
+                [membership.json() for membership in membershipList]
         ), 200
     return jsonify(
         {
             "code": 406,
             "error": False,
             "message": "There are no such membership with ID: " + str(id),
-            "data": []
         }
     ), 406
 
@@ -148,7 +147,6 @@ def createMembership():
                 "code": 406,
                 "error": True,
                 "message": "An error occurred while creating the new Membership. " + str(e),
-                "data": data
             }
         ), 406
 
@@ -226,7 +224,7 @@ def getAllMembershipRecords():
     membershipRecordList = MembershipRecord.query.all()
     if len(membershipRecordList):
         return jsonify(
-                membershipRecord.jsonWithUserAndMembership() for membershipRecord in membershipRecordList
+                [membershipRecord.jsonWithUserAndMembership() for membershipRecord in membershipRecordList]
         ), 200
     return jsonify(
         {
@@ -243,9 +241,7 @@ def getMembershipRecordsByID(id: int):
     membershipRecordList = MembershipRecord.query.filter_by(UserId=id).all()
     if len(membershipRecordList):
         return jsonify(
-                    [
-                        membershipRecord.jsonWithUserAndMembership() for membershipRecord in membershipRecordList
-                        ]
+                    [membershipRecord.jsonWithUserAndMembership() for membershipRecord in membershipRecordList]
         ), 200
     return jsonify(
         {
@@ -262,9 +258,7 @@ def getMembershipRecordsByMembershipID(id: int):
     membershipRecordList = MembershipRecord.query.filter_by(MembershipTypeId=id).all()
     if len(membershipRecordList):
         return jsonify(
-                [
-                    membershipRecord.jsonWithUserAndMembership() for membershipRecord in membershipRecordList
-                ]
+                [membershipRecord.jsonWithUserAndMembership() for membershipRecord in membershipRecordList]
         ), 200
     return jsonify(
         {

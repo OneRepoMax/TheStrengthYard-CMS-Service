@@ -245,6 +245,7 @@ def deleteUser(id: int):
             db.session.delete(user)
             db.session.commit()
             return "User Deleted Successfully of ID: " + str(id) + ".", 200
+        
         return "User not found", 404
     except Exception as e:
         db.session.rollback()
