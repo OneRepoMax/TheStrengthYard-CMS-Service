@@ -27,7 +27,7 @@ INSERT INTO `User` VALUES
 -- -----------------------------------------------------
 -- Inserting Sample Data into Table `tsy_db`.`Memberships`
 -- -----------------------------------------------------
-INSERT INTO `Memberships` VALUES 
+INSERT INTO `memberships` VALUES 
 (1, 'Monthly', 250, 'Progressive Strength Class Membership (Standard)', "Get access to our Progressive Strength Class and enjoy a well-rounded fitness experience. This membership includes monthly sessions to help you build strength and improve your overall fitness.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG"),
 (2, 'Yearly', 2400, 'Progressive Strength Class Membership (Standard)', "Make a commitment to your fitness journey with our Progressive Strength Class Membership. This yearly plan gives you access to our classes, helping you achieve your strength and fitness goals throughout the year.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG"),
 (3, 'Monthly', 200, 'Progressive Strength Class Membership (Student)',"Designed exclusively for students, this membership offers access to our Progressive Strength Class. Stay fit while you pursue your education with our monthly class sessions.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG"),
@@ -40,7 +40,13 @@ INSERT INTO `Memberships` VALUES
 -- Inserting Sample Data into Table `tsy_db`.`MembershipRecord`
 -- -----------------------------------------------------
 INSERT INTO `MembershipRecord` VALUES 
-(1, 100, 5, '2023-01-01', '2023-05-01', 'Active'),
-(2, 101, 2, '2023-01-01', '2024-01-01', 'Active');
-(3, 102, 2, '2023-01-01', '2024-01-01', 'Active');
+(1, 100, 5, '2023-01-01', '2023-05-01', 'Inactive'),
+(2, 101, 2, '2023-01-01', '2024-01-01', 'Inactive'),
+(3, 102, 2, '2023-01-01', '2024-01-01', 'Inactive');
+
+INSERT INTO `MembershipLog` VALUES 
+(900, '2023-01-01', 'Membership record created', 'Created', 1),
+(901, '2023-01-01', 'Membership record created', 'Created', 2),
+(902, '2023-01-01', 'Membership record created', 'Created', 3);
+
 
