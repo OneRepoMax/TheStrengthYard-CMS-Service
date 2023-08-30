@@ -42,4 +42,5 @@ INSERT INTO `Memberships` VALUES
 INSERT INTO `MembershipRecord` VALUES 
 (1, 100, 5, '2023-01-01', '2023-05-01', 'Active'),
 (2, 101, 2, '2023-01-01', '2024-01-01', 'Active');
+(3, 102, 2, '2023-01-01', '2024-01-01', 'Active');
 
