@@ -27,7 +27,7 @@ INSERT INTO `User` VALUES
 -- -----------------------------------------------------
 -- Inserting Sample Data into Table `tsy_db`.`Memberships`
 -- -----------------------------------------------------
-INSERT INTO `Memberships` VALUES 
+INSERT INTO `memberships` VALUES 
 (1, 'Monthly', 250, 'Progressive Strength Class Membership (Standard)', "Get access to our Progressive Strength Class and enjoy a well-rounded fitness experience. This membership includes monthly sessions to help you build strength and improve your overall fitness.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG"),
 (2, 'Yearly', 2400, 'Progressive Strength Class Membership (Standard)', "Make a commitment to your fitness journey with our Progressive Strength Class Membership. This yearly plan gives you access to our classes, helping you achieve your strength and fitness goals throughout the year.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG"),
 (3, 'Monthly', 200, 'Progressive Strength Class Membership (Student)',"Designed exclusively for students, this membership offers access to our Progressive Strength Class. Stay fit while you pursue your education with our monthly class sessions.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG"),
@@ -40,6 +40,32 @@ INSERT INTO `Memberships` VALUES
 -- Inserting Sample Data into Table `tsy_db`.`MembershipRecord`
 -- -----------------------------------------------------
 INSERT INTO `MembershipRecord` VALUES 
-(1, 100, 5, '2023-01-01', '2023-05-01', 'Active'),
-(2, 101, 2, '2023-01-01', '2024-01-01', 'Active');
+(1, 100, 5, '2023-01-01', '2023-05-01', 'Inactive'),
+(2, 101, 2, '2023-01-01', '2024-01-01', 'Inactive'),
+(3, 102, 2, '2023-01-01', '2024-01-01', 'Inactive');
+(4, 100, 1, '2023-01-01', '2023-12-31', 'Inactive'),
+(5, 101, 3, '2023-02-01', '2023-12-31', 'Inactive'),
+(6, 102, 2, '2023-03-01', '2023-12-31', 'Inactive'),
+(7, 103, 1, '2023-04-01', '2023-12-31', 'Inactive'),
+(8, 104, 2, '2023-05-01', '2023-12-31', 'Inactive'),
+(9, 105, 4, '2023-06-01', '2023-12-31', 'Inactive'),
+(10, 106, 3, '2023-07-01', '2023-12-31', 'Inactive'),
+(11, 107, 1, '2023-08-01', '2023-12-31', 'Inactive'),
+(12, 108, 4, '2023-09-01', '2023-12-31', 'Inactive'),
+(13, 109, 2, '2023-10-01', '2023-12-31', 'Inactive');
+
+INSERT INTO `MembershipLog` VALUES 
+(900, '2023-01-01', 'Membership record created', 'Created', 1),
+(901, '2023-01-01', 'Membership record created', 'Created', 2),
+(902, '2023-01-01', 'Membership record created', 'Created', 3);
+(903, '2023-01-01', 'Membership record created', 'Created', 4),
+(904, '2023-02-01', 'Membership record created', 'Created', 5),
+(905, '2023-03-01', 'Membership record created', 'Created', 6),
+(906, '2023-04-01', 'Membership record created', 'Created', 7),
+(907, '2023-05-01', 'Membership record created', 'Created', 8),
+(908, '2023-06-01', 'Membership record created', 'Created', 9),
+(909, '2023-07-01', 'Membership record created', 'Created', 10),
+(910, '2023-08-01', 'Membership record created', 'Created', 11),
+(911, '2023-09-01', 'Membership record created', 'Created', 12),
+(912, '2023-10-01', 'Membership record created', 'Created', 13);
 

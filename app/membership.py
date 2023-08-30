@@ -37,7 +37,7 @@ class Memberships(db.Model):
 class MembershipRecord(db.Model):
     __tablename__ = 'MembershipRecord'
 
-    MembershipRecordId = db.Column(db.Integer, primary_key=True)
+    MembershipRecordId = db.Column(db.Integer, primary_key=True, autoincrement=True)
     UserId = db.Column(db.Integer, db.ForeignKey('User.UserId'), primary_key=True)
     MembershipTypeId = db.Column(db.Integer, db.ForeignKey('Memberships.MembershipTypeId'), primary_key=True)
     StartDate = db.Column(db.Date)
@@ -340,6 +340,17 @@ def createMembershipRecord():
         membershipRecord = MembershipRecord(**data)
         db.session.add(membershipRecord)
         db.session.commit()
+
+        # Create a membership log with "Created" status
+        membershipLog = MembershipLog(
+            Date=membershipRecord.StartDate,
+            Description="Membership record created",
+            ActionType="Created",
+            MembershipRecordId=membershipRecord.MembershipRecordId
+        )
+        db.session.add(membershipLog)
+        db.session.commit()
+
         return jsonify(
             data
         ), 200
