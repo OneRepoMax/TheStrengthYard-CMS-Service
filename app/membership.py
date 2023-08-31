@@ -43,8 +43,8 @@ class MembershipRecord(db.Model):
     StartDate = db.Column(db.Date)
     EndDate = db.Column(db.Date)
     ActiveStatus = db.Column(db.String, default='Inactive')
-    User = db.relationship('User', backref=db.backref('memberships', cascade='all, delete-orphan'))
-    Membership = db.relationship('Memberships', backref=db.backref('memberships', cascade='all, delete-orphan'))
+    User = db.relationship('User', backref=db.backref('Memberships', cascade='all, delete-orphan'))
+    Membership = db.relationship('Memberships', backref=db.backref('Memberships', cascade='all, delete-orphan'))
 
     def json(self):
         return {
@@ -65,6 +65,17 @@ class MembershipRecord(db.Model):
             "EndDate": self.EndDate,
             "ActiveStatus": self.ActiveStatus,
             "User": self.User.json(),
+            "Membership": self.Membership.json()
+        }
+    
+    def jsonWithMembership(self):
+        return {
+            "MembershipRecordId": self.MembershipRecordId,
+            "UserId": self.UserId,
+            "MembershipTypeId": self.MembershipTypeId,
+            "StartDate": self.StartDate,
+            "EndDate": self.EndDate,
+            "ActiveStatus": self.ActiveStatus,
             "Membership": self.Membership.json()
         }
     
@@ -230,7 +241,7 @@ def getAllMembershipRecords():
     membershipRecordList = MembershipRecord.query.all()
     if len(membershipRecordList):
         return jsonify(
-                [membershipRecord.json() for membershipRecord in membershipRecordList]
+                [membershipRecord.jsonWithUserAndMembership() for membershipRecord in membershipRecordList]
         ), 200
     return jsonify(
         {
@@ -247,7 +258,7 @@ def getMembershipRecordsByID(id: int):
     membershipRecordList = MembershipRecord.query.filter_by(UserId=id).all()
     if len(membershipRecordList):
         return jsonify(
-                    [membershipRecord.json() for membershipRecord in membershipRecordList]
+                    [membershipRecord.jsonWithMembership() for membershipRecord in membershipRecordList]
         ), 200
     return jsonify(
         {
