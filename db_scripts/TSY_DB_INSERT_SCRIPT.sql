@@ -56,12 +56,12 @@ INSERT INTO `MembershipRecord` VALUES
 -- (13, 109, 2, '2023-10-01', '2023-12-31', 'Inactive');
 
 INSERT INTO `MembershipLog` VALUES 
-(900, '2023-01-01', 'Membership record created', 'Created', 1),
-(901, '2023-01-01', 'Membership record created', 'Created', 2),
-(902, '2023-01-01', 'Membership record created', 'Created', 3),
-(903, '2023-01-01', 'Membership record created', 'Created', 4),
-(904, '2023-02-01', 'Membership record created', 'Created', 5),
-(905, '2023-03-01', 'Membership record created', 'Created', 6);
+(900, '2023-01-01', 'Created', 'Membership record created', 1),
+(901, '2023-01-01', 'Created', 'Membership record created', 2),
+(902, '2023-01-01', 'Created', 'Membership record created', 3),
+(903, '2023-01-01', 'Created', 'Membership record created', 4),
+(904, '2023-02-01', 'Created', 'Membership record created', 5),
+(905, '2023-03-01', 'Created', 'Membership record created', 6);
 -- (906, '2023-04-01', 'Membership record created', 'Created', 7),
 -- (907, '2023-05-01', 'Membership record created', 'Created', 8),
 -- (908, '2023-06-01', 'Membership record created', 'Created', 9),
