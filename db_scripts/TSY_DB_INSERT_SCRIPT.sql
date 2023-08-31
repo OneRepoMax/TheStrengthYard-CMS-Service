@@ -32,6 +32,7 @@ INSERT INTO `memberships` VALUES
 (2, 'Yearly', 2400, 'Progressive Strength Class Membership (Standard)', "Make a commitment to your fitness journey with our Progressive Strength Class Membership. This yearly plan gives you access to our classes, helping you achieve your strength and fitness goals throughout the year.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG"),
 (3, 'Monthly', 200, 'Progressive Strength Class Membership (Student)',"Designed exclusively for students, this membership offers access to our Progressive Strength Class. Stay fit while you pursue your education with our monthly class sessions.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG"),
 (4, 'Yearly', 1800, 'Progressive Strength Class Membership (Student)', "Students can enjoy a full year of fitness with this membership. Attend our Progressive Strength Class sessions and work towards a healthier lifestyle throughout the academic year.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG"),
+(5, 'Monthly', 90, 'Open Gym Membership', "Embrace a consistent fitness routine with our Open Gym Membership. Enjoy a full year of access to our gym, allowing you to stay active and work towards your fitness goals.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG"),
 (6, 'Yearly', 900, 'Open Gym Membership', "Embrace a consistent fitness routine with our Open Gym Membership. Enjoy a full year of access to our gym, allowing you to stay active and work towards your fitness goals.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG"),
 (7, 'One-Time', 260, 'Beginner Olympic Weightlifting Course', "Discover the world of Olympic weightlifting with our Beginner Course. This one-time fee covers the cost of the course, where you'll learn the fundamentals of safe and effective weightlifting.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG"),
 (8, 'One-Time', 150, 'Barbell Fundamentals Course', "Master the art of working with barbells through our Fundamentals Course. This one-time fee grants you access to the course, where you'll learn essential techniques and principles.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG");
@@ -45,14 +46,14 @@ INSERT INTO `MembershipRecord` VALUES
 (3, 102, 2, '2023-01-01', '2024-01-01', 'Inactive'),
 (4, 100, 1, '2023-01-01', '2023-12-31', 'Inactive'),
 (5, 101, 3, '2023-02-01', '2023-12-31', 'Inactive'),
-(6, 102, 2, '2023-03-01', '2023-12-31', 'Inactive'),
-(7, 103, 1, '2023-04-01', '2023-12-31', 'Inactive'),
-(8, 104, 2, '2023-05-01', '2023-12-31', 'Inactive'),
-(9, 105, 4, '2023-06-01', '2023-12-31', 'Inactive'),
-(10, 106, 3, '2023-07-01', '2023-12-31', 'Inactive'),
-(11, 107, 1, '2023-08-01', '2023-12-31', 'Inactive'),
-(12, 108, 4, '2023-09-01', '2023-12-31', 'Inactive'),
-(13, 109, 2, '2023-10-01', '2023-12-31', 'Inactive');
+(6, 102, 2, '2023-03-01', '2023-12-31', 'Inactive');
+-- (7, 103, 1, '2023-04-01', '2023-12-31', 'Inactive'),
+-- (8, 104, 2, '2023-05-01', '2023-12-31', 'Inactive'),
+-- (9, 105, 4, '2023-06-01', '2023-12-31', 'Inactive'),
+-- (10, 106, 3, '2023-07-01', '2023-12-31', 'Inactive'),
+-- (11, 107, 1, '2023-08-01', '2023-12-31', 'Inactive'),
+-- (12, 108, 4, '2023-09-01', '2023-12-31', 'Inactive'),
+-- (13, 109, 2, '2023-10-01', '2023-12-31', 'Inactive');
 
 INSERT INTO `MembershipLog` VALUES 
 (900, '2023-01-01', 'Membership record created', 'Created', 1),
@@ -60,12 +61,12 @@ INSERT INTO `MembershipLog` VALUES
 (902, '2023-01-01', 'Membership record created', 'Created', 3),
 (903, '2023-01-01', 'Membership record created', 'Created', 4),
 (904, '2023-02-01', 'Membership record created', 'Created', 5),
-(905, '2023-03-01', 'Membership record created', 'Created', 6),
-(906, '2023-04-01', 'Membership record created', 'Created', 7),
-(907, '2023-05-01', 'Membership record created', 'Created', 8),
-(908, '2023-06-01', 'Membership record created', 'Created', 9),
-(909, '2023-07-01', 'Membership record created', 'Created', 10),
-(910, '2023-08-01', 'Membership record created', 'Created', 11),
-(911, '2023-09-01', 'Membership record created', 'Created', 12),
-(912, '2023-10-01', 'Membership record created', 'Created', 13);
+(905, '2023-03-01', 'Membership record created', 'Created', 6);
+-- (906, '2023-04-01', 'Membership record created', 'Created', 7),
+-- (907, '2023-05-01', 'Membership record created', 'Created', 8),
+-- (908, '2023-06-01', 'Membership record created', 'Created', 9),
+-- (909, '2023-07-01', 'Membership record created', 'Created', 10),
+-- (910, '2023-08-01', 'Membership record created', 'Created', 11),
+-- (911, '2023-09-01', 'Membership record created', 'Created', 12),
+-- (912, '2023-10-01', 'Membership record created', 'Created', 13);
 
