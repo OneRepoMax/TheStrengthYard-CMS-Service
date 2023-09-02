@@ -355,7 +355,7 @@ def createMembershipRecord():
         # Create a membership log with "Created" status
         membershipLog = MembershipLog(
             Date=membershipRecord.StartDate,
-            Description="Membership record created",
+            Description="Membership record created on " + str(membershipRecord.StartDate) + ".",
             ActionType="Created",
             MembershipRecordId=membershipRecord.MembershipRecordId
         )
