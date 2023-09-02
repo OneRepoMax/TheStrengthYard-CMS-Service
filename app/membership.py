@@ -2,6 +2,7 @@ from app import app, db
 from flask import jsonify, request
 from app.user import User
 from datetime import datetime
+from app.payments import Payment
 
 class Memberships(db.Model):
     __tablename__ = 'Memberships'
@@ -292,7 +293,7 @@ def getMembershipRecordByRecordID(id: int):
     membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=id).first()
     if membershipRecord:
         return jsonify(
-                membershipRecord.json()
+                membershipRecord.jsonWithUserAndMembership()
         ), 200
     return jsonify(
         {
@@ -658,4 +659,13 @@ def deleteMembershipLog(id: int):
                 "message": "An error occurred while deleting the Membership Log. " + str(e)
             }
         ), 406
-        
+
+# Function and Route to refresh the ActiveStatus of all Membership Records by checking the Payment Date
+@app.route("/membershiprecord/refresh")
+def refreshMembershipRecords():
+    # First, get all Membership Records
+    membershipRecordList = MembershipRecord.query.all()
+    # Next, get the current date
+    currentDate = datetime.now().date()
+    print(currentDate)
+    # Then, for each Membership Record, 

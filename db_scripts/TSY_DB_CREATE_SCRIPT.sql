@@ -103,12 +103,12 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`Payment` (
   `PaymentMode` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`PaymentId`),
   INDEX `MembershipRecordFK_idx` (`MembershipRecordId` ASC) VISIBLE,
-  UNIQUE INDEX `MembershipRecordId_UNIQUE` (`MembershipRecordId` ASC) VISIBLE,
   CONSTRAINT `MembershipRecordFK`
     FOREIGN KEY (`MembershipRecordId`)
     REFERENCES `tsy_db`.`MembershipRecord` (`MembershipRecordId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
+AUTO_INCREMENT = 7000
 ENGINE = InnoDB;
 
 
