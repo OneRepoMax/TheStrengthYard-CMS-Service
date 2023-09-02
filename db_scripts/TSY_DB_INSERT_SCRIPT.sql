@@ -43,8 +43,8 @@ INSERT INTO `memberships` VALUES
 INSERT INTO `MembershipRecord` VALUES 
 (1, 100, 5, '2023-01-15', '2023-05-15', 'Active'),
 (2, 101, 2, '2023-01-01', '2024-01-01', 'Active'),
-(3, 102, 2, '2023-01-01', '2024-01-01', 'Active'),
-(4, 100, 1, '2023-01-12', '2023-08-12', 'Active');
+(3, 43, 2, '2023-01-01', '2024-01-01', 'Active'),
+(4, 102, 1, '2023-07-02', '2023-09-02', 'Active');
 -- (5, 101, 3, '2023-02-01', '2023-12-31', 'Active'),
 -- (6, 102, 2, '2023-03-01', '2023-12-31', 'Active');
 -- (7, 103, 1, '2023-04-01', '2023-12-31', 'Inactive'),
@@ -62,7 +62,7 @@ INSERT INTO `MembershipLog` VALUES
 (900, '2023-01-15', 'Created', 'Membership record created', 1),
 (901, '2023-01-01', 'Created', 'Membership record created', 2),
 (902, '2023-01-01', 'Created', 'Membership record created', 3),
-(903, '2023-01-12', 'Created', 'Membership record created', 4);
+(903, '2023-07-02', 'Created', 'Membership record created', 4);
 -- (904, '2023-02-01', 'Created', 'Membership record created', 5),
 -- (905, '2023-03-01', 'Created', 'Membership record created', 6);
 -- (906, '2023-04-01', 'Membership record created', 'Created', 7),
@@ -83,14 +83,8 @@ INSERT INTO `Payment` VALUES
 (7003, NULL, 1, '2023-04-15', 90, 0, 'PayNow'),
 (7004, NULL, 2, '2023-01-01', 2400, 0, 'PayNow'),
 (7005, NULL, 3, '2023-01-01', 2400, 0, 'PayNow'),
-(7006, NULL, 4, '2023-01-12', 250, 0, 'PayNow'),
-(7007, NULL, 4, '2023-02-12', 250, 0, 'PayNow'),
-(7008, NULL, 4, '2023-03-12', 250, 0, 'PayNow'),
-(7009, NULL, 4, '2023-04-12', 250, 0, 'PayNow'),
-(7010, NULL, 4, '2023-05-12', 250, 0, 'PayNow'),
-(7011, NULL, 4, '2023-06-12', 250, 0, 'PayNow'),
-(7012, NULL, 4, '2023-07-12', 250, 0, 'PayNow'),
-(7013, NULL, 4, '2023-08-12', 250, 0, 'PayNow');
+(7006, NULL, 4, '2023-07-02', 250, 0, 'PayNow'),
+(7007, NULL, 4, '2023-08-28', 250, 0, 'PayNow');
 
 
 
