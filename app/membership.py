@@ -389,7 +389,9 @@ def updateMembershipRecord(id: int):
     {
         "MembershipRecordId": 1,
         "StartDate": "2021-01-01",
-        "EndDate": "2023-12-31"
+        "EndDate": "2023-12-31",
+        "ActiveStatus": "Active",
+        "StatusRemarks": null
     }
     """
     data = request.get_json()
