@@ -153,15 +153,6 @@ def createMembership():
     """
     data = request.get_json()
     try:
-        membershipExists = Memberships.query.filter_by(Description=data["Description"]).first()
-        if membershipExists:
-            return jsonify(
-                {
-                    "code": 409,
-                    "error": True,
-                    "message": "Membership with Description: (" + data["Description"] + ") already exists."
-                }
-            ), 409
         membership = Memberships(**data)
         db.session.add(membership)
         db.session.commit()
