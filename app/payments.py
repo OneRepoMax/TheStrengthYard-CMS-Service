@@ -252,10 +252,6 @@ def refreshMembershipRecords():
 
         
     # Return a success message
-    return jsonify(
-        {
-            "code": 200,
-            "error": False,
-            "message": "Membership Records have been refreshed."
-        }
+    return (
+        "Membership Records have been refreshed."
     ), 200
