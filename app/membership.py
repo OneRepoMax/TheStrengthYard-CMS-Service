@@ -87,6 +87,7 @@ class MembershipLog(db.Model):
     ActionType = db.Column(db.String)
     Description = db.Column(db.String)
     MembershipRecordId = db.Column(db.Integer, db.ForeignKey('MembershipRecord.MembershipRecordId'))
+    MembershipRecord = db.relationship('MembershipRecord', backref=db.backref('MembershipRecord', cascade='all, delete-orphan'))
 
     def json(self):
         return {
@@ -95,6 +96,16 @@ class MembershipLog(db.Model):
             "ActionType": self.ActionType,
             "Description": self.Description,
             "MembershipRecordId": self.MembershipRecordId
+        }
+
+    def jsonWithMembershipRecord(self):
+        return {
+            "MembershipLogId": self.MembershipLogId,
+            "Date": self.Date,
+            "ActionType": self.ActionType,
+            "Description": self.Description,
+            "MembershipRecordId": self.MembershipRecordId,
+            "MembershipRecord": self.MembershipRecord.json()
         }
     
 @app.route("/memberships/test")
@@ -265,7 +276,6 @@ def getMembershipRecordsByID(id: int):
             "code": 406,
             "error": False,
             "message": "There are no existings memberships with User ID: " + str(id),
-            "data": []
         }
     ), 406
 
@@ -498,11 +508,11 @@ def createMembershipLog():
             SelectedMembershipRecord.ActiveStatus = 'Paused'
             db.session.commit()
             # Create the new Membership Log and add into the DB
-            membershipLog = MembershipLog(**data)
+            membershipLog = MembershipLog(**data) 
             db.session.add(membershipLog)
             db.session.commit()
             return jsonify(
-                    "Membership with ID: " + str(data["MembershipRecordId"]) + " has been paused."
+                    membershipLog.json()
             ), 200
         # Check for Action Type. If it is "Resume", then check if there is an existing "Resume" Membership Log
         elif data["ActionType"] == "Resume":
@@ -603,7 +613,7 @@ def getMembershipLogsByMembershipRecordID(id: int):
     membershipLogList = MembershipLog.query.filter_by(MembershipRecordId=id).all()
     if len(membershipLogList):
         return jsonify(
-            [membershipLog.json() for membershipLog in membershipLogList]
+            [membershipLog.jsonWithMembershipRecord() for membershipLog in membershipLogList]
         ), 200
     return jsonify(
         {
