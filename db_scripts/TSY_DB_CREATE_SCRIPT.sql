@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`MembershipRecord` (
   `StartDate` DATE NOT NULL,
   `EndDate` DATE,
   `ActiveStatus` VARCHAR(255) NOT NULL DEFAULT "Active",
+  `StatusRemarks` LONGTEXT NULL DEFAULT NULL,
   INDEX `MembershipTypeFK_idx` (`MembershipTypeId` ASC) VISIBLE,
   PRIMARY KEY (`MembershipRecordId`),
   INDEX `UserFK_idx` (`UserId` ASC) VISIBLE,

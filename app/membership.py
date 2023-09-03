@@ -42,7 +42,8 @@ class MembershipRecord(db.Model):
     MembershipTypeId = db.Column(db.Integer, db.ForeignKey('Memberships.MembershipTypeId'), primary_key=True)
     StartDate = db.Column(db.Date)
     EndDate = db.Column(db.Date)
-    ActiveStatus = db.Column(db.String, default='Inactive')
+    ActiveStatus = db.Column(db.String, default='Active')
+    StatusRemarks = db.Column(db.String)
     User = db.relationship('User', backref=db.backref('Memberships', cascade='all, delete-orphan'))
     Membership = db.relationship('Memberships', backref=db.backref('Memberships', cascade='all, delete-orphan'))
 
@@ -53,7 +54,8 @@ class MembershipRecord(db.Model):
             "MembershipTypeId": self.MembershipTypeId,
             "StartDate": self.StartDate,
             "EndDate": self.EndDate,
-            "ActiveStatus": self.ActiveStatus
+            "ActiveStatus": self.ActiveStatus,
+            "StatusRemarks": self.StatusRemarks
         }
 
     def jsonWithUserAndMembership(self):
@@ -64,6 +66,7 @@ class MembershipRecord(db.Model):
             "StartDate": self.StartDate,
             "EndDate": self.EndDate,
             "ActiveStatus": self.ActiveStatus,
+            "StatusRemarks": self.StatusRemarks,
             "User": self.User.json(),
             "Membership": self.Membership.json()
         }
@@ -76,6 +79,7 @@ class MembershipRecord(db.Model):
             "StartDate": self.StartDate,
             "EndDate": self.EndDate,
             "ActiveStatus": self.ActiveStatus,
+            "StatusRemarks": self.StatusRemarks,
             "Membership": self.Membership.json()
         }
     
