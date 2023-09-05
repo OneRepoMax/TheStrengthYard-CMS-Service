@@ -697,10 +697,7 @@ def getMembershipRecordsByFilter():
         ), 200
     return jsonify(
         {
-            "code": 406,
-            "error": False,
-            "message": "There are no existing memberships with Active Status: Active",
-            "data": []
+            "message": "There are no existing memberships with Active Status: " + data["ActiveStatus"],
         }
     ), 406
         
