@@ -488,10 +488,11 @@ def createMembershipLog():
                     "message": "Membership Record with ID: " + str(data["MembershipRecordId"]) + " does not exist."
                 }
             ), 406
-        # Check for Action Type. If it is "Pause", then check if there is an existing "Pause" Membership Log
+        # Check for Action Type. If it is "Pause", pull the latest Membership Log and check if it is a "Pause" Log. If it is, then return an error and rollback, specifying the reason that the Membership Record already has an existing Pause Log.
         if data["ActionType"] == "Pause":
-            ExistingPauseLog = MembershipLog.query.filter_by(MembershipRecordId=data["MembershipRecordId"], ActionType="Pause").first()
-            if ExistingPauseLog:
+            LatestMembershipLog = MembershipLog.query.filter_by(MembershipRecordId=data["MembershipRecordId"]).order_by(MembershipLog.MembershipLogId.desc()).first()
+
+            if LatestMembershipLog.ActionType == "Pause":
                 return jsonify(
                     {
                         "message": "Membership with ID: " + str(data["MembershipRecordId"]) + " already has an existing Pause Log."
@@ -507,10 +508,11 @@ def createMembershipLog():
             return jsonify(
                     membershipLog.json()
             ), 200
-        # Check for Action Type. If it is "Resume", then check if there is an existing "Resume" Membership Log
+        # Check for Action Type. If it is "Resume", pull the latest Membership Log and check if it is a "Resume" Log. If it is, then return an error and rollback, specifying the reason that the Membership Record already has an existing Resume Log.
         elif data["ActionType"] == "Resume":
-            ExistingResumeLog = MembershipLog.query.filter_by(MembershipRecordId=data["MembershipRecordId"], ActionType="Resume").first()
-            if ExistingResumeLog:
+            LatestMembershipLog = MembershipLog.query.filter_by(MembershipRecordId=data["MembershipRecordId"]).order_by(MembershipLog.MembershipLogId.desc()).first()
+
+            if LatestMembershipLog.ActionType == "Resume":
                 return jsonify(
                     {
                         "message": "Membership with ID: " + str(data["MembershipRecordId"]) + " already has an existing Resume Log."
@@ -547,6 +549,10 @@ def createMembershipLog():
                 ), 412
             # Create the new Membership Log and add into the DB
             membershipLog = MembershipLog(**data)
+
+            # Add to the existing MembershipLog's description to include the number of additional days that we extended the Membership for (and how we computed it in brackets e.g. Paused Date - End Date in dd/mm/yyyy), as well as the new Membership End Date.
+            membershipLog.Description = membershipLog.Description + "\nExtended the Membership by " + str(difference.days) + " days to " + str(SelectedMembershipRecord.EndDate) + "." + "(Paused Date: " + str(PreviousPauseLog.Date) + ", Resumed Date: " + date_string + ")"
+
             db.session.add(membershipLog)
             db.session.commit()
             return jsonify(
