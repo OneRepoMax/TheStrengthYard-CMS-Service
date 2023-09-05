@@ -1,7 +1,7 @@
 from app import app, db
 from flask import jsonify, request
 from app.user import User
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class Memberships(db.Model):
     __tablename__ = 'Memberships'
@@ -42,7 +42,8 @@ class MembershipRecord(db.Model):
     MembershipTypeId = db.Column(db.Integer, db.ForeignKey('Memberships.MembershipTypeId'), primary_key=True)
     StartDate = db.Column(db.Date)
     EndDate = db.Column(db.Date)
-    ActiveStatus = db.Column(db.String, default='Inactive')
+    ActiveStatus = db.Column(db.String, default='Active')
+    StatusRemarks = db.Column(db.String)
     User = db.relationship('User', backref=db.backref('Memberships', cascade='all, delete-orphan'))
     Membership = db.relationship('Memberships', backref=db.backref('Memberships', cascade='all, delete-orphan'))
 
@@ -53,7 +54,8 @@ class MembershipRecord(db.Model):
             "MembershipTypeId": self.MembershipTypeId,
             "StartDate": self.StartDate,
             "EndDate": self.EndDate,
-            "ActiveStatus": self.ActiveStatus
+            "ActiveStatus": self.ActiveStatus,
+            "StatusRemarks": self.StatusRemarks
         }
 
     def jsonWithUserAndMembership(self):
@@ -64,6 +66,7 @@ class MembershipRecord(db.Model):
             "StartDate": self.StartDate,
             "EndDate": self.EndDate,
             "ActiveStatus": self.ActiveStatus,
+            "StatusRemarks": self.StatusRemarks,
             "User": self.User.json(),
             "Membership": self.Membership.json()
         }
@@ -76,6 +79,7 @@ class MembershipRecord(db.Model):
             "StartDate": self.StartDate,
             "EndDate": self.EndDate,
             "ActiveStatus": self.ActiveStatus,
+            "StatusRemarks": self.StatusRemarks,
             "Membership": self.Membership.json()
         }
     
@@ -293,7 +297,7 @@ def getMembershipRecordByRecordID(id: int):
     membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=id).first()
     if membershipRecord:
         return jsonify(
-                membershipRecord.json()
+                membershipRecord.jsonWithUserAndMembership()
         ), 200
     return jsonify(
         {
@@ -356,7 +360,7 @@ def createMembershipRecord():
         # Create a membership log with "Created" status
         membershipLog = MembershipLog(
             Date=membershipRecord.StartDate,
-            Description="Membership record created",
+            Description="Membership record created on " + str(membershipRecord.StartDate) + ".",
             ActionType="Created",
             MembershipRecordId=membershipRecord.MembershipRecordId
         )
@@ -386,7 +390,9 @@ def updateMembershipRecord(id: int):
     {
         "MembershipRecordId": 1,
         "StartDate": "2021-01-01",
-        "EndDate": "2023-12-31"
+        "EndDate": "2023-12-31",
+        "ActiveStatus": "Active",
+        "StatusRemarks": null
     }
     """
     data = request.get_json()
@@ -651,4 +657,16 @@ def deleteMembershipLog(id: int):
                 "message": "An error occurred while deleting the Membership Log. " + str(e)
             }
         ), 406
+
         
+
+        
+            
+
+            
+            
+
+
+
+
+
