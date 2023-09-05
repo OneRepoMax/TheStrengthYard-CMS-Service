@@ -664,6 +664,45 @@ def deleteMembershipLog(id: int):
             }
         ), 406
 
+# Function and Route to get Membership Records based on the Active Status filter
+@app.route("/membershiprecord/filter", methods=['POST'])
+def getMembershipRecordsByFilter():
+    """
+    SAMPLE REQUEST for "Active" Status
+    {
+        "ActiveStatus": "Active"
+    }
+    SAMPLE REQUEST for "Pending Payment" Status
+    {
+        "ActiveStatus": "Pending Payment"
+    }
+    SAMPLE REQUEST for "Paused" Status
+    {
+        "ActiveStatus": "Paused"
+    }
+    SAMPLE REQUEST for "Expired" Status
+    {
+        "ActiveStatus": "Expired"
+    }
+    SAMPLE REQUEST for "Terminated" Status
+    {
+        "ActiveStatus": "Terminated"
+    }
+    """
+    data = request.get_json()
+    membershipRecordList = MembershipRecord.query.filter_by(ActiveStatus=data["ActiveStatus"]).all()
+    if len(membershipRecordList):
+        return jsonify(
+            [membershipRecord.jsonWithUserAndMembership() for membershipRecord in membershipRecordList]
+        ), 200
+    return jsonify(
+        {
+            "code": 406,
+            "error": False,
+            "message": "There are no existing memberships with Active Status: Active",
+            "data": []
+        }
+    ), 406
         
 
         
