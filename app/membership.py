@@ -700,7 +700,44 @@ def getMembershipRecordsByFilter():
             "message": "There are no existing memberships with Active Status: " + data["ActiveStatus"],
         }
     ), 406
-        
+
+# Function and Route to get all Membership Logs across all Membership Records from the User Id
+@app.route("/membershiplog/user/<int:id>")
+def getMembershipLogsByUserID(id: int):
+    # Get all Membership Records of the given User Id
+    membershipRecordList = MembershipRecord.query.filter_by(UserId=id).all()
+    print(membershipRecordList)
+    # Create a new master list to store all of the Membership Records and their related Membership Logs
+    MasterMembershipRecordAndLogList = []
+    if len(membershipRecordList):
+        # Loop through each Membership Record that the user has and pull out all of the related Membership Logs to this Membership Record
+        for membershipRecord in membershipRecordList:
+            # Create a temporary empty list to store all of the Membership Logs of this Membership Record
+            tempMembershipLogList = []
+            # Get all of the Membership Logs of that specific Membership Record
+            membershipLogList = MembershipLog.query.filter_by(MembershipRecordId=membershipRecord.MembershipRecordId).all()
+            # Loop through each Membership Log and append it to the tempMembershipLogList
+            for membershipLog in membershipLogList:
+                tempMembershipLogList.append(membershipLog.json())
+            # Append the Membership Record and its related Membership Logs to the membershipRecordAndLogList
+            MasterMembershipRecordAndLogList.append(
+                {
+                    "MembershipRecord": membershipRecord.jsonWithMembership(),
+                    "MembershipLog": tempMembershipLogList
+                }
+            )
+        # Return the MasterMembershipRecordAndLogList and their related Membership Logs
+        return jsonify(
+            MasterMembershipRecordAndLogList
+        ), 200
+    return jsonify(
+        {
+            "code": 406,
+            "error": False,
+            "message": "There are no existing membership logs with User ID: " + str(id),
+            "data": []
+        }
+    ), 406
 
         
             
