@@ -17,6 +17,7 @@ class Memberships(db.Model):
     Title = db.Column(db.String)
     Description = db.Column(db.String)
     Picture = db.Column(db.String)
+    PayPalPlanId = db.Column(db.String)
 
     def json(self):
         return {
@@ -25,7 +26,8 @@ class Memberships(db.Model):
             "BaseFee": self.BaseFee,
             "Title": self.Title,
             "Description": self.Description,
-            "Picture": self.Picture
+            "Picture": self.Picture,
+            "PayPalPlanId": self.PayPalPlanId
         }
     
     def jsonWithUser(self):
@@ -36,6 +38,7 @@ class Memberships(db.Model):
             "Title": self.Title,
             "Description": self.Description,
             "Picture": self.Picture,
+            "PayPalPlanId": self.PayPalPlanId,
             "User": [user.json() for user in self.User]
         }
     
@@ -183,33 +186,67 @@ def createMembership():
     }
     """
     data = request.get_json()
+    # Check that data["Type"] is not One-Time:
+    if data["Type"] != "One-Time":
+        
+        # Use the access token to make the API call
+        access_token = get_access_token()
 
-    # Use the access token to make the API call
-    access_token = get_access_token()
+        # Create headers for request to PayPal API to create a new Product
+        headers = {
+            'Authorization': 'Bearer ' + access_token,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Prefer': 'return=representation',
+        }
 
-    # Create headers for request to PayPal API to create a new Product
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Prefer': 'return=representation',
-    }
-
-    # Create the request body to send to PayPal API to create a new Product
-    paypalproductdata = '{"name": "' + data["Title"] + '","description": "' + data["Description"] + '","type": "SERVICE","category": "EXERCISE_AND_FITNESS","image_url": "' + data["Picture"] + '","home_url": "' + data["Picture"] + '"}'
+        # Create the request body to send to PayPal API to create a new Product
+        paypalproductdata = '{"name": "' + data["Title"] + '","description": "' + data["Description"] + '","type": "SERVICE","category": "EXERCISE_AND_FITNESS","image_url": "' + data["Picture"] + '","home_url": "' + data["Picture"] + '"}'
     
-    productresponse = requests.post('https://api-m.sandbox.paypal.com/v1/catalogs/products', headers=headers, data=paypalproductdata)
+        productresponse = requests.post('https://api-m.sandbox.paypal.com/v1/catalogs/products', headers=headers, data=paypalproductdata)
 
-    # Create request body to send to PayPal API to create a new Plan
-    paypalplandata = '{"product_id": "' + productresponse.json()["id"] + '","name": "' + data["Title"] + '","description": "' + data["Description"] + '","billing_cycles": [{"frequency": {"interval_unit": "MONTH","interval_count": 1},"tenure_type": "REGULAR","sequence": 1,"total_cycles": 0,"pricing_scheme": {"fixed_price": {"value": ' + str(data["BaseFee"]) + ',"currency_code": "SGD"}}}],"payment_preferences": {"auto_bill_outstanding": true,"setup_fee": {"value": "0","currency_code": "SGD"},"setup_fee_failure_action": "CONTINUE","payment_failure_threshold": 3}}'
+        # Create request body to send to PayPal API to create a new Plan
+        # NEED TO EDIT TO CHANGE OTHER VARIABLES OF THE PLAN E.G. CYCLE, SETUP FEE, ETC.
+        if data["Type"] == "Monthly":
+            paypalplandata = '{"product_id": "' + productresponse.json()["id"] + '","name": "' + data["Title"] + '","description": "' + data["Description"] + '","billing_cycles": [{"frequency": {"interval_unit": "MONTH","interval_count": 1},"tenure_type": "REGULAR","sequence": 1,"total_cycles": 0,"pricing_scheme": {"fixed_price": {"value": ' + str(data["BaseFee"]) + ',"currency_code": "SGD"}}}],"payment_preferences": {"auto_bill_outstanding": true,"setup_fee": {"value": "0","currency_code": "SGD"},"setup_fee_failure_action": "CONTINUE","payment_failure_threshold": 3}}'
+        elif data["Type"] == "Yearly":
+            paypalplandata = '{"product_id": "' + productresponse.json()["id"] + '","name": "' + data["Title"] + '","description": "' + data["Description"] + '","billing_cycles": [{"frequency": {"interval_unit": "YEAR","interval_count": 1},"tenure_type": "REGULAR","sequence": 1,"total_cycles": 0,"pricing_scheme": {"fixed_price": {"value": ' + str(data["BaseFee"]) + ',"currency_code": "SGD"}}}],"payment_preferences": {"auto_bill_outstanding": true,"setup_fee": {"value": "0","currency_code": "SGD"},"setup_fee_failure_action": "CONTINUE","payment_failure_threshold": 3}}'
 
-    planresponse = requests.post('https://api-m.sandbox.paypal.com/v1/billing/plans', headers=headers, data=paypalplandata)
+        planresponse = requests.post('https://api-m.sandbox.paypal.com/v1/billing/plans', headers=headers, data=paypalplandata)
 
-    # If the both responses are successful, print the response then create the new Membership in the DB
-    if productresponse.status_code == 201 and planresponse.status_code == 201:
-        print(productresponse.json())
-        print(planresponse.json())
+        # If the both responses are successful, print the response then create the new Membership in the DB
+        if productresponse.status_code == 201 and planresponse.status_code == 201:
+            print(productresponse.json())
+            print(planresponse.json())
+            try:
+                # Create a new Membership together with the PayPal Plan ID
+                membership = Memberships(**data, PayPalPlanId=planresponse.json()["id"])
+                db.session.add(membership)
+                db.session.commit()
+                return jsonify(
+                        membership.json()
+                ), 200
+            except Exception as e:
+                db.session.rollback()
+                return jsonify(
+                    {
+                        "code": 406,
+                        "error": True,
+                        "message": "An error occurred while creating the new Membership. " + str(e),
+                    }
+                ), 406
+        else:
+            return jsonify(
+                {
+                    "code": 407,
+                    "error": True,
+                    "message": "An error occurred while creating the new Membership in PayPal. " + str(productresponse.json()) + str(planresponse.json()),
+                }
+            ), 407
+    # Else if data["Type"] is One-Time, then create the new Membership in the DB without the PayPal Plan ID, leaving it as NULL
+    else:
         try:
+            # Create a new Membership together 
             membership = Memberships(**data)
             db.session.add(membership)
             db.session.commit()
@@ -225,15 +262,7 @@ def createMembership():
                     "message": "An error occurred while creating the new Membership. " + str(e),
                 }
             ), 406
-    else:
-        return jsonify(
-            {
-                "code": 407,
-                "error": True,
-                "message": "An error occurred while creating the new Membership in PayPal. " + str(productresponse.json()) + str(planresponse.json()),
-            }
-        ), 407
-    
+
 # Function and Route to Get all Memberships (Products) in PayPal
 @app.route("/memberships/paypal")
 def getAllMembershipsPayPal():
@@ -305,7 +334,6 @@ def getAllPlansPayPal():
             }
         ), 407
 
-
 # Function and Route to Update a Membership by ID
 @app.route("/memberships/<int:id>", methods=['PUT'])
 def updateMembership(id: int):
@@ -351,12 +379,41 @@ def updateMembership(id: int):
 def deleteMembership(id: int):
     try:
         membership = Memberships.query.filter_by(MembershipTypeId=id).first()
+        print(membership.json())
         if membership:
+
+            # Use the access token to make the API call
+            access_token = get_access_token()
+
+            # Create headers for request to PayPal API to deactivate a Plan
+            headers = {
+                'Authorization': 'Bearer ' + access_token,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            }
+
+            print(membership.PayPalPlanId)
+            response = requests.post('https://api-m.sandbox.paypal.com/v1/billing/plans/' + membership.PayPalPlanId + '/deactivate', headers=headers)
+
+            # If the response is successful, print the response
+            if response.status_code == 204:
+                # Print a Message to say that PayPal plan has been deactivated
+                print("PayPal Plan with ID " + membership.PayPalPlanId + " has been deactivated.")
+            else:
+                return jsonify(
+                    {
+                        "code": 407,
+                        "error": True,
+                        "message": "An error occurred while deactivating the Membership (Plan) in PayPal. " + str(response.json()),
+                    }
+                ), 407
+            
             db.session.delete(membership)
             db.session.commit()
             return jsonify(
-                    "Membership with ID: " + str(id) + " has been deleted."
+                    "Membership with ID: " + str(id) + " has been deleted. Plan has been deactivated in PayPal."
             ), 200
+            
         return jsonify(
             {
                 "code": 406,
