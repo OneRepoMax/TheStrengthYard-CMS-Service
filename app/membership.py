@@ -2,6 +2,11 @@ from app import app, db
 from flask import jsonify, request
 from app.user import User
 from datetime import datetime, timedelta
+import requests, json
+from os import environ
+
+client_id = environ.get('PAYPAL_CLIENT_ID')
+client_secret = environ.get('PAYPAL_CLIENT_SECRET')
 
 class Memberships(db.Model):
     __tablename__ = 'Memberships'
@@ -111,7 +116,27 @@ class MembershipLog(db.Model):
             "MembershipRecordId": self.MembershipRecordId,
             "MembershipRecord": self.MembershipRecord.json()
         }
-    
+
+# Create a function to get the access token from PayPal
+def get_access_token():
+    auth_url = 'https://api-m.sandbox.paypal.com/v1/oauth2/token'  # Use the sandbox URL for testing
+    headers = {
+        'Accept': 'application/json',
+        'Accept-Language': 'en_US',
+    }
+    data = {
+        'grant_type': 'client_credentials'
+    }
+    auth = (client_id, client_secret)
+
+    response = requests.post(auth_url, headers=headers, data=data, auth=auth)
+    if response.status_code == 200:
+        response_data = json.loads(response.text)
+        access_token = response_data['access_token']
+        return access_token
+    else:
+        raise Exception('Failed to obtain access token')
+
 @app.route("/memberships/test")
 def testMembership():
     return "membership route is working"
@@ -144,7 +169,7 @@ def getMembershipByID(id: int):
         }
     ), 406
 
-# Function and Route to Create a new Membership
+# Function and Route to Create a new Membership (With PayPal Integration)
 @app.route("/memberships", methods=['POST'])
 def createMembership():
     """
@@ -152,26 +177,134 @@ def createMembership():
     {
         "Type": "Monthly",
         "BaseFee": 100,
-        "Description": "Monthly Training Membership"
+        "Description": "Monthly Training Membership",
+        "Title": "Monthly Training",
+        "Picture": "https://example.com/picture.jpg"
     }
     """
     data = request.get_json()
-    try:
-        membership = Memberships(**data)
-        db.session.add(membership)
-        db.session.commit()
-        return jsonify(
-                membership.json()
-        ), 200
-    except Exception as e:
-        db.session.rollback()
+
+    # Use the access token to make the API call
+    access_token = get_access_token()
+
+    # Create headers for request to PayPal API to create a new Product
+    headers = {
+        'Authorization': 'Bearer ' + access_token,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Prefer': 'return=representation',
+    }
+
+    # Create the request body to send to PayPal API to create a new Product
+    paypalproductdata = '{"name": "' + data["Title"] + '","description": "' + data["Description"] + '","type": "SERVICE","category": "EXERCISE_AND_FITNESS","image_url": "' + data["Picture"] + '","home_url": "' + data["Picture"] + '"}'
+    
+    productresponse = requests.post('https://api-m.sandbox.paypal.com/v1/catalogs/products', headers=headers, data=paypalproductdata)
+
+    # Create request body to send to PayPal API to create a new Plan
+    paypalplandata = '{"product_id": "' + productresponse.json()["id"] + '","name": "' + data["Title"] + '","description": "' + data["Description"] + '","billing_cycles": [{"frequency": {"interval_unit": "MONTH","interval_count": 1},"tenure_type": "REGULAR","sequence": 1,"total_cycles": 0,"pricing_scheme": {"fixed_price": {"value": ' + str(data["BaseFee"]) + ',"currency_code": "SGD"}}}],"payment_preferences": {"auto_bill_outstanding": true,"setup_fee": {"value": "0","currency_code": "SGD"},"setup_fee_failure_action": "CONTINUE","payment_failure_threshold": 3}}'
+
+    planresponse = requests.post('https://api-m.sandbox.paypal.com/v1/billing/plans', headers=headers, data=paypalplandata)
+
+    # If the both responses are successful, print the response then create the new Membership in the DB
+    if productresponse.status_code == 201 and planresponse.status_code == 201:
+        print(productresponse.json())
+        print(planresponse.json())
+        try:
+            membership = Memberships(**data)
+            db.session.add(membership)
+            db.session.commit()
+            return jsonify(
+                    membership.json()
+            ), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify(
+                {
+                    "code": 406,
+                    "error": True,
+                    "message": "An error occurred while creating the new Membership. " + str(e),
+                }
+            ), 406
+    else:
         return jsonify(
             {
-                "code": 406,
+                "code": 407,
                 "error": True,
-                "message": "An error occurred while creating the new Membership. " + str(e),
+                "message": "An error occurred while creating the new Membership in PayPal. " + str(productresponse.json()) + str(planresponse.json()),
             }
-        ), 406
+        ), 407
+    
+# Function and Route to Get all Memberships (Products) in PayPal
+@app.route("/memberships/paypal")
+def getAllMembershipsPayPal():
+    # Use the access token to make the API call
+    access_token = get_access_token()
+
+    # Create headers for request to PayPal API to get all Products
+    headers = {
+        'Authorization': 'Bearer ' + access_token,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    }
+
+    # params
+    params = {
+        'page_size': 20,
+        'page': 1,
+        'total_required': 'true'
+    }
+
+    response = requests.get('https://api-m.sandbox.paypal.com/v1/catalogs/products', headers=headers, params=params)
+
+    # If the response is successful, return the response
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return jsonify(
+            {
+                "code": 407,
+                "error": True,
+                "message": "An error occurred while retrieving the Memberships from PayPal. " + str(response.json()),
+            }
+        ), 407
+    
+# Function and Route to list all Plans (Memberships) in PayPal
+@app.route("/memberships/paypal/plans")
+def getAllPlansPayPal():
+    # Use the access token to make the API call
+    access_token = get_access_token()
+
+    # Create headers for request to PayPal API to get all Plans
+    headers = {
+        'Authorization': 'Bearer ' + access_token,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Prefer': 'return=representation',
+    }
+
+    # params
+    params = {
+        'sort_order': 'DESC',
+        'sort_by': 'create_time',
+        'page_size': 20,
+        'page': 1,
+        'total_required': 'true'
+    }
+
+    response = requests.get('https://api-m.sandbox.paypal.com/v1/billing/plans', headers=headers, params=params)
+
+    # If the response is successful, return the response
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return jsonify(
+            {
+                "code": 407,
+                "error": True,
+                "message": "An error occurred while retrieving the Plans from PayPal. " + str(response.json()),
+            }
+        ), 407
+
 
 # Function and Route to Update a Membership by ID
 @app.route("/memberships/<int:id>", methods=['PUT'])
@@ -738,7 +871,6 @@ def getMembershipLogsByUserID(id: int):
             "data": []
         }
     ), 406
-
         
             
 
