@@ -381,32 +381,33 @@ def deleteMembership(id: int):
         membership = Memberships.query.filter_by(MembershipTypeId=id).first()
         print(membership.json())
         if membership:
+            
+            if membership.Type != "One-Time":
+                # Use the access token to make the API call
+                access_token = get_access_token()
 
-            # Use the access token to make the API call
-            access_token = get_access_token()
+                # Create headers for request to PayPal API to deactivate a Plan
+                headers = {
+                    'Authorization': 'Bearer ' + access_token,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                }
 
-            # Create headers for request to PayPal API to deactivate a Plan
-            headers = {
-                'Authorization': 'Bearer ' + access_token,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            }
+                print(membership.PayPalPlanId)
+                response = requests.post('https://api-m.sandbox.paypal.com/v1/billing/plans/' + membership.PayPalPlanId + '/deactivate', headers=headers)
 
-            print(membership.PayPalPlanId)
-            response = requests.post('https://api-m.sandbox.paypal.com/v1/billing/plans/' + membership.PayPalPlanId + '/deactivate', headers=headers)
-
-            # If the response is successful, print the response
-            if response.status_code == 204:
-                # Print a Message to say that PayPal plan has been deactivated
-                print("PayPal Plan with ID " + membership.PayPalPlanId + " has been deactivated.")
-            else:
-                return jsonify(
-                    {
-                        "code": 407,
-                        "error": True,
-                        "message": "An error occurred while deactivating the Membership (Plan) in PayPal. " + str(response.json()),
-                    }
-                ), 407
+                # If the response is successful, print the response
+                if response.status_code == 204:
+                    # Print a Message to say that PayPal plan has been deactivated
+                    print("PayPal Plan with ID " + membership.PayPalPlanId + " has been deactivated.")
+                else:
+                    return jsonify(
+                        {
+                            "code": 407,
+                            "error": True,
+                            "message": "An error occurred while deactivating the Membership (Plan) in PayPal. " + str(response.json()),
+                        }
+                    ), 407
             
             db.session.delete(membership)
             db.session.commit()
