@@ -46,6 +46,7 @@ class MembershipRecord(db.Model):
     __tablename__ = 'MembershipRecord'
 
     MembershipRecordId = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    PayPalSubscriptionId = db.Column(db.String)
     UserId = db.Column(db.Integer, db.ForeignKey('User.UserId'), primary_key=True)
     MembershipTypeId = db.Column(db.Integer, db.ForeignKey('Memberships.MembershipTypeId'), primary_key=True)
     StartDate = db.Column(db.Date)
@@ -58,6 +59,7 @@ class MembershipRecord(db.Model):
     def json(self):
         return {
             "MembershipRecordId": self.MembershipRecordId,
+            "PayPalSubscriptionId": self.PayPalSubscriptionId,
             "UserId": self.UserId,
             "MembershipTypeId": self.MembershipTypeId,
             "StartDate": self.StartDate,
@@ -69,6 +71,7 @@ class MembershipRecord(db.Model):
     def jsonWithUserAndMembership(self):
         return {
             "MembershipRecordId": self.MembershipRecordId,
+            "PayPalSubscriptionId": self.PayPalSubscriptionId,
             "UserId": self.UserId,
             "MembershipTypeId": self.MembershipTypeId,
             "StartDate": self.StartDate,
@@ -82,6 +85,7 @@ class MembershipRecord(db.Model):
     def jsonWithMembership(self):
         return {
             "MembershipRecordId": self.MembershipRecordId,
+            "PayPalSubscriptionId": self.PayPalSubscriptionId,
             "UserId": self.UserId,
             "MembershipTypeId": self.MembershipTypeId,
             "StartDate": self.StartDate,
@@ -208,9 +212,9 @@ def createMembership():
         # Create request body to send to PayPal API to create a new Plan
         # NEED TO EDIT TO CHANGE OTHER VARIABLES OF THE PLAN E.G. CYCLE, SETUP FEE, ETC.
         if data["Type"] == "Monthly":
-            paypalplandata = '{"product_id": "' + productresponse.json()["id"] + '","name": "' + data["Title"] + '","description": "' + data["Description"] + '","billing_cycles": [{"frequency": {"interval_unit": "MONTH","interval_count": 1},"tenure_type": "REGULAR","sequence": 1,"total_cycles": 0,"pricing_scheme": {"fixed_price": {"value": ' + str(data["BaseFee"]) + ',"currency_code": "SGD"}}}],"payment_preferences": {"auto_bill_outstanding": true,"setup_fee": {"value": "0","currency_code": "SGD"},"setup_fee_failure_action": "CONTINUE","payment_failure_threshold": 3}}'
+            paypalplandata = '{"product_id": "' + productresponse.json()["id"] + '","name": "' + data["Title"] + ' (Monthly Plan)","description": "' + data["Description"] + '","billing_cycles": [{"frequency": {"interval_unit": "MONTH","interval_count": 1},"tenure_type": "REGULAR","sequence": 1,"total_cycles": 0,"pricing_scheme": {"fixed_price": {"value": ' + str(data["BaseFee"]) + ',"currency_code": "SGD"}}}],"payment_preferences": {"auto_bill_outstanding": true,"setup_fee": {"value": "70","currency_code": "SGD"},"setup_fee_failure_action": "CONTINUE","payment_failure_threshold": 1}}'
         elif data["Type"] == "Yearly":
-            paypalplandata = '{"product_id": "' + productresponse.json()["id"] + '","name": "' + data["Title"] + '","description": "' + data["Description"] + '","billing_cycles": [{"frequency": {"interval_unit": "YEAR","interval_count": 1},"tenure_type": "REGULAR","sequence": 1,"total_cycles": 0,"pricing_scheme": {"fixed_price": {"value": ' + str(data["BaseFee"]) + ',"currency_code": "SGD"}}}],"payment_preferences": {"auto_bill_outstanding": true,"setup_fee": {"value": "0","currency_code": "SGD"},"setup_fee_failure_action": "CONTINUE","payment_failure_threshold": 3}}'
+            paypalplandata = '{"product_id": "' + productresponse.json()["id"] + '","name": "' + data["Title"] + ' (Yearly Plan)","description": "' + data["Description"] + '","billing_cycles": [{"frequency": {"interval_unit": "YEAR","interval_count": 1},"tenure_type": "REGULAR","sequence": 1,"total_cycles": 0,"pricing_scheme": {"fixed_price": {"value": ' + str(data["BaseFee"]) + ',"currency_code": "SGD"}}}],"payment_preferences": {"auto_bill_outstanding": true,"setup_fee": {"value": "70","currency_code": "SGD"},"setup_fee_failure_action": "CONTINUE","payment_failure_threshold": 1}}'
 
         planresponse = requests.post('https://api-m.sandbox.paypal.com/v1/billing/plans', headers=headers, data=paypalplandata)
 
@@ -505,6 +509,7 @@ def createMembershipRecord():
     """
     Sample Request
     {
+        "PayPalSubscriptionId": "I-1234567890",
         "UserId": 100,
         "MembershipTypeId": 4,
         "StartDate": "2021-01-01",

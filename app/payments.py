@@ -9,7 +9,7 @@ class Payment(db.Model):
     __tablename__ = 'Payment'
 
     PaymentId = db.Column(db.Integer, primary_key=True)
-    PayPalId = db.Column(db.String(255))
+    PayPalTransactionId = db.Column(db.String(255))
     MembershipRecordId = db.Column(db.Integer, db.ForeignKey('MembershipRecord.MembershipRecordId'))
     TransactionDate = db.Column(db.Date, nullable=False)
     Amount = db.Column(db.Float, nullable=False)
@@ -19,7 +19,7 @@ class Payment(db.Model):
     def json(self):
         return {
             'PaymentId': self.PaymentId,
-            'PayPalId': self.PayPalId,
+            'PayPalTransactionId': self.PayPalTransactionId,
             'MembershipRecordId': self.MembershipRecordId,
             'TransactionDate': self.TransactionDate,
             'Amount': self.Amount,
@@ -83,14 +83,14 @@ def makePayment(MembershipRecordId):
     """
     Sample Request (if any other mode than PayPal is used)
     {
-        "PayPalId": null,
+        "PayPalTransactionId": null,
         "Amount": 250,
         "Discount": 0,
         "PaymentMode": "PayNow"
     }
     Sample Request (if PayPal is used)
     {
-        "PayPalId": "1234567890",
+        "PayPalTransactionId": "1234567890",
         "Amount": 250,
         "Discount": 0,
         "PaymentMode": "PayPal"
@@ -98,7 +98,7 @@ def makePayment(MembershipRecordId):
     """
     data = request.get_json()
     payment = Payment(
-        PayPalId = data['PayPalId'],
+        PayPalTransactionId = data['PayPalTransactionId'],
         MembershipRecordId = MembershipRecordId,
         TransactionDate = datetime.now(),
         Amount = data['Amount'],
@@ -148,14 +148,14 @@ def makeYearlyPayment(MembershipRecordId):
     """
     Sample Request (if any other mode than PayPal is used)
     {
-        "PayPalId": null,
+        "PayPalTransactionId": null,
         "Amount": 2400,
         "Discount": 0,
         "PaymentMode": "PayNow"
     }
     Sample Request (if PayPal is used)
     {
-        "PayPalId": "1234567890",
+        "PayPalTransactionId": "1234567890",
         "Amount": 2400,
         "Discount": 0,
         "PaymentMode": "PayPal"
@@ -163,7 +163,7 @@ def makeYearlyPayment(MembershipRecordId):
     """
     data = request.get_json()
     payment = Payment(
-        PayPalId = data['PayPalId'],
+        PayPalTransactionId = data['PayPalTransactionId'],
         MembershipRecordId = MembershipRecordId,
         TransactionDate = datetime.now(),
         Amount = data['Amount'],

@@ -68,6 +68,7 @@ DROP TABLE IF EXISTS `tsy_db`.`MembershipRecord` ;
 
 CREATE TABLE IF NOT EXISTS `tsy_db`.`MembershipRecord` (
   `MembershipRecordId` INT NOT NULL AUTO_INCREMENT,
+  `PayPalSubscriptionId` VARCHAR(255) NULL DEFAULT NULL,
   `UserId` INT NOT NULL,
   `MembershipTypeId` INT NOT NULL,
   `StartDate` DATE NOT NULL,
@@ -97,7 +98,7 @@ DROP TABLE IF EXISTS `tsy_db`.`Payment` ;
 
 CREATE TABLE IF NOT EXISTS `tsy_db`.`Payment` (
   `PaymentId` INT NOT NULL AUTO_INCREMENT,
-  `PayPalId` VARCHAR(255) NULL DEFAULT NULL,
+  `PayPalTransactionId` VARCHAR(255) NULL DEFAULT NULL,
   `MembershipRecordId` INT NOT NULL,
   `TransactionDate` DATE NOT NULL,
   `Amount` DOUBLE NOT NULL,
