@@ -3,6 +3,9 @@ from flask import jsonify, request
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from app.membership import MembershipRecord, MembershipLog, Memberships
+import requests
+import json
+from app.auth import get_access_token
 
 
 class Payment(db.Model):
@@ -255,3 +258,54 @@ def refreshMembershipRecords():
     return (
         "Membership Records have been refreshed."
     ), 200
+
+@app.route("/recordPayment", methods=['POST'])
+def recordPayment():
+
+        transmission_id = request.headers.get('PAYPAL-TRANSMISSION-ID')
+        transmission_time = request.headers.get('PAYPAL-TRANSMISSION-TIME')
+        transmission_sig = request.headers.get('PAYPAL-TRANSMISSION-SIG')
+        auth_algo = request.headers.get('PAYPAL-AUTH-ALGO')
+
+        data = {
+            'auth_algo': auth_algo, 
+            'cert_url':request.headers.get('PAYPAL-CERT-URL'),
+            'transmission_id': transmission_id,
+            'transmission_sig': transmission_sig,
+            'transmission_time': transmission_time,
+            'webhook_id': '6HJ03451BX462510T',
+            'webhook_event': request.get_json()
+        }
+
+        access_token = get_access_token()
+        headers = {
+            'Authorization': 'Bearer ' + access_token,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        }
+        validation = requests.post('https://api-m.sandbox.paypal.com/v1/notifications/verify-webhook-signature',
+                            headers=headers, data=json.dumps(data))
+        
+        print(validation.text)
+        
+
+        data = request.get_json()
+        transactionID = data['resource']['id']
+        transactionDate = datetime.now()
+        # subscriptionID = data['resource']['billing_agreement_id']
+        amount = data['resource']['amount']['total']
+        newPayment = Payment(
+            PayPalTransactionId = transactionID, ## Take the invoice number
+            MembershipRecordId = 1,
+            TransactionDate = transactionDate,
+            Amount = amount,
+            Discount = 0,
+            PaymentMode = "PayPal"
+        )
+
+        db.session.add(newPayment)
+        db.session.commit()
+
+        return ("Success"), 200
+    # else:
+    #     return ("Recieved"), 200
