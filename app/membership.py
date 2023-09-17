@@ -723,10 +723,10 @@ def createMembershipLog():
                 }
 
                 # Include data in the request body to state reason for suspension
-                data = '{"reason": "User has paused their membership on ' + str(datetime.now()) + '"}'
+                reasondata = '{"reason": "User has paused their membership on ' + str(datetime.now()) + '"}'
 
                 # Make the API call to suspend the Subscription
-                response = requests.post('https://api-m.sandbox.paypal.com/v1/billing/subscriptions/' + SelectedMembershipRecord.PayPalSubscriptionId + '/suspend', headers=headers, data=data)
+                response = requests.post('https://api-m.sandbox.paypal.com/v1/billing/subscriptions/' + SelectedMembershipRecord.PayPalSubscriptionId + '/suspend', headers=headers, data=reasondata)
 
                 # If the response is successful, print the response
                 if response.status_code == 204:
@@ -742,7 +742,7 @@ def createMembershipLog():
                     ), 407
             db.session.commit()
             # Create the new Membership Log and add into the DB
-            membershipLog = MembershipLog(**data) 
+            membershipLog = MembershipLog(**data)
             db.session.add(membershipLog)
             db.session.commit()
             return jsonify(
@@ -774,10 +774,10 @@ def createMembershipLog():
                 }
 
                 # Include data in the request body to state reason for reactivation
-                data = '{"reason": "User has resumed their membership on ' + str(datetime.now()) + '"}'
+                reasondata = '{"reason": "User has resumed their membership on ' + str(datetime.now()) + '"}'
 
                 # Make the API call to reactivate the Subscription
-                response = requests.post('https://api-m.sandbox.paypal.com/v1/billing/subscriptions/' + SelectedMembershipRecord.PayPalSubscriptionId + '/activate', headers=headers, data=data)
+                response = requests.post('https://api-m.sandbox.paypal.com/v1/billing/subscriptions/' + SelectedMembershipRecord.PayPalSubscriptionId + '/activate', headers=headers, data=reasondata)
 
                 # If the response is successful, print the response
                 if response.status_code == 204:
