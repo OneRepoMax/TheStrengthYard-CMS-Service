@@ -605,8 +605,40 @@ def updateMembershipRecord(id: int):
 @app.route("/membershiprecord/<int:id>", methods=['DELETE'])
 def deleteMembershipRecord(id: int):
     try:
+        # Check if the Membership Record exists first
         membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=id).first()
+        
         if membershipRecord:
+            # Use the access token to make the API call
+            access_token = get_access_token()
+
+            # Create headers for request to PayPal API to cancel a Subscription
+            headers = {
+                'Authorization': 'Bearer ' + access_token,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            }
+
+            # If the Membership Record has a PayPal Subscription ID, then cancel the Subscription in PayPal
+            if membershipRecord.PayPalSubscriptionId:
+                # Include data in the request body to state reason for cancellation
+                data = '{"reason": "User has terminated their membership on ' + str(datetime.now()) + '"}'
+
+                # Make the API call to cancel the Subscription
+                response = requests.post('https://api-m.sandbox.paypal.com/v1/billing/subscriptions/' + membershipRecord.PayPalSubscriptionId + '/cancel', headers=headers, data=data)
+
+                # If the response is successful, print the response
+                if response.status_code == 204:
+                    # Print a Message to say that PayPal Subscription has been cancelled
+                    print("PayPal Subscription with ID " + membershipRecord.PayPalSubscriptionId + " has been cancelled.")
+                else:
+                    return jsonify(
+                        {
+                            "code": 407,
+                            "error": True,
+                            "message": "An error occurred while cancelling the Membership (Subscription) in PayPal. " + str(response.json()),
+                        }
+                    ), 407
             db.session.delete(membershipRecord)
             db.session.commit()
             return jsonify(
@@ -677,6 +709,37 @@ def createMembershipLog():
                 ), 409
             # If there is no existing "Pause" Membership Log, then using the SelectedMembershipRecord, update it and change the ActiveStatus column to Paused
             SelectedMembershipRecord.ActiveStatus = 'Paused'
+
+            # Check the MembershipRecord if the PayPalSubscriptionId is not null, if it is not null, then pause the Subscription in PayPal
+            if SelectedMembershipRecord.PayPalSubscriptionId:
+                # Use the access token to make the API call
+                access_token = get_access_token()
+
+                # Create headers for request to PayPal API to suspend a Subscription
+                headers = {
+                    'Authorization': 'Bearer ' + access_token,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                }
+
+                # Include data in the request body to state reason for suspension
+                data = '{"reason": "User has paused their membership on ' + str(datetime.now()) + '"}'
+
+                # Make the API call to suspend the Subscription
+                response = requests.post('https://api-m.sandbox.paypal.com/v1/billing/subscriptions/' + SelectedMembershipRecord.PayPalSubscriptionId + '/suspend', headers=headers, data=data)
+
+                # If the response is successful, print the response
+                if response.status_code == 204:
+                    # Print a Message to say that PayPal Subscription has been suspended
+                    print("PayPal Subscription with ID " + SelectedMembershipRecord.PayPalSubscriptionId + " has been suspended.")
+                else:
+                    return jsonify(
+                        {
+                            "code": 407,
+                            "error": True,
+                            "message": "An error occurred while suspending the Membership (Subscription) in PayPal. " + str(response.json()),
+                        }
+                    ), 407
             db.session.commit()
             # Create the new Membership Log and add into the DB
             membershipLog = MembershipLog(**data) 
@@ -697,6 +760,37 @@ def createMembershipLog():
                 ), 409
             # If there is no existing "Resume" Membership Log, then using the SelectedMembershipRecord, update it and change the ActiveStatus column to 'Active'. Once done, use the given Date and check for the previous log's Pause Date. If the given Date is after the Pause Date, then compute the difference and update the MembershipRecord's EndDate accordingly. If the given Date is before the Pause Date, then return an error.
             SelectedMembershipRecord.ActiveStatus = 'Active'
+
+            # Check the MembershipRecord if the PayPalSubscriptionId is not null, if it is not null, then resume the Subscription in PayPal
+            if SelectedMembershipRecord.PayPalSubscriptionId:
+                # Use the access token to make the API call
+                access_token = get_access_token()
+
+                # Create headers for request to PayPal API to reactivate a Subscription
+                headers = {
+                    'Authorization': 'Bearer ' + access_token,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                }
+
+                # Include data in the request body to state reason for reactivation
+                data = '{"reason": "User has resumed their membership on ' + str(datetime.now()) + '"}'
+
+                # Make the API call to reactivate the Subscription
+                response = requests.post('https://api-m.sandbox.paypal.com/v1/billing/subscriptions/' + SelectedMembershipRecord.PayPalSubscriptionId + '/activate', headers=headers, data=data)
+
+                # If the response is successful, print the response
+                if response.status_code == 204:
+                    # Print a Message to say that PayPal Subscription has been reactivated
+                    print("PayPal Subscription with ID " + SelectedMembershipRecord.PayPalSubscriptionId + " has been reactivated.")
+                else:
+                    return jsonify(
+                        {
+                            "code": 407,
+                            "error": True,
+                            "message": "An error occurred while reactivating the Membership (Subscription) in PayPal. " + str(response.json()),
+                        }
+                    ), 407
             db.session.commit()
             # Get the previous Pause Log
             PreviousPauseLog = MembershipLog.query.filter_by(MembershipRecordId=data["MembershipRecordId"], ActionType="Pause").first()
