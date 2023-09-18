@@ -76,9 +76,9 @@ INSERT INTO `MembershipLog` VALUES
 -- -----------------------------------------------------
 -- Inserting Sample Data into Table `tsy_db`.`Payment`
 -- -----------------------------------------------------
--- INSERT INTO `Payment` VALUES
--- (7000, NULL, 1, '2023-01-15', 90, 0, 'PayNow'),
--- (7001, NULL, 1, '2023-02-15', 90, 0, 'PayNow'),
+INSERT INTO `Payment` VALUES
+(7000, "5R580284D01408702", 1, '2023-09-17', 90, 0, 'PayPal'),
+(7001, "675969738X6948417", 2, '2023-09-17', 250, 0, 'PayPal');
 -- (7002, NULL, 1, '2023-03-15', 90, 0, 'PayNow'),
 -- (7003, NULL, 1, '2023-04-15', 90, 0, 'PayNow'),
 -- (7004, NULL, 2, '2023-01-01', 2400, 0, 'PayNow'),

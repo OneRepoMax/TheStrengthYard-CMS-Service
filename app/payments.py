@@ -259,6 +259,7 @@ def refreshMembershipRecords():
         "Membership Records have been refreshed."
     ), 200
 
+# Function and Route for PayPal Webhook to record payments
 @app.route("/recordPayment", methods=['POST'])
 def recordPayment():
 
@@ -309,3 +310,21 @@ def recordPayment():
         return ("Success"), 200
     # else:
     #     return ("Recieved"), 200
+
+# Function and Route to get all Payments history by MembershipRecordId
+@app.route('/payments/history/membershiprecord/<int:MembershipRecordId>')
+def getPaymentsHistoryByMembershipRecordId(MembershipRecordId):
+    paymentList = Payment.query.filter_by(MembershipRecordId=MembershipRecordId).all()
+    if len(paymentList):
+        return jsonify(
+            [
+                payment.json() for payment in paymentList
+            ]
+        ), 200
+    return jsonify(
+        {
+            "code": 404,
+            "message": "There are no payments for MembershipRecordId {}.".format(MembershipRecordId),
+            "error": True
+        }
+    ), 404
