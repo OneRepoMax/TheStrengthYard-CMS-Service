@@ -826,12 +826,7 @@ def createMembershipLog():
 
             db.session.add(membershipLog)
             db.session.commit()
-            return jsonify(
-                    {
-                        "message":"Membership with ID: " + str(data["MembershipRecordId"]) + " has been resumed.",
-                        "log": membershipLog.json()
-                    }
-            ), 200
+            return jsonify(membershipLog.json()), 200
         # Check for Action Type. If it is "Terminate", then check if there is an existing "Terminate" Membership Log. If not, then using the SelectedMembershipRecord, update it and change the ActiveStatus column to Terminated. Once done, use the given Date and replace the SelectedMembershipRecord's EndDate with the given Date to show that Membership has been terminated.
         elif data["ActionType"] == "Terminate":
             ExistingTerminateLog = MembershipLog.query.filter_by(MembershipRecordId=data["MembershipRecordId"], ActionType="Terminate").first()
