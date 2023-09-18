@@ -7,32 +7,34 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings.openai import OpenAIEmbeddings
 import numpy as np
 from langchain.vectorstores import Chroma
+from tabulate import tabulate
 
+print("Loading environment variables...")
+load_dotenv()
 
-load_dotenv(dotenv_path)
-
-openai.api_key = environ.getenv("OPENAI_API_KEY")
+openai.api_key = environ.get("OPENAI_API_KEY")
 
 # Loads all documents from folder and stores them in a variable called <pages>
-loader = PyPDFDirectoryLoader("./docs/")
+print("Loading all documents from folder and stores them in a variable called <pages>")
+loader = PyPDFDirectoryLoader(path="./docs/")
 pages = loader.load()
 
-# Prints the first page of the first document
-print(pages[0].page_content)
-
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1000,
-    chunk_overlap=150,
+    chunk_size=100,
+    chunk_overlap=20,
     length_function=len
 )
 
+print("Splitting documents into chunks...")
 splits = text_splitter.split_documents(pages)
 len(splits)
+print(splits)
 
 # Import necessary functionality to perform embeddings and store it in a vectorstore
+print("Storing files as vector db...")
 embedding = OpenAIEmbeddings()
 
-# Define directory in Google Drive to store the vectors
+# Define directory to store the vectors
 persist_directory = './vectordb'
 
 # Perform embeddings and store the vectors in the above directory in G Drive
@@ -45,16 +47,16 @@ vectordb = Chroma.from_documents(
 # Print the number of vectors stored
 print(vectordb._collection.count())
 
+print("Testing a sample question...")
+
 # Define question and top k chucks to retrieve
-question="What is A Good Space?"
+question="Who are TSY Trainers?"
 k=2
 
 # Retrieve the chucks based on the question and top k chucks
 docs = vectordb.similarity_search(question, k)
 
 # The code below prints the top k chucks based on the retrived chucks
-from tabulate import tabulate
-
 # Assuming you have docs as a list of dictionaries, and k is the number of elements in docs
 # Also assuming that each doc is a dictionary with the keys 'metadata' and 'page_content'
 table_data = []
