@@ -262,7 +262,7 @@ def refreshMembershipRecords():
 # Function and Route for PayPal Webhook to record payments
 @app.route("/recordPayment", methods=['POST'])
 def recordPayment():
-
+        # Validate Webhook First
         transmission_id = request.headers.get('PAYPAL-TRANSMISSION-ID')
         transmission_time = request.headers.get('PAYPAL-TRANSMISSION-TIME')
         transmission_sig = request.headers.get('PAYPAL-TRANSMISSION-SIG')
@@ -287,29 +287,31 @@ def recordPayment():
         validation = requests.post('https://api-m.sandbox.paypal.com/v1/notifications/verify-webhook-signature',
                             headers=headers, data=json.dumps(data))
         
-        print(validation.text)
-        
+        verification = validation.json()
+        if (verification['verification_status'] == "SUCCESS"):
+            data = request.get_json()
+            transactionID = data['resource']['id']
+            transactionDate = datetime.now()
+            subscriptionID = data['resource']['billing_agreement_id']
+            amount = data['resource']['amount']['total']
 
-        data = request.get_json()
-        transactionID = data['resource']['id']
-        transactionDate = datetime.now()
-        # subscriptionID = data['resource']['billing_agreement_id']
-        amount = data['resource']['amount']['total']
-        newPayment = Payment(
-            PayPalTransactionId = transactionID, ## Take the invoice number
-            MembershipRecordId = 1,
-            TransactionDate = transactionDate,
-            Amount = amount,
-            Discount = 0,
-            PaymentMode = "PayPal"
-        )
+            # Get the MembershipRecordId based on the PayPalSubscriptionId
+            paymentList = MembershipRecord.query.filter_by(PayPalSubscriptionId=subscriptionID).first()
+            paymentList = paymentList.json()
 
-        db.session.add(newPayment)
-        db.session.commit()
+            newPayment = Payment(
+                PayPalTransactionId = transactionID, ## Take the invoice number
+                MembershipRecordId = paymentList['MembershipRecordId'],
+                TransactionDate = transactionDate,
+                Amount = amount,
+                Discount = 0,
+                PaymentMode = "PayPal"
+            )
 
-        return ("Success"), 200
-    # else:
-    #     return ("Recieved"), 200
+            db.session.add(newPayment)
+            db.session.commit()
+
+            return ("Payment Successfully Recorded"), 201
 
 # Function and Route to get all Payments history by MembershipRecordId
 @app.route('/payments/history/membershiprecord/<int:MembershipRecordId>')
