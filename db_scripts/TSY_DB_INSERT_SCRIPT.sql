@@ -28,21 +28,21 @@ INSERT INTO `User` VALUES
 -- Inserting Sample Data into Table `tsy_db`.`Memberships`
 -- -----------------------------------------------------
 INSERT INTO `memberships` VALUES 
-(1, 'Monthly', 250, 'Progressive Strength Class Membership (Standard)', "Get access to our Progressive Strength Class and enjoy a well-rounded fitness experience. This membership includes monthly sessions to help you build strength and improve your overall fitness.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", NULL),
-(2, 'Yearly', 2400, 'Progressive Strength Class Membership (Standard)', "Make a commitment to your fitness journey with our Progressive Strength Class Membership. This yearly plan gives you access to our classes, helping you achieve your strength and fitness goals throughout the year.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", NULL),
-(3, 'Monthly', 200, 'Progressive Strength Class Membership (Student)',"Designed exclusively for students, this membership offers access to our Progressive Strength Class. Stay fit while you pursue your education with our monthly class sessions.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", NULL),
-(4, 'Yearly', 1800, 'Progressive Strength Class Membership (Student)', "Students can enjoy a full year of fitness with this membership. Attend our Progressive Strength Class sessions and work towards a healthier lifestyle throughout the academic year.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", NULL),
-(5, 'Monthly', 90, 'Open Gym Membership', "Embrace a consistent fitness routine with our Open Gym Membership. Enjoy a full year of access to our gym, allowing you to stay active and work towards your fitness goals.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", NULL),
-(6, 'Yearly', 900, 'Open Gym Membership', "Embrace a consistent fitness routine with our Open Gym Membership. Enjoy a full year of access to our gym, allowing you to stay active and work towards your fitness goals.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", NULL),
+(1, 'Monthly', 250, 'Progressive Strength Class Membership (Standard)', "Get access to our Progressive Strength Class and enjoy a well-rounded fitness experience. This membership includes monthly sessions to help you build strength and improve your overall fitness.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", "P-3Y5474454G139761KMUA2YTA"),
+(2, 'Yearly', 2400, 'Progressive Strength Class Membership (Standard)', "Make a commitment to your fitness journey with our Progressive Strength Class Membership. This yearly plan gives you access to our classes, helping you achieve your strength and fitness goals throughout the year.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", "P-7VE04701FA968924KMUA3ADA"),
+(3, 'Monthly', 200, 'Progressive Strength Class Membership (Student)',"Designed exclusively for students, this membership offers access to our Progressive Strength Class. Stay fit while you pursue your education with our monthly class sessions.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", "P-2CG607110D459422MMUECUIA"),
+(4, 'Yearly', 1800, 'Progressive Strength Class Membership (Student)', "Students can enjoy a full year of fitness with this membership. Attend our Progressive Strength Class sessions and work towards a healthier lifestyle throughout the academic year.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", "P-9K282057GE548025UMUECU6I"),
+(5, 'Monthly', 90, 'Open Gym Membership', "Embrace a consistent fitness routine with our Open Gym Membership. Enjoy a full year of access to our gym, allowing you to stay active and work towards your fitness goals.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", "P-28V320045U278380RMUA3XOI"),
+(6, 'Yearly', 900, 'Open Gym Membership', "Embrace a consistent fitness routine with our Open Gym Membership. Enjoy a full year of access to our gym, allowing you to stay active and work towards your fitness goals.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", "P-57K47766M4645771LMUECVWY"),
 (7, 'One-Time', 260, 'Beginner Olympic Weightlifting Course', "Discover the world of Olympic weightlifting with our Beginner Course. This one-time fee covers the cost of the course, where you'll learn the fundamentals of safe and effective weightlifting.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", NULL),
 (8, 'One-Time', 150, 'Barbell Fundamentals Course', "Master the art of working with barbells through our Fundamentals Course. This one-time fee grants you access to the course, where you'll learn essential techniques and principles.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", NULL);
 
 -- -----------------------------------------------------
 -- Inserting Sample Data into Table `tsy_db`.`MembershipRecord`
 -- -----------------------------------------------------
--- INSERT INTO `MembershipRecord` VALUES 
--- (1, 100, 5, '2023-01-15', '2023-05-15', 'Active', NULL),
--- (2, 101, 2, '2022-08-28', '2023-08-28', 'Active', NULL),
+INSERT INTO `MembershipRecord` VALUES 
+(1, "I-AYW50U49PVHR", 100, 5, '2023-09-17', '2023-10-17', 'Active', NULL),
+(2, "I-ESS5740VP2M5", 1, 1, '2023-09-17', '2023-10-17', 'Active', NULL);
 -- (3, 43, 2, '2023-01-01', '2024-01-01', 'Active', NULL),
 -- (4, 102, 1, '2023-07-02', '2023-09-14', 'Active', NULL);
 -- (5, 101, 3, '2023-02-01', '2023-12-31', 'Active'),
@@ -58,9 +58,9 @@ INSERT INTO `memberships` VALUES
 -- -----------------------------------------------------
 -- Inserting Sample Data into Table `tsy_db`.`MembershipLog`
 -- -----------------------------------------------------
--- INSERT INTO `MembershipLog` VALUES 
--- (900, '2023-01-15', 'Created', 'Membership record created', 1),
--- (901, '2023-01-01', 'Created', 'Membership record created', 2),
+INSERT INTO `MembershipLog` VALUES 
+(900, '2023-09-17', 'Created', 'Membership record created', 1),
+(901, '2023-09-17', 'Created', 'Membership record created', 2);
 -- (902, '2023-01-01', 'Created', 'Membership record created', 3),
 -- (903, '2023-07-02', 'Created', 'Membership record created', 4);
 -- (904, '2023-02-01', 'Created', 'Membership record created', 5),
