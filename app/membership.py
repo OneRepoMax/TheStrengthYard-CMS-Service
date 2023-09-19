@@ -792,8 +792,8 @@ def createMembershipLog():
                         }
                     ), 407
             db.session.commit()
-            # Get the previous Pause Log
-            PreviousPauseLog = MembershipLog.query.filter_by(MembershipRecordId=data["MembershipRecordId"], ActionType="Pause").first()
+            # Get the latest Pause Log
+            PreviousPauseLog = MembershipLog.query.filter_by(MembershipRecordId=data["MembershipRecordId"], ActionType="Pause").order_by(MembershipLog.MembershipLogId.desc()).first()
             #  If there is no previous Pause Log, return an error and rollback, specifying the reason that there was no previous Pause Log to compute the difference in dates from.
             if not PreviousPauseLog:
                 db.session.rollback()
