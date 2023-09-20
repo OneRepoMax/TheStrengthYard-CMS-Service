@@ -42,7 +42,8 @@ INSERT INTO `memberships` VALUES
 -- -----------------------------------------------------
 INSERT INTO `MembershipRecord` VALUES 
 (1, "I-AYW50U49PVHR", 100, 5, '2023-09-17', '2023-10-17', 'Active', NULL),
-(2, "I-ESS5740VP2M5", 1, 1, '2023-09-17', '2023-10-17', 'Active', NULL);
+(2, "I-4911T96L5EU0", 1, 1, '2023-09-13', '2023-10-13', 'Active', NULL),
+(3, "I-BW42BRSB56P0", 3, 5, '2023-09-19', '2023-10-19', 'Active', NULL);
 -- (3, 43, 2, '2023-01-01', '2024-01-01', 'Active', NULL),
 -- (4, 102, 1, '2023-07-02', '2023-09-14', 'Active', NULL);
 -- (5, 101, 3, '2023-02-01', '2023-12-31', 'Active'),
@@ -60,8 +61,8 @@ INSERT INTO `MembershipRecord` VALUES
 -- -----------------------------------------------------
 INSERT INTO `MembershipLog` VALUES 
 (900, '2023-09-17', 'Created', 'Membership record created', 1),
-(901, '2023-09-17', 'Created', 'Membership record created', 2);
--- (902, '2023-01-01', 'Created', 'Membership record created', 3),
+(901, '2023-09-13', 'Created', 'Membership record created', 2),
+(902, '2023-09-19', 'Created', 'Membership record created', 3);
 -- (903, '2023-07-02', 'Created', 'Membership record created', 4);
 -- (904, '2023-02-01', 'Created', 'Membership record created', 5),
 -- (905, '2023-03-01', 'Created', 'Membership record created', 6);
@@ -78,7 +79,8 @@ INSERT INTO `MembershipLog` VALUES
 -- -----------------------------------------------------
 INSERT INTO `Payment` VALUES
 (7000, "5R580284D01408702", 1, '2023-09-17', 90, 0, 'PayPal'),
-(7001, "675969738X6948417", 2, '2023-09-17', 250, 0, 'PayPal');
+(7001, "48185841BJ220500G", 2, '2023-09-13', 250, 0, 'PayPal'),
+(7002, "57M12318994098505", 3, '2023-09-19', 90, 0, 'PayPal');
 -- (7002, NULL, 1, '2023-03-15', 90, 0, 'PayNow'),
 -- (7003, NULL, 1, '2023-04-15', 90, 0, 'PayNow'),
 -- (7004, NULL, 2, '2023-01-01', 2400, 0, 'PayNow'),

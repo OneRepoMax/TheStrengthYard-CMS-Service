@@ -838,6 +838,36 @@ def createMembershipLog():
                 ), 409
             SelectedMembershipRecord.ActiveStatus = 'Terminated'
             SelectedMembershipRecord.EndDate = data["Date"]
+            # Check if the MembershipRecord if the PayPalSubscriptionId is not null, if it is not null, then cancel the Subscription in PayPal
+            if SelectedMembershipRecord.PayPalSubscriptionId:
+                # Use the access token to make the API call
+                access_token = get_access_token()
+
+                # Create headers for request to PayPal API to cancel a Subscription
+                headers = {
+                    'Authorization': 'Bearer ' + access_token,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                }
+
+                # Include data in the request body to state reason for cancellation
+                reasondata = '{"reason": "User has terminated their membership on ' + data["Date"] + '"}'
+
+                # Make the API call to cancel the Subscription
+                response = requests.post('https://api-m.sandbox.paypal.com/v1/billing/subscriptions/' + SelectedMembershipRecord.PayPalSubscriptionId + '/cancel', headers=headers, data=reasondata)
+
+                # If the response is successful, print the response
+                if response.status_code == 204:
+                    # Print a Message to say that PayPal Subscription has been cancelled
+                    print("PayPal Subscription with ID " + SelectedMembershipRecord.PayPalSubscriptionId + " has been cancelled.")
+                else:
+                    return jsonify(
+                        {
+                            "code": 407,
+                            "error": True,
+                            "message": "An error occurred while cancelling the Membership (Subscription) in PayPal. " + str(response.json()),
+                        }
+                    ), 407
             db.session.commit()
             # Create the new Membership Log and add into the DB
             membershipLog = MembershipLog(**data)

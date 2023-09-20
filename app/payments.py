@@ -80,136 +80,6 @@ def getPaymentsByMembershipRecordId(MembershipRecordId):
         }
     ), 404
 
-# Function and Route to make a monthly Payment for a MembershipRecord
-@app.route('/payments/membershiprecord/<int:MembershipRecordId>', methods=['POST'])
-def makePayment(MembershipRecordId):
-    """
-    Sample Request (if any other mode than PayPal is used)
-    {
-        "PayPalTransactionId": null,
-        "Amount": 250,
-        "Discount": 0,
-        "PaymentMode": "PayNow"
-    }
-    Sample Request (if PayPal is used)
-    {
-        "PayPalTransactionId": "1234567890",
-        "Amount": 250,
-        "Discount": 0,
-        "PaymentMode": "PayPal"
-    }
-    """
-    data = request.get_json()
-    payment = Payment(
-        PayPalTransactionId = data['PayPalTransactionId'],
-        MembershipRecordId = MembershipRecordId,
-        TransactionDate = datetime.now(),
-        Amount = data['Amount'],
-        Discount = data['Discount'],
-        PaymentMode = data['PaymentMode']
-    )
-    try:
-        db.session.add(payment)
-        db.session.commit()
-
-        # Update the MembershipRecord by extending the End Date by 1 month, but keeping the same day e.g. from 2021-01-15 to 2021-02-15. And if the current date is less than the MembershipRecord's new End Date, we change the MembershipRecord's ActiveStatus to "Active"
-        membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=MembershipRecordId).first()
-        membershipRecord.EndDate = membershipRecord.EndDate + relativedelta(months=1)
-        if datetime.now().date() < membershipRecord.EndDate:
-            membershipRecord.ActiveStatus = "Active"
-            # Change the MembershipRecord's StatusRemarks to null to indicate all is well
-            # !!!(This is used to remove any previous remarks that may have been set)!!!
-            membershipRecord.StatusRemarks = None
-        db.session.commit()
-
-        # Create a new Membership Log entry to record the extension of the membership
-        membershipLog = MembershipLog(
-            Date=datetime.now().date(),
-            Description="Membership extended by 1 month to {}".format(membershipRecord.EndDate.strftime("%d/%m/%Y")),
-            ActionType="Membership Extended",
-            MembershipRecordId=MembershipRecordId
-        )
-        db.session.add(membershipLog)
-        db.session.commit()
-
-        return jsonify(
-            payment.json()
-        ), 201
-
-    except:
-        return jsonify(
-            {
-                "code": 500,
-                "message": "An error occurred creating the payment.",
-                "error": True
-            }
-        ), 500
-    
-# Function and Route to make a yearly Payment for a MembershipRecord
-@app.route('/payments/yearly/membershiprecord/<int:MembershipRecordId>', methods=['POST'])
-def makeYearlyPayment(MembershipRecordId):
-    """
-    Sample Request (if any other mode than PayPal is used)
-    {
-        "PayPalTransactionId": null,
-        "Amount": 2400,
-        "Discount": 0,
-        "PaymentMode": "PayNow"
-    }
-    Sample Request (if PayPal is used)
-    {
-        "PayPalTransactionId": "1234567890",
-        "Amount": 2400,
-        "Discount": 0,
-        "PaymentMode": "PayPal"
-    }
-    """
-    data = request.get_json()
-    payment = Payment(
-        PayPalTransactionId = data['PayPalTransactionId'],
-        MembershipRecordId = MembershipRecordId,
-        TransactionDate = datetime.now(),
-        Amount = data['Amount'],
-        Discount = data['Discount'],
-        PaymentMode = data['PaymentMode']
-    )
-    try:
-        db.session.add(payment)
-        db.session.commit()
-
-        # Update the MembershipRecord by extending the End Date by 1 year, but keeping the same day e.g. from 2021-01-15 to 2022-01-15. And if the current date is less than the MembershipRecord's new End Date, we change the MembershipRecord's ActiveStatus to "Active"
-        membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=MembershipRecordId).first()
-        membershipRecord.EndDate = membershipRecord.EndDate + relativedelta(years=1)
-        if datetime.now().date() < membershipRecord.EndDate:
-            membershipRecord.ActiveStatus = "Active"
-            # Change the MembershipRecord's StatusRemarks to null to indicate all is well
-            # !!!(This is used to remove any previous remarks that may have been set)!!!
-            membershipRecord.StatusRemarks = None 
-        db.session.commit()
-
-        # Create a new Membership Log entry to record the extension of the membership
-        membershipLog = MembershipLog(
-            Date=datetime.now().date(),
-            Description="Membership extended by 1 year to {}".format(membershipRecord.EndDate.strftime("%d/%m/%Y")),
-            ActionType="Membership Extended",
-            MembershipRecordId=MembershipRecordId
-        )
-        db.session.add(membershipLog)
-        db.session.commit()
-
-        return jsonify(
-            payment.json()
-        ), 201
-
-    except:
-        return jsonify(
-            {
-                "code": 400,
-                "message": "An error occurred creating the payment.",
-                "error": True
-            }
-        ), 400
-    
 # Function and Route to refresh the ActiveStatus of all Membership Records by checking the Payment Date and Membership Record End Date
 @app.route("/membershiprecord/refresh")
 def refreshMembershipRecords():
@@ -308,10 +178,70 @@ def recordPayment():
                 PaymentMode = "PayPal"
             )
 
+            # Check if amount is equal to $70, which is the initial setup fee. If it is not, check if this is the very first payment or not by checking the Payment table using this MembershipRecordId. If it is NOT the first payment, run the extendMembershipRecordDates function to extend the membership by 1 month or 1 year depending on the membership type. Else if it is the first payment, do not extend the membership.
+            if amount != 70:
+                payment = Payment.query.filter_by(MembershipRecordId=paymentList['MembershipRecordId']).first()
+                if payment:
+                    extendMembershipRecordDates(paymentList['MembershipRecordId'])
+                
             db.session.add(newPayment)
             db.session.commit()
 
             return ("Payment Successfully Recorded"), 201
+
+# Function to extend the membership after successful payment
+def extendMembershipRecordDates(MembershipRecordId):
+    # First, get the MembershipRecord based on the MembershipRecordId
+    membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=MembershipRecordId).first()
+
+    # Then, get the Membership based on the MembershipId to check if it is a monthly or yearly membership
+    membership = Memberships.query.filter_by(MembershipTypeId=membershipRecord.MembershipTypeId).first()
+
+    # If it is a monthly membership, extend the membership by 1 month
+    if membership.Type == "Monthly":
+        # Update the MembershipRecord by extending the End Date by 1 month, but keeping the same day e.g. from 2021-01-15 to 2021-02-15. Similarly, update the MembershipRecord Start Date to the old End Date to reflect the validity of the new membership. And if the current date is less than the MembershipRecord's new End Date, we change the MembershipRecord's ActiveStatus to "Active"
+        membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=MembershipRecordId).first()
+        membershipRecord.EndDate = membershipRecord.EndDate + relativedelta(months=1)
+        membershipRecord.StartDate = membershipRecord.EndDate - relativedelta(months=1)
+        if datetime.now().date() < membershipRecord.EndDate:
+            membershipRecord.ActiveStatus = "Active"
+            # Change the MembershipRecord's StatusRemarks to null to indicate all is well
+            # !!!(This is used to remove any previous remarks that may have been set)!!!
+            membershipRecord.StatusRemarks = None
+        db.session.commit()
+
+        # Create a new Membership Log entry to record the extension of the membership
+        membershipLog = MembershipLog(
+            Date=datetime.now().date(),
+            Description="Membership extended by 1 month to {}".format(membershipRecord.EndDate.strftime("%d/%m/%Y")),
+            ActionType="Membership Extended",
+            MembershipRecordId=MembershipRecordId
+        )
+        db.session.add(membershipLog)
+        db.session.commit()
+
+    # Else if it is a yearly membership, extend the membership by 1 year
+    elif membership.Type == "Yearly":
+        # Update the MembershipRecord by extending the End Date by 1 year, but keeping the same day e.g. from 2021-01-15 to 2022-01-15. Similarly, update the MembershipRecord Start Date to the old End Date to reflect the validity of the new membership. And if the current date is less than the MembershipRecord's new End Date, we change the MembershipRecord's ActiveStatus to "Active"
+        membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=MembershipRecordId).first()
+        membershipRecord.EndDate = membershipRecord.EndDate + relativedelta(years=1)
+        membershipRecord.StartDate = membershipRecord.EndDate - relativedelta(years=1)
+        if datetime.now().date() < membershipRecord.EndDate:
+            membershipRecord.ActiveStatus = "Active"
+            # Change the MembershipRecord's StatusRemarks to null to indicate all is well
+            # !!!(This is used to remove any previous remarks that may have been set)!!!
+            membershipRecord.StatusRemarks = None 
+        db.session.commit()
+
+        # Create a new Membership Log entry to record the extension of the membership
+        membershipLog = MembershipLog(
+            Date=datetime.now().date(),
+            Description="Membership extended by 1 year to {}".format(membershipRecord.EndDate.strftime("%d/%m/%Y")),
+            ActionType="Membership Extended",
+            MembershipRecordId=MembershipRecordId
+        )
+        db.session.add(membershipLog)
+        db.session.commit()
 
 # Function and Route to get all Payments history by MembershipRecordId
 @app.route('/payments/history/membershiprecord/<int:MembershipRecordId>')
