@@ -179,7 +179,7 @@ def recordPayment():
             )
 
             # Check if amount is equal to $70, which is the initial setup fee. If it is not, check if this is the very first payment or not by checking the Payment table using this MembershipRecordId. If it is NOT the first payment, run the extendMembershipRecordDates function to extend the membership by 1 month or 1 year depending on the membership type. Else if it is the first payment, do not extend the membership.
-            if amount != 70:
+            if amount != "70.00":
                 payment = Payment.query.filter_by(MembershipRecordId=paymentList['MembershipRecordId']).first()
                 if payment:
                     extendMembershipRecordDates(paymentList['MembershipRecordId'])
