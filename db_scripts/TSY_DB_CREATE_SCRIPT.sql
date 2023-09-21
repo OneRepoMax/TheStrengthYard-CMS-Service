@@ -52,11 +52,13 @@ DROP TABLE IF EXISTS `tsy_db`.`Memberships` ;
 CREATE TABLE IF NOT EXISTS `tsy_db`.`Memberships` (
   `MembershipTypeId` INT NOT NULL AUTO_INCREMENT,
   `Type` VARCHAR(255) NOT NULL,
+  `Visibility` VARCHAR(255) NOT NULL,
   `BaseFee` DOUBLE NOT NULL,
   `Title` VARCHAR(255) NOT NULL,
   `Description` LONGTEXT NULL,
   `Picture` LONGTEXT,
   `PayPalPlanId` LONGTEXT NULL,
+  `SetupFee` DOUBLE NULL,
   PRIMARY KEY (`MembershipTypeId`))
 ENGINE = InnoDB;
 

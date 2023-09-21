@@ -14,32 +14,38 @@ class Memberships(db.Model):
 
     MembershipTypeId = db.Column(db.Integer, primary_key=True)
     Type = db.Column(db.String)
+    Visiblity = db.Column(db.String)
     BaseFee = db.Column(db.Float)
     Title = db.Column(db.String)
     Description = db.Column(db.String)
     Picture = db.Column(db.String)
     PayPalPlanId = db.Column(db.String)
+    SetupFee = db.Column(db.Float)
 
     def json(self):
         return {
             "MembershipTypeId": self.MembershipTypeId,
             "Type": self.Type,
+            "Visiblity": self.Visiblity,
             "BaseFee": self.BaseFee,
             "Title": self.Title,
             "Description": self.Description,
             "Picture": self.Picture,
-            "PayPalPlanId": self.PayPalPlanId
+            "PayPalPlanId": self.PayPalPlanId,
+            "SetupFee": self.SetupFee
         }
     
     def jsonWithUser(self):
         return {
             "MembershipTypeId": self.MembershipTypeId,
             "Type": self.Type,
+            "Visiblity": self.Visiblity,
             "BaseFee": self.BaseFee,
             "Title": self.Title,
             "Description": self.Description,
             "Picture": self.Picture,
             "PayPalPlanId": self.PayPalPlanId,
+            "SetupFee": self.SetupFee,
             "User": [user.json() for user in self.User]
         }
     
@@ -164,10 +170,12 @@ def createMembership():
     Sample Request
     {
         "Type": "Monthly",
+        "Visibility": "Public",
         "BaseFee": 100,
         "Description": "Monthly Training Membership",
         "Title": "Monthly Training",
-        "Picture": "https://example.com/picture.jpg"
+        "Picture": "https://example.com/picture.jpg",
+        "SetupFee": 70
     }
     """
     data = request.get_json()
@@ -193,9 +201,9 @@ def createMembership():
         # Create request body to send to PayPal API to create a new Plan
         # NEED TO EDIT TO CHANGE OTHER VARIABLES OF THE PLAN E.G. CYCLE, SETUP FEE, ETC.
         if data["Type"] == "Monthly":
-            paypalplandata = '{"product_id": "' + productresponse.json()["id"] + '","name": "' + data["Title"] + ' (Monthly Plan)","description": "' + data["Description"] + '","billing_cycles": [{"frequency": {"interval_unit": "MONTH","interval_count": 1},"tenure_type": "REGULAR","sequence": 1,"total_cycles": 0,"pricing_scheme": {"fixed_price": {"value": ' + str(data["BaseFee"]) + ',"currency_code": "SGD"}}}],"payment_preferences": {"auto_bill_outstanding": true,"setup_fee": {"value": "70","currency_code": "SGD"},"setup_fee_failure_action": "CONTINUE","payment_failure_threshold": 1}}'
+            paypalplandata = '{"product_id": "' + productresponse.json()["id"] + '","name": "' + data["Title"] + ' (Monthly Plan)","description": "' + data["Description"] + '","billing_cycles": [{"frequency": {"interval_unit": "MONTH","interval_count": 1},"tenure_type": "REGULAR","sequence": 1,"total_cycles": 0,"pricing_scheme": {"fixed_price": {"value": ' + str(data["BaseFee"]) + ',"currency_code": "SGD"}}}],"payment_preferences": {"auto_bill_outstanding": true,"setup_fee": {"value": ' + str(data["SetupFee"]) + ',"currency_code": "SGD"},"setup_fee_failure_action": "CONTINUE","payment_failure_threshold": 1}}'
         elif data["Type"] == "Yearly":
-            paypalplandata = '{"product_id": "' + productresponse.json()["id"] + '","name": "' + data["Title"] + ' (Yearly Plan)","description": "' + data["Description"] + '","billing_cycles": [{"frequency": {"interval_unit": "YEAR","interval_count": 1},"tenure_type": "REGULAR","sequence": 1,"total_cycles": 0,"pricing_scheme": {"fixed_price": {"value": ' + str(data["BaseFee"]) + ',"currency_code": "SGD"}}}],"payment_preferences": {"auto_bill_outstanding": true,"setup_fee": {"value": "70","currency_code": "SGD"},"setup_fee_failure_action": "CONTINUE","payment_failure_threshold": 1}}'
+            paypalplandata = '{"product_id": "' + productresponse.json()["id"] + '","name": "' + data["Title"] + ' (Yearly Plan)","description": "' + data["Description"] + '","billing_cycles": [{"frequency": {"interval_unit": "YEAR","interval_count": 1},"tenure_type": "REGULAR","sequence": 1,"total_cycles": 0,"pricing_scheme": {"fixed_price": {"value": ' + str(data["BaseFee"]) + ',"currency_code": "SGD"}}}],"payment_preferences": {"auto_bill_outstanding": true,"setup_fee": {"value": ' + str(data["SetupFee"]) + ',"currency_code": "SGD"},"setup_fee_failure_action": "CONTINUE","payment_failure_threshold": 1}}'
 
         planresponse = requests.post('https://api-m.sandbox.paypal.com/v1/billing/plans', headers=headers, data=paypalplandata)
 
