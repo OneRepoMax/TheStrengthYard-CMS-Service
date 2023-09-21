@@ -14,7 +14,7 @@ class Memberships(db.Model):
 
     MembershipTypeId = db.Column(db.Integer, primary_key=True)
     Type = db.Column(db.String)
-    Visiblity = db.Column(db.String)
+    Visibility = db.Column(db.String)
     BaseFee = db.Column(db.Float)
     Title = db.Column(db.String)
     Description = db.Column(db.String)
@@ -26,7 +26,7 @@ class Memberships(db.Model):
         return {
             "MembershipTypeId": self.MembershipTypeId,
             "Type": self.Type,
-            "Visiblity": self.Visiblity,
+            "Visibility": self.Visibility,
             "BaseFee": self.BaseFee,
             "Title": self.Title,
             "Description": self.Description,
@@ -39,7 +39,7 @@ class Memberships(db.Model):
         return {
             "MembershipTypeId": self.MembershipTypeId,
             "Type": self.Type,
-            "Visiblity": self.Visiblity,
+            "Visibility": self.Visibility,
             "BaseFee": self.BaseFee,
             "Title": self.Title,
             "Description": self.Description,
@@ -146,6 +146,23 @@ def getAllMemberships():
     return jsonify(
              "There are no Memberships."
     ), 200
+
+# Function and Route to get all Memberships that are 'Public' under Visibility attribute (For Users to see)
+@app.route("/memberships/public")
+def getAllPublicMemberships():
+    membershipList = Memberships.query.filter_by(Visibility="Public").all()
+    if len(membershipList):
+        return jsonify(
+                [membership.json() for membership in membershipList]
+        ), 200
+    return jsonify(
+        {
+            "code": 406,
+            "error": False,
+            "message": "There are no public memberships.",
+            "data": []
+        }
+    ), 406
 
 # Function and Route for getting a Membership by ID
 @app.route("/memberships/<int:id>")
