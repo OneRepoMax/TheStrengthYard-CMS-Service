@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS `tsy_db_test`.`MembershipRecord` (
   `StartDate` DATE NOT NULL,
   `EndDate` DATE,
   `ActiveStatus` VARCHAR(255) NOT NULL DEFAULT "Inactive",
+  `StatusRemarks` LONGTEXT NULL DEFAULT NULL,
   INDEX `MembershipTypeFK_idx` (`MembershipTypeId` ASC) VISIBLE,
   PRIMARY KEY (`MembershipRecordId`),
   INDEX `UserFK_idx` (`UserId` ASC) VISIBLE,
@@ -109,6 +110,7 @@ CREATE TABLE IF NOT EXISTS `tsy_db_test`.`Payment` (
     REFERENCES `tsy_db_test`.`MembershipRecord` (`MembershipRecordId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
+AUTO_INCREMENT = 7000 
 ENGINE = InnoDB;
 
 
@@ -281,12 +283,10 @@ INSERT INTO `memberships` VALUES
 -- Inserting Sample Data into Table `tsy_db`.`MembershipRecord`
 -- -----------------------------------------------------
 INSERT INTO `MembershipRecord` VALUES 
-(1, 100, 5, '2023-01-01', '2023-05-01', 'Inactive'),
-(2, 101, 2, '2023-01-01', '2024-01-01', 'Inactive'),
-(3, 102, 2, '2023-01-01', '2024-01-01', 'Inactive'),
-(4, 100, 1, '2023-01-01', '2023-12-31', 'Inactive'),
-(5, 101, 3, '2023-02-01', '2023-12-31', 'Inactive'),
-(6, 102, 2, '2023-03-01', '2023-12-31', 'Inactive');
+(1, 100, 5, '2023-01-15', '2023-05-15', 'Active', NULL),
+(2, 101, 2, '2022-08-28', '2023-08-28', 'Active', NULL),
+(3, 43, 2, '2023-01-01', '2024-01-01', 'Active', NULL),
+(4, 102, 1, '2023-07-02', '2023-09-02', 'Active', NULL);
 -- (7, 103, 1, '2023-04-01', '2023-12-31', 'Inactive'),
 -- (8, 104, 2, '2023-05-01', '2023-12-31', 'Inactive'),
 -- (9, 105, 4, '2023-06-01', '2023-12-31', 'Inactive'),
@@ -299,9 +299,9 @@ INSERT INTO `MembershipLog` VALUES
 (900, '2023-01-01', 'Created', 'Membership record created', 1),
 (901, '2023-01-01', 'Created', 'Membership record created', 2),
 (902, '2023-01-01', 'Created', 'Membership record created', 3),
-(903, '2023-01-01', 'Created', 'Membership record created', 4),
-(904, '2023-02-01', 'Created', 'Membership record created', 5),
-(905, '2023-03-01', 'Created', 'Membership record created', 6);
+(903, '2023-01-01', 'Created', 'Membership record created', 4);
+-- (904, '2023-02-01', 'Created', 'Membership record created', 5),
+-- (905, '2023-03-01', 'Created', 'Membership record created', 6);
 -- (906, '2023-04-01', 'Membership record created', 'Created', 7),
 -- (907, '2023-05-01', 'Membership record created', 'Created', 8),
 -- (908, '2023-06-01', 'Membership record created', 'Created', 9),
@@ -310,3 +310,12 @@ INSERT INTO `MembershipLog` VALUES
 -- (911, '2023-09-01', 'Membership record created', 'Created', 12),
 -- (912, '2023-10-01', 'Membership record created', 'Created', 13);
 
+INSERT INTO `Payment` VALUES
+(7000, NULL, 1, '2023-01-15', 90, 0, 'PayNow'),
+(7001, NULL, 1, '2023-02-15', 90, 0, 'PayNow'),
+(7002, NULL, 1, '2023-03-15', 90, 0, 'PayNow'),
+(7003, NULL, 1, '2023-04-15', 90, 0, 'PayNow'),
+(7004, NULL, 2, '2023-01-01', 2400, 0, 'PayNow'),
+(7005, NULL, 3, '2023-01-01', 2400, 0, 'PayNow'),
+(7006, NULL, 4, '2023-07-02', 250, 0, 'PayNow'),
+(7007, NULL, 4, '2023-08-02', 250, 0, 'PayNow');
