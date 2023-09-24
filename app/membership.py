@@ -1,135 +1,13 @@
 from app import app, db
 from flask import jsonify, request
-from app.user import User
 from datetime import datetime, timedelta
 import requests, json
 from os import environ
 from app.auth import get_access_token
+from app.models import Memberships, MembershipRecord, MembershipLog, User
 
 client_id = environ.get('PAYPAL_CLIENT_ID')
 client_secret = environ.get('PAYPAL_CLIENT_SECRET')
-
-class Memberships(db.Model):
-    __tablename__ = 'Memberships'
-
-    MembershipTypeId = db.Column(db.Integer, primary_key=True)
-    Type = db.Column(db.String)
-    Visibility = db.Column(db.String)
-    BaseFee = db.Column(db.Float)
-    Title = db.Column(db.String)
-    Description = db.Column(db.String)
-    Picture = db.Column(db.String)
-    PayPalPlanId = db.Column(db.String)
-    SetupFee = db.Column(db.Float)
-
-    def json(self):
-        return {
-            "MembershipTypeId": self.MembershipTypeId,
-            "Type": self.Type,
-            "Visibility": self.Visibility,
-            "BaseFee": self.BaseFee,
-            "Title": self.Title,
-            "Description": self.Description,
-            "Picture": self.Picture,
-            "PayPalPlanId": self.PayPalPlanId,
-            "SetupFee": self.SetupFee
-        }
-    
-    def jsonWithUser(self):
-        return {
-            "MembershipTypeId": self.MembershipTypeId,
-            "Type": self.Type,
-            "Visibility": self.Visibility,
-            "BaseFee": self.BaseFee,
-            "Title": self.Title,
-            "Description": self.Description,
-            "Picture": self.Picture,
-            "PayPalPlanId": self.PayPalPlanId,
-            "SetupFee": self.SetupFee,
-            "User": [user.json() for user in self.User]
-        }
-    
-class MembershipRecord(db.Model):
-    __tablename__ = 'MembershipRecord'
-
-    MembershipRecordId = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    PayPalSubscriptionId = db.Column(db.String)
-    UserId = db.Column(db.Integer, db.ForeignKey('User.UserId'), primary_key=True)
-    MembershipTypeId = db.Column(db.Integer, db.ForeignKey('Memberships.MembershipTypeId'), primary_key=True)
-    StartDate = db.Column(db.Date)
-    EndDate = db.Column(db.Date)
-    ActiveStatus = db.Column(db.String, default='Active')
-    StatusRemarks = db.Column(db.String)
-    User = db.relationship('User', backref=db.backref('Memberships', cascade='all, delete-orphan'))
-    Membership = db.relationship('Memberships', backref=db.backref('Memberships', cascade='all, delete-orphan'))
-
-    def json(self):
-        return {
-            "MembershipRecordId": self.MembershipRecordId,
-            "PayPalSubscriptionId": self.PayPalSubscriptionId,
-            "UserId": self.UserId,
-            "MembershipTypeId": self.MembershipTypeId,
-            "StartDate": self.StartDate,
-            "EndDate": self.EndDate,
-            "ActiveStatus": self.ActiveStatus,
-            "StatusRemarks": self.StatusRemarks
-        }
-
-    def jsonWithUserAndMembership(self):
-        return {
-            "MembershipRecordId": self.MembershipRecordId,
-            "PayPalSubscriptionId": self.PayPalSubscriptionId,
-            "UserId": self.UserId,
-            "MembershipTypeId": self.MembershipTypeId,
-            "StartDate": self.StartDate,
-            "EndDate": self.EndDate,
-            "ActiveStatus": self.ActiveStatus,
-            "StatusRemarks": self.StatusRemarks,
-            "User": self.User.json(),
-            "Membership": self.Membership.json()
-        }
-    
-    def jsonWithMembership(self):
-        return {
-            "MembershipRecordId": self.MembershipRecordId,
-            "PayPalSubscriptionId": self.PayPalSubscriptionId,
-            "UserId": self.UserId,
-            "MembershipTypeId": self.MembershipTypeId,
-            "StartDate": self.StartDate,
-            "EndDate": self.EndDate,
-            "ActiveStatus": self.ActiveStatus,
-            "StatusRemarks": self.StatusRemarks,
-            "Membership": self.Membership.json()
-        }
-    
-class MembershipLog(db.Model):
-    __tablename__ = 'MembershipLog'
-
-    MembershipLogId = db.Column(db.Integer, primary_key=True)
-    Date = db.Column(db.Date)
-    ActionType = db.Column(db.String)
-    Description = db.Column(db.String)
-    MembershipRecordId = db.Column(db.Integer, db.ForeignKey('MembershipRecord.MembershipRecordId'))
-    MembershipRecord = db.relationship('MembershipRecord', backref=db.backref('MembershipRecord', cascade='all, delete-orphan'))
-
-    def json(self):
-        return {
-            "MembershipLogId": self.MembershipLogId,
-            "Date": self.Date,
-            "ActionType": self.ActionType,
-            "Description": self.Description,
-            "MembershipRecordId": self.MembershipRecordId
-        }
-
-    def jsonWithMembershipRecord(self):
-        return {
-            "MembershipLogId": self.MembershipLogId,
-            "Date": self.Date,
-            "ActionType": self.ActionType,
-            "Description": self.Description,
-            "MembershipRecordId": self.MembershipRecordId,
-            "MembershipRecord": self.MembershipRecord.json()
-        }
 
 @app.route("/memberships/test")
 def testMembership():
@@ -196,11 +74,12 @@ def createMembership():
     }
     """
     data = request.get_json()
+
+    # Use the access token to make the API call
+    access_token = get_access_token()
+
     # Check that data["Type"] is not One-Time:
     if data["Type"] != "One-Time":
-        
-        # Use the access token to make the API call
-        access_token = get_access_token()
 
         # Create headers for request to PayPal API to create a new Product
         headers = {
@@ -253,25 +132,54 @@ def createMembership():
                     "message": "An error occurred while creating the new Membership in PayPal. " + str(productresponse.json()) + str(planresponse.json()),
                 }
             ), 407
-    # Else if data["Type"] is One-Time, then create the new Membership in the DB without the PayPal Plan ID, leaving it as NULL
+    # Else if data["Type"] is One-Time, since it is not a recurring purchase, we create a simple checkout in PayPal instead
     else:
-        try:
-            # Create a new Membership together 
-            membership = Memberships(**data)
-            db.session.add(membership)
-            db.session.commit()
-            return jsonify(
-                    membership.json()
-            ), 200
-        except Exception as e:
-            db.session.rollback()
+        # Create headers for request to PayPal API to create a new checkout Order
+        headers = {
+            "Authorization": "Bearer " + access_token,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Prefer": "return=representation",
+        }
+
+        # Create request body to send to PayPal API to create a new Order
+        paypalorderdata = '{"intent": "CAPTURE", "purchase_units": [{"items": [{"name": "' + data["Title"] + '", "description": "' + data["Description"] + '", "quantity": "1","unit_amount": {"currency_code": "SGD","value": "' + str(data["BaseFee"]) + '"}}],"amount": {"currency_code": "SGD","value": "' + str(data["BaseFee"]) + '","breakdown": {"item_total": {"currency_code": "SGD","value": "' + str(data["BaseFee"]) + '"}}}}],"application_context": {"return_url": "https://example.com/return","cancel_url": "https://example.com/cancel"}}'
+
+        orderresponse = requests.post(
+            "https://api-m.sandbox.paypal.com/v2/checkout/orders",
+            headers=headers,
+            data=paypalorderdata,
+        )
+
+        print(orderresponse.json())
+        # If the both responses are successful, print the response then create the new Membership in the DB
+        if orderresponse.status_code == 201:
+            try:
+                # Create a new Membership together with the PayPal Plan ID
+                membership = Memberships(**data, PayPalPlanId=orderresponse.json()["id"])
+                db.session.add(membership)
+                db.session.commit()
+                return jsonify(
+                        membership.json()
+                ), 200
+            except Exception as e:
+                db.session.rollback()
+                return jsonify(
+                    {
+                        "code": 406,
+                        "error": True,
+                        "message": "An error occurred while creating the new Membership. " + str(e),
+                    }
+                ), 406
+        else:
             return jsonify(
                 {
-                    "code": 406,
+                    "code": 407,
                     "error": True,
-                    "message": "An error occurred while creating the new Membership. " + str(e),
+                    "message": "An error occurred while creating the new Membership in PayPal. " + str(orderresponse.json()),
                 }
-            ), 406
+            ), 407
+    
 
 # Function and Route to Get all Memberships (Products) in PayPal
 @app.route("/memberships/paypal")

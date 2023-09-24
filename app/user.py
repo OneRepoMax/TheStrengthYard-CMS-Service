@@ -4,64 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from app.token import confirm_token, generate_token
 from app.email import send_email
-
-class User(db.Model):
-    __tablename__ = 'User'
-
-    UserId = db.Column(db.Integer, primary_key=True)
-    EmailAddress = db.Column(db.String)
-    FirstName = db.Column(db.String)
-    LastName = db.Column(db.String)
-    Gender = db.Column(db.String)
-    DateOfBirth = db.Column(db.Date)
-    HomeAddress = db.Column(db.String)
-    PostalCode = db.Column(db.Integer)
-    ContactNo = db.Column(db.String)
-    Password = db.Column(db.String)
-    UserType = db.Column(db.String)
-    AccountCreationDate = db.Column(db.Date)
-    DisplayPicture = db.Column(db.String)
-    Verified = db.Column(db.String)
-
-    def json(self):
-        return {
-            "UserId": self.UserId,
-            "EmailAddress": self.EmailAddress,
-            "FirstName": self.FirstName,
-            "LastName": self.LastName,
-            "Gender": self.Gender,
-            "DateOfBirth": self.DateOfBirth,
-            "HomeAddress": self.HomeAddress,
-            "PostalCode": self.PostalCode,
-            "ContactNo": self.ContactNo,
-            "Password": self.Password,
-            "UserType": self.UserType,
-            "AccountCreationDate": self.AccountCreationDate,
-            "DisplayPicture": self.DisplayPicture,
-            "Verified": self.Verified
-        }
-
-class IndemnityForm(db.Model):
-    __tablename__ = 'IndemnityForm'
-
-    IndemnityFormId = db.Column(db.Integer, primary_key=True)
-    UserId = db.Column(db.Integer, db.ForeignKey('User.UserId'),primary_key=True)
-    FeedbackDiscover = db.Column(db.String)
-    MedicalHistory = db.Column(db.String)
-    MedicalRemarks = db.Column(db.String)
-    AcknowledgementTnC = db.Column(db.Boolean, default=True)
-    AcknowledgementOpenGymRules = db.Column(db.Boolean, default=True)
-
-    def json(self):
-        return {
-            "IndemnityFormId": self.IndemnityFormId,
-            "UserId": self.UserId,
-            "FeedbackDiscover": self.FeedbackDiscover,
-            "MedicalHistory": self.MedicalHistory,
-            "MedicalRemarks": self.MedicalRemarks,
-            "AcknowledgementTnC": self.AcknowledgementTnC,
-            "AcknowledgementOpenGymRules": self.AcknowledgementOpenGymRules
-        }
+from app.models import User, IndemnityForm, MembershipRecord, Payment, MembershipLog
 
 @app.route("/user/test")
 def testUser():
@@ -240,6 +183,24 @@ def deleteUser(id: int):
             indemnityForm = IndemnityForm.query.filter_by(UserId=id).first()
             if indemnityForm:
                 db.session.delete(indemnityForm)
+
+            # Check if user has any Membership Record, and retrieve all of them
+            membershipRecordList = MembershipRecord.query.filter_by(UserId=id).all()
+
+            # For each membershipRecord, check if there are any Payments, MembershipLogs, and delete all of them
+            for membershipRecord in membershipRecordList:
+                # Delete all Payments tied to the Membership Record
+                paymentList = Payment.query.filter_by(MembershipRecordId=membershipRecord.MembershipRecordId).all()
+                for payment in paymentList:
+                    db.session.delete(payment)
+
+                # Delete all Membership Logs tied to the Membership Record
+                membershipLogList = MembershipLog.query.filter_by(MembershipRecordId=membershipRecord.MembershipRecordId).all()
+                for membershipLog in membershipLogList:
+                    db.session.delete(membershipLog)
+                
+                # Delete the Membership Record
+                db.session.delete(membershipRecord)
                 
             # Delete the User
             db.session.delete(user)

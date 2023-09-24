@@ -2,34 +2,11 @@ from app import app, db
 from flask import jsonify, request
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-from app.membership import MembershipRecord, MembershipLog, Memberships
 import requests
 import json
 from app.auth import get_access_token
+from app.models import MembershipRecord, MembershipLog, Memberships, Payment
 
-
-class Payment(db.Model):
-    __tablename__ = 'Payment'
-
-    PaymentId = db.Column(db.Integer, primary_key=True)
-    PayPalTransactionId = db.Column(db.String(255))
-    MembershipRecordId = db.Column(db.Integer, db.ForeignKey('MembershipRecord.MembershipRecordId'))
-    TransactionDate = db.Column(db.Date, nullable=False)
-    Amount = db.Column(db.Float, nullable=False)
-    Discount = db.Column(db.Float, nullable=False)
-    PaymentMode = db.Column(db.String(255), nullable=False)
-
-    def json(self):
-        return {
-            'PaymentId': self.PaymentId,
-            'PayPalTransactionId': self.PayPalTransactionId,
-            'MembershipRecordId': self.MembershipRecordId,
-            'TransactionDate': self.TransactionDate,
-            'Amount': self.Amount,
-            'Discount': self.Discount,
-            'PaymentMode': self.PaymentMode
-        }
-    
 # Function and Route to get all Payments
 @app.route('/payments')
 def getPayments():
