@@ -1,117 +1,14 @@
 from app import app, db
 from flask import jsonify, request
-from app.user import User
 from datetime import datetime, timedelta
+import requests, json
+from os import environ
+from app.auth import get_access_token
+from app.models import Memberships, MembershipRecord, MembershipLog, User
 
-class Memberships(db.Model):
-    __tablename__ = 'Memberships'
+client_id = environ.get('PAYPAL_CLIENT_ID')
+client_secret = environ.get('PAYPAL_CLIENT_SECRET')
 
-    MembershipTypeId = db.Column(db.Integer, primary_key=True)
-    Type = db.Column(db.String)
-    BaseFee = db.Column(db.Float)
-    Title = db.Column(db.String)
-    Description = db.Column(db.String)
-    Picture = db.Column(db.String)
-
-    def json(self):
-        return {
-            "MembershipTypeId": self.MembershipTypeId,
-            "Type": self.Type,
-            "BaseFee": self.BaseFee,
-            "Title": self.Title,
-            "Description": self.Description,
-            "Picture": self.Picture
-        }
-    
-    def jsonWithUser(self):
-        return {
-            "MembershipTypeId": self.MembershipTypeId,
-            "Type": self.Type,
-            "BaseFee": self.BaseFee,
-            "Title": self.Title,
-            "Description": self.Description,
-            "Picture": self.Picture,
-            "User": [user.json() for user in self.User]
-        }
-    
-class MembershipRecord(db.Model):
-    __tablename__ = 'MembershipRecord'
-
-    MembershipRecordId = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    UserId = db.Column(db.Integer, db.ForeignKey('User.UserId'), primary_key=True)
-    MembershipTypeId = db.Column(db.Integer, db.ForeignKey('Memberships.MembershipTypeId'), primary_key=True)
-    StartDate = db.Column(db.Date)
-    EndDate = db.Column(db.Date)
-    ActiveStatus = db.Column(db.String, default='Active')
-    StatusRemarks = db.Column(db.String)
-    User = db.relationship('User', backref=db.backref('Memberships', cascade='all, delete-orphan'))
-    Membership = db.relationship('Memberships', backref=db.backref('Memberships', cascade='all, delete-orphan'))
-
-    def json(self):
-        return {
-            "MembershipRecordId": self.MembershipRecordId,
-            "UserId": self.UserId,
-            "MembershipTypeId": self.MembershipTypeId,
-            "StartDate": self.StartDate,
-            "EndDate": self.EndDate,
-            "ActiveStatus": self.ActiveStatus,
-            "StatusRemarks": self.StatusRemarks
-        }
-
-    def jsonWithUserAndMembership(self):
-        return {
-            "MembershipRecordId": self.MembershipRecordId,
-            "UserId": self.UserId,
-            "MembershipTypeId": self.MembershipTypeId,
-            "StartDate": self.StartDate,
-            "EndDate": self.EndDate,
-            "ActiveStatus": self.ActiveStatus,
-            "StatusRemarks": self.StatusRemarks,
-            "User": self.User.json(),
-            "Membership": self.Membership.json()
-        }
-    
-    def jsonWithMembership(self):
-        return {
-            "MembershipRecordId": self.MembershipRecordId,
-            "UserId": self.UserId,
-            "MembershipTypeId": self.MembershipTypeId,
-            "StartDate": self.StartDate,
-            "EndDate": self.EndDate,
-            "ActiveStatus": self.ActiveStatus,
-            "StatusRemarks": self.StatusRemarks,
-            "Membership": self.Membership.json()
-        }
-    
-class MembershipLog(db.Model):
-    __tablename__ = 'MembershipLog'
-
-    MembershipLogId = db.Column(db.Integer, primary_key=True)
-    Date = db.Column(db.Date)
-    ActionType = db.Column(db.String)
-    Description = db.Column(db.String)
-    MembershipRecordId = db.Column(db.Integer, db.ForeignKey('MembershipRecord.MembershipRecordId'))
-    MembershipRecord = db.relationship('MembershipRecord', backref=db.backref('MembershipRecord', cascade='all, delete-orphan'))
-
-    def json(self):
-        return {
-            "MembershipLogId": self.MembershipLogId,
-            "Date": self.Date,
-            "ActionType": self.ActionType,
-            "Description": self.Description,
-            "MembershipRecordId": self.MembershipRecordId
-        }
-
-    def jsonWithMembershipRecord(self):
-        return {
-            "MembershipLogId": self.MembershipLogId,
-            "Date": self.Date,
-            "ActionType": self.ActionType,
-            "Description": self.Description,
-            "MembershipRecordId": self.MembershipRecordId,
-            "MembershipRecord": self.MembershipRecord.json()
-        }
-    
 @app.route("/memberships/test")
 def testMembership():
     return "membership route is working"
@@ -127,6 +24,23 @@ def getAllMemberships():
     return jsonify(
              "There are no Memberships."
     ), 200
+
+# Function and Route to get all Memberships that are 'Public' under Visibility attribute (For Users to see)
+@app.route("/memberships/public")
+def getAllPublicMemberships():
+    membershipList = Memberships.query.filter_by(Visibility="Public").all()
+    if len(membershipList):
+        return jsonify(
+                [membership.json() for membership in membershipList]
+        ), 200
+    return jsonify(
+        {
+            "code": 406,
+            "error": False,
+            "message": "There are no public memberships.",
+            "data": []
+        }
+    ), 406
 
 # Function and Route for getting a Membership by ID
 @app.route("/memberships/<int:id>")
@@ -144,34 +58,199 @@ def getMembershipByID(id: int):
         }
     ), 406
 
-# Function and Route to Create a new Membership
+# Function and Route to Create a new Membership (With PayPal Integration)
 @app.route("/memberships", methods=['POST'])
 def createMembership():
     """
     Sample Request
     {
         "Type": "Monthly",
+        "Visibility": "Public",
         "BaseFee": 100,
-        "Description": "Monthly Training Membership"
+        "Description": "Monthly Training Membership",
+        "Title": "Monthly Training",
+        "Picture": "https://example.com/picture.jpg",
+        "SetupFee": 70
     }
     """
     data = request.get_json()
-    try:
-        membership = Memberships(**data)
-        db.session.add(membership)
-        db.session.commit()
-        return jsonify(
-                membership.json()
-        ), 200
-    except Exception as e:
-        db.session.rollback()
+
+    # Use the access token to make the API call
+    access_token = get_access_token()
+
+    # Check that data["Type"] is not One-Time:
+    if data["Type"] != "One-Time":
+
+        # Create headers for request to PayPal API to create a new Product
+        headers = {
+            'Authorization': 'Bearer ' + access_token,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Prefer': 'return=representation',
+        }
+
+        # Create the request body to send to PayPal API to create a new Product
+        paypalproductdata = '{"name": "' + data["Title"] + '","description": "' + data["Description"] + '","type": "SERVICE","category": "EXERCISE_AND_FITNESS","image_url": "' + data["Picture"] + '","home_url": "' + data["Picture"] + '"}'
+    
+        productresponse = requests.post('https://api-m.sandbox.paypal.com/v1/catalogs/products', headers=headers, data=paypalproductdata)
+
+        # Create request body to send to PayPal API to create a new Plan
+        # NEED TO EDIT TO CHANGE OTHER VARIABLES OF THE PLAN E.G. CYCLE, SETUP FEE, ETC.
+        if data["Type"] == "Monthly":
+            paypalplandata = '{"product_id": "' + productresponse.json()["id"] + '","name": "' + data["Title"] + ' (Monthly Plan)","description": "' + data["Description"] + '","billing_cycles": [{"frequency": {"interval_unit": "MONTH","interval_count": 1},"tenure_type": "REGULAR","sequence": 1,"total_cycles": 0,"pricing_scheme": {"fixed_price": {"value": ' + str(data["BaseFee"]) + ',"currency_code": "SGD"}}}],"payment_preferences": {"auto_bill_outstanding": true,"setup_fee": {"value": ' + str(data["SetupFee"]) + ',"currency_code": "SGD"},"setup_fee_failure_action": "CONTINUE","payment_failure_threshold": 1}}'
+        elif data["Type"] == "Yearly":
+            paypalplandata = '{"product_id": "' + productresponse.json()["id"] + '","name": "' + data["Title"] + ' (Yearly Plan)","description": "' + data["Description"] + '","billing_cycles": [{"frequency": {"interval_unit": "YEAR","interval_count": 1},"tenure_type": "REGULAR","sequence": 1,"total_cycles": 0,"pricing_scheme": {"fixed_price": {"value": ' + str(data["BaseFee"]) + ',"currency_code": "SGD"}}}],"payment_preferences": {"auto_bill_outstanding": true,"setup_fee": {"value": ' + str(data["SetupFee"]) + ',"currency_code": "SGD"},"setup_fee_failure_action": "CONTINUE","payment_failure_threshold": 1}}'
+
+        planresponse = requests.post('https://api-m.sandbox.paypal.com/v1/billing/plans', headers=headers, data=paypalplandata)
+
+        # If the both responses are successful, print the response then create the new Membership in the DB
+        if productresponse.status_code == 201 and planresponse.status_code == 201:
+            print(productresponse.json())
+            print(planresponse.json())
+            try:
+                # Create a new Membership together with the PayPal Plan ID
+                membership = Memberships(**data, PayPalPlanId=planresponse.json()["id"])
+                db.session.add(membership)
+                db.session.commit()
+                return jsonify(
+                        membership.json()
+                ), 200
+            except Exception as e:
+                db.session.rollback()
+                return jsonify(
+                    {
+                        "code": 406,
+                        "error": True,
+                        "message": "An error occurred while creating the new Membership. " + str(e),
+                    }
+                ), 406
+        else:
+            return jsonify(
+                {
+                    "code": 407,
+                    "error": True,
+                    "message": "An error occurred while creating the new Membership in PayPal. " + str(productresponse.json()) + str(planresponse.json()),
+                }
+            ), 407
+    # Else if data["Type"] is One-Time, since it is not a recurring purchase, we create a simple checkout in PayPal instead
+    else:
+        # Create headers for request to PayPal API to create a new checkout Order
+        headers = {
+            "Authorization": "Bearer " + access_token,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Prefer": "return=representation",
+        }
+
+        # Create request body to send to PayPal API to create a new Order
+        paypalorderdata = '{"intent": "CAPTURE", "purchase_units": [{"items": [{"name": "' + data["Title"] + '", "description": "' + data["Description"] + '", "quantity": "1","unit_amount": {"currency_code": "SGD","value": "' + str(data["BaseFee"]) + '"}}],"amount": {"currency_code": "SGD","value": "' + str(data["BaseFee"]) + '","breakdown": {"item_total": {"currency_code": "SGD","value": "' + str(data["BaseFee"]) + '"}}}}],"application_context": {"return_url": "https://example.com/return","cancel_url": "https://example.com/cancel"}}'
+
+        orderresponse = requests.post(
+            "https://api-m.sandbox.paypal.com/v2/checkout/orders",
+            headers=headers,
+            data=paypalorderdata,
+        )
+
+        print(orderresponse.json())
+        # If the both responses are successful, print the response then create the new Membership in the DB
+        if orderresponse.status_code == 201:
+            try:
+                # Create a new Membership together with the PayPal Plan ID
+                membership = Memberships(**data, PayPalPlanId=orderresponse.json()["id"])
+                db.session.add(membership)
+                db.session.commit()
+                return jsonify(
+                        membership.json()
+                ), 200
+            except Exception as e:
+                db.session.rollback()
+                return jsonify(
+                    {
+                        "code": 406,
+                        "error": True,
+                        "message": "An error occurred while creating the new Membership. " + str(e),
+                    }
+                ), 406
+        else:
+            return jsonify(
+                {
+                    "code": 407,
+                    "error": True,
+                    "message": "An error occurred while creating the new Membership in PayPal. " + str(orderresponse.json()),
+                }
+            ), 407
+    
+
+# Function and Route to Get all Memberships (Products) in PayPal
+@app.route("/memberships/paypal")
+def getAllMembershipsPayPal():
+    # Use the access token to make the API call
+    access_token = get_access_token()
+
+    # Create headers for request to PayPal API to get all Products
+    headers = {
+        'Authorization': 'Bearer ' + access_token,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    }
+
+    # params
+    params = {
+        'page_size': 20,
+        'page': 1,
+        'total_required': 'true'
+    }
+
+    response = requests.get('https://api-m.sandbox.paypal.com/v1/catalogs/products', headers=headers, params=params)
+
+    # If the response is successful, return the response
+    if response.status_code == 200:
+        return response.json()
+    else:
         return jsonify(
             {
-                "code": 406,
+                "code": 407,
                 "error": True,
-                "message": "An error occurred while creating the new Membership. " + str(e),
+                "message": "An error occurred while retrieving the Memberships from PayPal. " + str(response.json()),
             }
-        ), 406
+        ), 407
+    
+# Function and Route to list all Plans (Memberships) in PayPal
+@app.route("/memberships/paypal/plans")
+def getAllPlansPayPal():
+    # Use the access token to make the API call
+    access_token = get_access_token()
+
+    # Create headers for request to PayPal API to get all Plans
+    headers = {
+        'Authorization': 'Bearer ' + access_token,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Prefer': 'return=representation',
+    }
+
+    # params
+    params = {
+        'sort_order': 'DESC',
+        'sort_by': 'create_time',
+        'page_size': 20,
+        'page': 1,
+        'total_required': 'true'
+    }
+
+    response = requests.get('https://api-m.sandbox.paypal.com/v1/billing/plans', headers=headers, params=params)
+
+    # If the response is successful, return the response
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return jsonify(
+            {
+                "code": 407,
+                "error": True,
+                "message": "An error occurred while retrieving the Plans from PayPal. " + str(response.json()),
+            }
+        ), 407
 
 # Function and Route to Update a Membership by ID
 @app.route("/memberships/<int:id>", methods=['PUT'])
@@ -218,12 +297,42 @@ def updateMembership(id: int):
 def deleteMembership(id: int):
     try:
         membership = Memberships.query.filter_by(MembershipTypeId=id).first()
+        print(membership.json())
         if membership:
+            
+            if membership.Type != "One-Time":
+                # Use the access token to make the API call
+                access_token = get_access_token()
+
+                # Create headers for request to PayPal API to deactivate a Plan
+                headers = {
+                    'Authorization': 'Bearer ' + access_token,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                }
+
+                print(membership.PayPalPlanId)
+                response = requests.post('https://api-m.sandbox.paypal.com/v1/billing/plans/' + membership.PayPalPlanId + '/deactivate', headers=headers)
+
+                # If the response is successful, print the response
+                if response.status_code == 204:
+                    # Print a Message to say that PayPal plan has been deactivated
+                    print("PayPal Plan with ID " + membership.PayPalPlanId + " has been deactivated.")
+                else:
+                    return jsonify(
+                        {
+                            "code": 407,
+                            "error": True,
+                            "message": "An error occurred while deactivating the Membership (Plan) in PayPal. " + str(response.json()),
+                        }
+                    ), 407
+            
             db.session.delete(membership)
             db.session.commit()
             return jsonify(
-                    "Membership with ID: " + str(id) + " has been deleted."
+                    "Membership with ID: " + str(id) + " has been deleted. Plan has been deactivated in PayPal."
             ), 200
+            
         return jsonify(
             {
                 "code": 406,
@@ -314,6 +423,7 @@ def createMembershipRecord():
     """
     Sample Request
     {
+        "PayPalSubscriptionId": "I-1234567890",
         "UserId": 100,
         "MembershipTypeId": 4,
         "StartDate": "2021-01-01",
@@ -428,8 +538,40 @@ def updateMembershipRecord(id: int):
 @app.route("/membershiprecord/<int:id>", methods=['DELETE'])
 def deleteMembershipRecord(id: int):
     try:
+        # Check if the Membership Record exists first
         membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=id).first()
+        
         if membershipRecord:
+            # Use the access token to make the API call
+            access_token = get_access_token()
+
+            # Create headers for request to PayPal API to cancel a Subscription
+            headers = {
+                'Authorization': 'Bearer ' + access_token,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            }
+
+            # If the Membership Record has a PayPal Subscription ID, then cancel the Subscription in PayPal
+            if membershipRecord.PayPalSubscriptionId:
+                # Include data in the request body to state reason for cancellation
+                data = '{"reason": "User has terminated their membership on ' + str(datetime.now()) + '"}'
+
+                # Make the API call to cancel the Subscription
+                response = requests.post('https://api-m.sandbox.paypal.com/v1/billing/subscriptions/' + membershipRecord.PayPalSubscriptionId + '/cancel', headers=headers, data=data)
+
+                # If the response is successful, print the response
+                if response.status_code == 204:
+                    # Print a Message to say that PayPal Subscription has been cancelled
+                    print("PayPal Subscription with ID " + membershipRecord.PayPalSubscriptionId + " has been cancelled.")
+                else:
+                    return jsonify(
+                        {
+                            "code": 407,
+                            "error": True,
+                            "message": "An error occurred while cancelling the Membership (Subscription) in PayPal. " + str(response.json()),
+                        }
+                    ), 407
             db.session.delete(membershipRecord)
             db.session.commit()
             return jsonify(
@@ -500,9 +642,40 @@ def createMembershipLog():
                 ), 409
             # If there is no existing "Pause" Membership Log, then using the SelectedMembershipRecord, update it and change the ActiveStatus column to Paused
             SelectedMembershipRecord.ActiveStatus = 'Paused'
+
+            # Check the MembershipRecord if the PayPalSubscriptionId is not null, if it is not null, then pause the Subscription in PayPal
+            if SelectedMembershipRecord.PayPalSubscriptionId:
+                # Use the access token to make the API call
+                access_token = get_access_token()
+
+                # Create headers for request to PayPal API to suspend a Subscription
+                headers = {
+                    'Authorization': 'Bearer ' + access_token,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                }
+
+                # Include data in the request body to state reason for suspension
+                reasondata = '{"reason": "User has paused their membership on ' + str(datetime.now()) + '"}'
+
+                # Make the API call to suspend the Subscription
+                response = requests.post('https://api-m.sandbox.paypal.com/v1/billing/subscriptions/' + SelectedMembershipRecord.PayPalSubscriptionId + '/suspend', headers=headers, data=reasondata)
+
+                # If the response is successful, print the response
+                if response.status_code == 204:
+                    # Print a Message to say that PayPal Subscription has been suspended
+                    print("PayPal Subscription with ID " + SelectedMembershipRecord.PayPalSubscriptionId + " has been suspended.")
+                else:
+                    return jsonify(
+                        {
+                            "code": 407,
+                            "error": True,
+                            "message": "An error occurred while suspending the Membership (Subscription) in PayPal. " + str(response.json()),
+                        }
+                    ), 407
             db.session.commit()
             # Create the new Membership Log and add into the DB
-            membershipLog = MembershipLog(**data) 
+            membershipLog = MembershipLog(**data)
             db.session.add(membershipLog)
             db.session.commit()
             return jsonify(
@@ -520,9 +693,40 @@ def createMembershipLog():
                 ), 409
             # If there is no existing "Resume" Membership Log, then using the SelectedMembershipRecord, update it and change the ActiveStatus column to 'Active'. Once done, use the given Date and check for the previous log's Pause Date. If the given Date is after the Pause Date, then compute the difference and update the MembershipRecord's EndDate accordingly. If the given Date is before the Pause Date, then return an error.
             SelectedMembershipRecord.ActiveStatus = 'Active'
+
+            # Check the MembershipRecord if the PayPalSubscriptionId is not null, if it is not null, then resume the Subscription in PayPal
+            if SelectedMembershipRecord.PayPalSubscriptionId:
+                # Use the access token to make the API call
+                access_token = get_access_token()
+
+                # Create headers for request to PayPal API to reactivate a Subscription
+                headers = {
+                    'Authorization': 'Bearer ' + access_token,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                }
+
+                # Include data in the request body to state reason for reactivation
+                reasondata = '{"reason": "User has resumed their membership on ' + str(datetime.now()) + '"}'
+
+                # Make the API call to reactivate the Subscription
+                response = requests.post('https://api-m.sandbox.paypal.com/v1/billing/subscriptions/' + SelectedMembershipRecord.PayPalSubscriptionId + '/activate', headers=headers, data=reasondata)
+
+                # If the response is successful, print the response
+                if response.status_code == 204:
+                    # Print a Message to say that PayPal Subscription has been reactivated
+                    print("PayPal Subscription with ID " + SelectedMembershipRecord.PayPalSubscriptionId + " has been reactivated.")
+                else:
+                    return jsonify(
+                        {
+                            "code": 407,
+                            "error": True,
+                            "message": "An error occurred while reactivating the Membership (Subscription) in PayPal. " + str(response.json()),
+                        }
+                    ), 407
             db.session.commit()
-            # Get the previous Pause Log
-            PreviousPauseLog = MembershipLog.query.filter_by(MembershipRecordId=data["MembershipRecordId"], ActionType="Pause").first()
+            # Get the latest Pause Log
+            PreviousPauseLog = MembershipLog.query.filter_by(MembershipRecordId=data["MembershipRecordId"], ActionType="Pause").order_by(MembershipLog.MembershipLogId.desc()).first()
             #  If there is no previous Pause Log, return an error and rollback, specifying the reason that there was no previous Pause Log to compute the difference in dates from.
             if not PreviousPauseLog:
                 db.session.rollback()
@@ -555,12 +759,7 @@ def createMembershipLog():
 
             db.session.add(membershipLog)
             db.session.commit()
-            return jsonify(
-                    {
-                        "message":"Membership with ID: " + str(data["MembershipRecordId"]) + " has been resumed.",
-                        "log": membershipLog.json()
-                    }
-            ), 200
+            return jsonify(membershipLog.json()), 200
         # Check for Action Type. If it is "Terminate", then check if there is an existing "Terminate" Membership Log. If not, then using the SelectedMembershipRecord, update it and change the ActiveStatus column to Terminated. Once done, use the given Date and replace the SelectedMembershipRecord's EndDate with the given Date to show that Membership has been terminated.
         elif data["ActionType"] == "Terminate":
             ExistingTerminateLog = MembershipLog.query.filter_by(MembershipRecordId=data["MembershipRecordId"], ActionType="Terminate").first()
@@ -572,6 +771,36 @@ def createMembershipLog():
                 ), 409
             SelectedMembershipRecord.ActiveStatus = 'Terminated'
             SelectedMembershipRecord.EndDate = data["Date"]
+            # Check if the MembershipRecord if the PayPalSubscriptionId is not null, if it is not null, then cancel the Subscription in PayPal
+            if SelectedMembershipRecord.PayPalSubscriptionId:
+                # Use the access token to make the API call
+                access_token = get_access_token()
+
+                # Create headers for request to PayPal API to cancel a Subscription
+                headers = {
+                    'Authorization': 'Bearer ' + access_token,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                }
+
+                # Include data in the request body to state reason for cancellation
+                reasondata = '{"reason": "User has terminated their membership on ' + data["Date"] + '"}'
+
+                # Make the API call to cancel the Subscription
+                response = requests.post('https://api-m.sandbox.paypal.com/v1/billing/subscriptions/' + SelectedMembershipRecord.PayPalSubscriptionId + '/cancel', headers=headers, data=reasondata)
+
+                # If the response is successful, print the response
+                if response.status_code == 204:
+                    # Print a Message to say that PayPal Subscription has been cancelled
+                    print("PayPal Subscription with ID " + SelectedMembershipRecord.PayPalSubscriptionId + " has been cancelled.")
+                else:
+                    return jsonify(
+                        {
+                            "code": 407,
+                            "error": True,
+                            "message": "An error occurred while cancelling the Membership (Subscription) in PayPal. " + str(response.json()),
+                        }
+                    ), 407
             db.session.commit()
             # Create the new Membership Log and add into the DB
             membershipLog = MembershipLog(**data)
@@ -738,7 +967,6 @@ def getMembershipLogsByUserID(id: int):
             "data": []
         }
     ), 406
-
         
             
 
