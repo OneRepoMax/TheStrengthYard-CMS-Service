@@ -25,6 +25,14 @@ INSERT INTO `User` VALUES
 (102, 'isalsamudra@gmail.com', 'Faisal', 'Samudra', 'M', '1996-12-30', 'Sample Address', 123456, '96116907', 'pbkdf2:sha256:260000$hJm022YX$5cdc10522fe8bdca504ffceff61f8a7822eb3de05b3e29efee100e246c8e804d', 'C', '2023-08-16', "", 1);
 
 -- -----------------------------------------------------
+-- Inserting Sample Data into Table `tsy_db`.`IndemnityForm`
+-- -----------------------------------------------------
+INSERT INTO `IndemnityForm` VALUES
+(300, "Search Engine, Friend's Recommendation, Walking Pass, Google Maps, Facebook Adverts, Google Adverts, Other", "Heart Problems, Pain in Chest when exercising/not exercising, Low Blood Pressure/High Blood Pressure, Any breathing difficulties or asthma, Diabetes, Fainting spells, Joint problems, Epilepsy, Currently on medication, Significant illness/Operations, None, Other","I had a heart operation back in 2008 and my knees are very weak. I am also on medication for my heart. I also have fainting spells once in a while.", 1, 1, 1),
+(301, "Search Engine, Friend's Recommendation, Walking Pass, Google Maps, Facebook Adverts, Google Adverts, Other", "Heart Problems, Pain in Chest when exercising/not exercising, Low Blood Pressure/High Blood Pressure, Any breathing difficulties or asthma, Diabetes, Fainting spells, Joint problems, Epilepsy, Currently on medication, Significant illness/Operations, None, Other","I had a heart operation back in 2008 and my knees are very weak. I am also on medication for my heart. I also have fainting spells once in a while.", 1, 1, 102);
+
+
+-- -----------------------------------------------------
 -- Inserting Sample Data into Table `tsy_db`.`Memberships`
 -- -----------------------------------------------------
 INSERT INTO `memberships` VALUES 
