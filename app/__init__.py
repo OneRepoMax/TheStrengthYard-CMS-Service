@@ -42,3 +42,4 @@ from .user import User
 from .membership import Memberships
 from .registration import IndemnityForm
 from .payments import Payment
+from .booking import Booking

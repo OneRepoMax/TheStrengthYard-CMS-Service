@@ -97,6 +97,24 @@ INSERT INTO `Payment` VALUES
 -- (7006, NULL, 4, '2023-07-02', 250, 0, 'PayNow'),
 -- (7007, NULL, 4, '2023-08-02', 250, 0, 'PayNow');
 
+-- -----------------------------------------------------
+-- Inserting Sample Data into Table `tsy_db`.`Class`
+-- -----------------------------------------------------
+INSERT INTO `Class` VALUES
+(300, 'Progressive Strength Class', 'Make progress towards your strength goals with our Progressive Strength Class.', 8),
+(301, 'Olympic Barbell Class', 'Learn the basics of Weightlifting safely with our Olympic Barbell Class.', 5);
+
+-- -----------------------------------------------------
+-- Inserting Sample Data into Table `tsy_db`.`ClassSlot`
+-- -----------------------------------------------------
+INSERT INTO `ClassSlot` VALUES
+(5000, 'Monday', '2023-10-02 07:00:00', '2023-10-02 08:00:00', 60, 0, 300),
+(5001, 'Monday', '2023-10-02 12:00:00', '2023-10-02 13:00:00', 60, 0, 300);
 
 
-
+-- -----------------------------------------------------
+-- Inserting Sample Data into Table `tsy_db`.`Points`
+-- -----------------------------------------------------
+INSERT INTO `Points` VALUES 
+(6000, 2, '2023-09-20', '2023-10-20', 12, 'Paid'),
+(6001, 2, '2023-10-20', '2023-11-20', 12, 'Not Paid');

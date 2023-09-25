@@ -201,3 +201,120 @@ class MembershipLog(db.Model):
             "MembershipRecordId": self.MembershipRecordId,
             "MembershipRecord": self.MembershipRecord.json()
         }
+    
+class Class(db.Model):
+    __tablename__ = 'Class'
+
+    ClassId = db.Column(db.Integer, primary_key=True)
+    ClassName = db.Column(db.String)
+    Description = db.Column(db.String)
+    MaximumCapacity = db.Column(db.Integer)
+
+    def json(self):
+        return {
+            "ClassId": self.ClassId,
+            "ClassName": self.ClassName,
+            "Description": self.Description,
+            "MaximumCapacity": self.MaximumCapacity
+        }
+    
+class ClassSlot(db.Model):
+    __tablename__ = 'ClassSlot'
+
+    ClassSlotId = db.Column(db.Integer, primary_key=True)
+    Day = db.Column(db.String)
+    StartTime = db.Column(db.Time)
+    EndTime = db.Column(db.Time)
+    Duration = db.Column(db.Integer)
+    CurrentCapacity = db.Column(db.Integer)
+    ClassId = db.Column(db.Integer, db.ForeignKey('Class.ClassId'))
+    Class = db.relationship('Class', backref=db.backref('Class', cascade='all, delete-orphan'))
+
+    def json(self):
+        return {
+            "ClassSlotId": self.ClassSlotId,
+            "Day": self.Day,
+            "StartTime": self.StartTime,
+            "EndTime": self.EndTime,
+            "Duration": self.Duration,
+            "CurrentCapacity": self.CurrentCapacity,
+            "ClassId": self.ClassId
+        }
+    
+    def jsonWithClass(self):
+        return {
+            "ClassSlotId": self.ClassSlotId,
+            "Day": self.Day,
+            "StartTime": self.StartTime,
+            "EndTime": self.EndTime,
+            "Duration": self.Duration,
+            "CurrentCapacity": self.CurrentCapacity,
+            "ClassId": self.ClassId,
+            "Class": self.Class.json()
+        }
+    
+class Booking(db.Model):
+    __tablename__ = 'Booking'
+
+    BookingId = db.Column(db.Integer, primary_key=True)
+    BookingDateTime = db.Column(db.DateTime)
+    Status = db.Column(db.String)
+    UserId = db.Column(db.Integer, db.ForeignKey('User.UserId'))
+    ClassSlotId = db.Column(db.Integer, db.ForeignKey('ClassSlot.ClassSlotId'))
+    User = db.relationship('User', backref=db.backref('Booking', cascade='all, delete-orphan'))
+    ClassSlot = db.relationship('ClassSlot', backref=db.backref('Booking', cascade='all, delete-orphan'))
+
+    def json(self):
+        return {
+            "BookingId": self.BookingId,
+            "BookingDateTime": self.BookingDateTime,
+            "Status": self.Status,
+            "UserId": self.UserId,
+            "ClassSlotId": self.ClassSlotId
+        }
+    
+    def jsonWithUserAndClassSlot(self):
+        return {
+            "BookingId": self.BookingId,
+            "BookingDateTime": self.BookingDateTime,
+            "Status": self.Status,
+            "UserId": self.UserId,
+            "ClassSlotId": self.ClassSlotId,
+            "User": self.User.json(),
+            "ClassSlot": self.ClassSlot.json()
+        }
+    
+class Points(db.Model):
+    __tablename__ = 'Points'
+
+    PointsId = db.Column(db.Integer, primary_key=True)
+    MembershipRecordId = db.Column(db.Integer, db.ForeignKey('MembershipRecord.MembershipRecordId'))
+    PointsStartDate = db.Column(db.Date)
+    PointsEndDate = db.Column(db.Date)
+    Balance = db.Column(db.Integer)
+    Status = db.Column(db.String)
+    MembershipRecord = db.relationship('MembershipRecord', backref=db.backref('Points', cascade='all, delete-orphan'))
+
+    def json(self):
+        return {
+            "PointsId": self.PointsId,
+            "MembershipRecordId": self.MembershipRecordId,
+            "PointsStartDate": self.PointsStartDate,
+            "PointsEndDate": self.PointsEndDate,
+            "Balance": self.Balance,
+            "Status": self.Status
+        }
+    
+    def jsonWithMembershipRecord(self):
+        return {
+            "PointsId": self.PointsId,
+            "MembershipRecordId": self.MembershipRecordId,
+            "PointsStartDate": self.PointsStartDate,
+            "PointsEndDate": self.PointsEndDate,
+            "Balance": self.Balance,
+            "Status": self.Status,
+            "MembershipRecord": self.MembershipRecord.json()
+        }
+    
+
+    

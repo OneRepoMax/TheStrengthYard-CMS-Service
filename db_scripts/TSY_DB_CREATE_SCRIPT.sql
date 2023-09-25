@@ -124,11 +124,11 @@ DROP TABLE IF EXISTS `tsy_db`.`Class` ;
 
 CREATE TABLE IF NOT EXISTS `tsy_db`.`Class` (
   `ClassId` INT NOT NULL AUTO_INCREMENT,
-  `ClassName` VARCHAR(45) NOT NULL,
+  `ClassName` VARCHAR(255) NOT NULL,
   `Description` LONGTEXT NOT NULL,
   `MaximumCapacity` INT NOT NULL,
-  `ClassType` INT NOT NULL,
   PRIMARY KEY (`ClassId`))
+AUTO_INCREMENT = 300
 ENGINE = InnoDB;
 
 
@@ -138,18 +138,21 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `tsy_db`.`ClassSlot` ;
 
 CREATE TABLE IF NOT EXISTS `tsy_db`.`ClassSlot` (
-  `ClassSlotId` INT NOT NULL,
+  `ClassSlotId` INT NOT NULL AUTO_INCREMENT,
   `Day` VARCHAR(45) NOT NULL,
   `StartTime` TIMESTAMP NOT NULL,
   `EndTime` TIMESTAMP NOT NULL,
+  `Duration` INT NOT NULL,
+  `CurrentCapacity` INT NOT NULL DEFAULT 0,
   `ClassId` INT NOT NULL,
   PRIMARY KEY (`ClassSlotId`, `ClassId`),
-  INDEX `fk_ClassSlot_Class1_idx` (`ClassId` ASC) VISIBLE,
-  CONSTRAINT `fk_ClassSlot_Class1`
+  INDEX `fk_ClassSlot_idx` (`ClassId` ASC) VISIBLE,
+  CONSTRAINT `fk_ClassSlot`
     FOREIGN KEY (`ClassId`)
     REFERENCES `tsy_db`.`Class` (`ClassId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
+AUTO_INCREMENT = 5000
 ENGINE = InnoDB;
 
 
@@ -159,23 +162,48 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `tsy_db`.`Booking` ;
 
 CREATE TABLE IF NOT EXISTS `tsy_db`.`Booking` (
-  `BookingDate` DATE NOT NULL,
-  `ClassDate` DATE NOT NULL,
-  `User_UserId` INT NOT NULL,
-  `ClassSlot_ClassSlotId` INT NOT NULL,
-  `ClassSlot_Class_ClassId` INT NOT NULL,
-  INDEX `fk_Booking_User1_idx` (`User_UserId` ASC) VISIBLE,
-  INDEX `fk_Booking_ClassSlot1_idx` (`ClassSlot_ClassSlotId` ASC, `ClassSlot_Class_ClassId` ASC) VISIBLE,
-  CONSTRAINT `fk_Booking_User1`
-    FOREIGN KEY (`User_UserId`)
+  `BookingId` INT NOT NULL AUTO_INCREMENT,
+  `BookingDateTime` DATETIME NOT NULL,
+  `Status` VARCHAR(45) NOT NULL,
+  `UserId` INT NOT NULL,
+  `ClassSlotId` INT NOT NULL,
+  PRIMARY KEY (`BookingId`, `UserId`, `ClassSlotId`),
+  INDEX `fk_Booking_User_idx` (`UserId` ASC) VISIBLE,
+  INDEX `fk_Booking_ClassSlot_idx` (`ClassSlotId` ASC) VISIBLE,
+  CONSTRAINT `fk_Booking_User`
+    FOREIGN KEY (`UserId`)
     REFERENCES `tsy_db`.`User` (`UserId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Booking_ClassSlot1`
-    FOREIGN KEY (`ClassSlot_ClassSlotId` , `ClassSlot_Class_ClassId`)
-    REFERENCES `tsy_db`.`ClassSlot` (`ClassSlotId` , `ClassId`)
+  CONSTRAINT `fk_Booking_ClassSlot`
+    FOREIGN KEY (`ClassSlotId`)
+    REFERENCES `tsy_db`.`ClassSlot` (`ClassSlotId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
+AUTO_INCREMENT = 8000
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `tsy_db`.`Points`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `tsy_db`.`Points` ;
+
+CREATE TABLE IF NOT EXISTS `tsy_db`.`Points` (
+  `PointsId` INT NOT NULL AUTO_INCREMENT,
+  `MembershipRecordId` INT NOT NULL,
+  `PointsStartDate` DATE NOT NULL,
+  `PointsEndDate` DATE NOT NULL,
+  `Balance` INT NOT NULL,
+  `Status` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`PointsId`),
+  INDEX `fk_Points_MembershipRecord_idx` (`MembershipRecordId` ASC) VISIBLE,
+  CONSTRAINT `fk_Points_MembershipRecord`
+    FOREIGN KEY (`MembershipRecordId`)
+    REFERENCES `tsy_db`.`MembershipRecord` (`MembershipRecordId`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+AUTO_INCREMENT = 6000
 ENGINE = InnoDB;
 
 
