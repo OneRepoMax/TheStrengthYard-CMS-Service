@@ -223,8 +223,8 @@ class ClassSlot(db.Model):
 
     ClassSlotId = db.Column(db.Integer, primary_key=True)
     Day = db.Column(db.String)
-    StartTime = db.Column(db.Time)
-    EndTime = db.Column(db.Time)
+    StartTime = db.Column(db.DateTime)
+    EndTime = db.Column(db.DateTime)
     Duration = db.Column(db.Integer)
     CurrentCapacity = db.Column(db.Integer)
     ClassId = db.Column(db.Integer, db.ForeignKey('Class.ClassId'))
