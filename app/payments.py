@@ -109,7 +109,7 @@ def refreshMembershipRecords():
 # Function and Route for PayPal Webhook to record payments
 @app.route("/recordPayment", methods=['POST'])
 def recordPayment():
-        # Validate Webhook First
+        # # Validate Webhook First
         transmission_id = request.headers.get('PAYPAL-TRANSMISSION-ID')
         transmission_time = request.headers.get('PAYPAL-TRANSMISSION-TIME')
         transmission_sig = request.headers.get('PAYPAL-TRANSMISSION-SIG')
@@ -138,12 +138,25 @@ def recordPayment():
         if (verification['verification_status'] == "SUCCESS"):
             data = request.get_json()
             transactionID = data['resource']['id']
+            subscriptionID = 0
             transactionDate = datetime.now()
-            subscriptionID = data['resource']['billing_agreement_id']
-            amount = data['resource']['amount']['total']
-
+            for i in data['resource']:
+                # Subscription
+                if i == 'billing_agreement_id':
+                    subscriptionID = data['resource']['billing_agreement_id']
+                    amount = data['resource']['amount']['total']
+                # One Time Payments
+                if i =='supplementary_data':
+                    transactionID = data['resource']['supplementary_data']['related_ids']['order_id']
+                    amount = data['resource']['amount']['value']
+            
             # Get the MembershipRecordId based on the PayPalSubscriptionId
-            paymentList = MembershipRecord.query.filter_by(PayPalSubscriptionId=subscriptionID).first()
+            if(subscriptionID != 0):
+                # Subscriptions
+                paymentList = MembershipRecord.query.filter_by(PayPalSubscriptionId=subscriptionID).first()
+            else:
+                # One Time Payments
+                paymentList = MembershipRecord.query.filter_by(PayPalSubscriptionId=transactionID).first()
             paymentList = paymentList.json()
 
             newPayment = Payment(
