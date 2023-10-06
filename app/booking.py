@@ -289,11 +289,10 @@ def createNewBooking():
             gymOwner = "tsy.fyp.2023@gmail.com"
 
             token = generate_token(gymOwner)
-            confirm_url = url_for("verifyEmail", token=token, _external=True)
 
             # Use new_booking.html template to generate the email content, with the following variables:
             # user_first_name, user_last_name, booking_id, booking_date_time, class_name, class_start_time, points_balance, duration, confirm_url
-            html = render_template("/new_booking.html", user_first_name=user.FirstName, user_last_name=user.LastName, booking_id=newBooking.BookingId, booking_date_time=newBooking.BookingDateTime, class_name=selectedClass.ClassName, class_start_time=selectedClassSlot.StartTime, points_balance=selectedPoints.Balance, duration=selectedClassSlot.Duration ,confirm_url=confirm_url)
+            html = render_template("/new_booking.html", user_first_name=user.FirstName, user_last_name=user.LastName, booking_id=newBooking.BookingId, booking_date_time=newBooking.BookingDateTime, class_name=selectedClass.ClassName, class_start_time=selectedClassSlot.StartTime, points_balance=selectedPoints.Balance, duration=selectedClassSlot.Duration, class_day=selectedClassSlot.Day)
 
             subject = "New Booking Confirmation - " + user.FirstName + " " + user.LastName
             send_email(gymOwner, subject, html)
@@ -345,6 +344,86 @@ def getAllBookingsByClassSlotID(id: int):
         ), 200
     return "There are no such bookings with Class Slot ID: " + str(id), 406
     
+# Function and Route to cancel a Booking by Booking ID
+@app.route("/booking/cancel/<int:id>")
+def cancelBookingByID(id: int):
+    # Check if booking exists
+    bookingExists = Booking.query.filter_by(BookingId=id).first()
+    if not bookingExists:
+        return "There are no such booking with Booking ID: " + str(id), 406
 
+    # Check if booking status is "Confirmed"
+    if bookingExists.Status == "Confirmed":
+        # Update booking status to "Cancelled"
+        bookingExists.Status = "Cancelled"
+
+        # Add updated booking to database
+        db.session.add(bookingExists)
+        db.session.commit()
+
+        # Retrieve the class slot with the given class slot ID
+        selectedClassSlot = ClassSlot.query.filter_by(ClassSlotId=bookingExists.ClassSlotId).first()
+
+        # Update the selectedClassSlot CurrentCapacity by adding 1
+        selectedClassSlot.CurrentCapacity += 1
+
+        # Add updated selectedClassSlot to database
+        db.session.add(selectedClassSlot)
+        db.session.commit()
+
+        # Using the selectedClassSlot's StartTime, we retrive the corresponding Points row from the Points table in which the selectedClassSlot's StartTime is between the PointsStartDate and PointsEndDate
+        selectedPoints = Points.query.filter(Points.PointsStartDate <= selectedClassSlot.StartTime).filter(Points.PointsEndDate >= selectedClassSlot.StartTime).first()
+
+        # Since there is a 12 hour cancellation policy, we check the current date time and the class slot's start time to see if it is more than 12 hours apart. 
+        # Get the current date time
+        now = datetime.now()
+
+        # Get the class slot's start time
+        classSlotStartTime = selectedClassSlot.StartTime
+
+        # Compute the difference between the current date time and the class slot's start time
+        difference = classSlotStartTime - now
+
+        # Check if the difference is less than 12 hours. If it is, we do not refund the user's points. If it is not, we refund the user's points.
+        user = User.query.filter_by(UserId=bookingExists.UserId).first()
+        gymOwner = "tsy.fyp.2023@gmail.com"
+        if difference < timedelta(hours=12):
+            # Send an email notification to the user and gym owner about the booking cancellation. 
+            emailMessage = "Your booking has been cancelled. Since the cancellation is not more than 12 hours before the class, you will not be refunded any points. Your current points balance from  is " + str(selectedPoints.Balance) + "."
+
+            token = generate_token(gymOwner)
+            html = render_template("/cancel_booking.html", user_first_name=user.FirstName, user_last_name=user.LastName, booking_id=bookingExists.BookingId, booking_date_time=bookingExists.BookingDateTime, class_name=selectedClassSlot.Class.ClassName, class_start_time=selectedClassSlot.StartTime, class_day= selectedClassSlot.Day, duration=selectedClassSlot.Duration, message=emailMessage, points_refunded=0)
+
+            subject = "Booking Cancellation - " + user.FirstName + " " + user.LastName
+            send_email(gymOwner, subject, html)
+            send_email(user.EmailAddress, subject, html)
+
+            return "Your booking has been cancelled. You will not be refunded any points.", 200
+        else:
+            # If the selectedPoints is not found, return 406
+            if not selectedPoints:
+                return "There are no valid points record for the selected class slot to refund the points", 406
+
+            # If selectedPoints is found, update the selectedPoints Balance by adding 1
+            selectedPoints.Balance += 1
+
+            # Add updated selectedPoints to database
+            db.session.add(selectedPoints)
+            db.session.commit()
+
+            # Send an email notification to the user and gym owner about the booking cancellation.
+            emailMessage = "Your booking has been cancelled. You have been refunded 1 point. Your current points balance is " + str(selectedPoints.Balance) + "."
+
+            token = generate_token(gymOwner)
+            html = render_template("/cancel_booking.html", user_first_name=user.FirstName, user_last_name=user.LastName, booking_id=bookingExists.BookingId, booking_date_time=bookingExists.BookingDateTime, class_name=selectedClassSlot.Class.ClassName, class_start_time=selectedClassSlot.StartTime, class_day= selectedClassSlot.Day, duration=selectedClassSlot.Duration, message=emailMessage, points_refunded=1)
+
+            subject = "Booking Cancellation - " + user.FirstName + " " + user.LastName
+
+            send_email(gymOwner, subject, html)
+            send_email(user.EmailAddress, subject, html)
+
+            return "Your booking has been cancelled. You have been refunded 1 point.", 200
+
+    
 
     
