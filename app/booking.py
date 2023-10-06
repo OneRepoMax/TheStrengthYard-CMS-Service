@@ -3,7 +3,6 @@ from flask import jsonify, request, url_for, render_template
 from datetime import datetime, timedelta
 import requests, json
 from app.models import MembershipRecord, Class, ClassSlot, Booking, User, Points
-from app.token import confirm_token, generate_token
 from app.email import send_email
 from app.user import verifyEmail
 
@@ -288,8 +287,6 @@ def createNewBooking():
             user = User.query.filter_by(UserId=userId).first()
             gymOwner = "tsy.fyp.2023@gmail.com"
 
-            token = generate_token(gymOwner)
-
             # Use new_booking.html template to generate the email content, with the following variables:
             # user_first_name, user_last_name, booking_id, booking_date_time, class_name, class_start_time, points_balance, duration, confirm_url
             html = render_template("/new_booking.html", user_first_name=user.FirstName, user_last_name=user.LastName, booking_id=newBooking.BookingId, booking_date_time=newBooking.BookingDateTime, class_name=selectedClass.ClassName, class_start_time=selectedClassSlot.StartTime, points_balance=selectedPoints.Balance, duration=selectedClassSlot.Duration, class_day=selectedClassSlot.Day)
@@ -392,7 +389,6 @@ def cancelBookingByID(id: int):
             # Send an email notification to the user and gym owner about the booking cancellation. 
             emailMessage = "Your booking has been cancelled. Since the cancellation is not more than 12 hours before the class, you will not be refunded any points. Your current points balance from  is " + str(selectedPoints.Balance) + "."
 
-            token = generate_token(gymOwner)
             html = render_template("/cancel_booking.html", user_first_name=user.FirstName, user_last_name=user.LastName, booking_id=bookingExists.BookingId, booking_date_time=bookingExists.BookingDateTime, class_name=selectedClassSlot.Class.ClassName, class_start_time=selectedClassSlot.StartTime, class_day= selectedClassSlot.Day, duration=selectedClassSlot.Duration, message=emailMessage, points_refunded=0, points_balance=selectedPoints.Balance)
 
             subject = "Booking Cancellation - " + user.FirstName + " " + user.LastName
