@@ -167,9 +167,11 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`Booking` (
   `Status` VARCHAR(45) NOT NULL,
   `UserId` INT NOT NULL,
   `ClassSlotId` INT NOT NULL,
-  PRIMARY KEY (`BookingId`, `UserId`, `ClassSlotId`),
+  `MembershipRecordId` INT NOT NULL,
+  PRIMARY KEY (`BookingId`),
   INDEX `fk_Booking_User_idx` (`UserId` ASC) VISIBLE,
   INDEX `fk_Booking_ClassSlot_idx` (`ClassSlotId` ASC) VISIBLE,
+  INDEX `fk_Booking_MembershipRecord_idx` (`MembershipRecordId` ASC) VISIBLE,
   CONSTRAINT `fk_Booking_User`
     FOREIGN KEY (`UserId`)
     REFERENCES `tsy_db`.`User` (`UserId`)
@@ -178,6 +180,11 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`Booking` (
   CONSTRAINT `fk_Booking_ClassSlot`
     FOREIGN KEY (`ClassSlotId`)
     REFERENCES `tsy_db`.`ClassSlot` (`ClassSlotId`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Booking_MembershipRecord`
+    FOREIGN KEY (`MembershipRecordId`)
+    REFERENCES `tsy_db`.`MembershipRecord` (`MembershipRecordId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 AUTO_INCREMENT = 8000
