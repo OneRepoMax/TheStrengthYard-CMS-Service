@@ -261,8 +261,10 @@ class Booking(db.Model):
     Status = db.Column(db.String)
     UserId = db.Column(db.Integer, db.ForeignKey('User.UserId'))
     ClassSlotId = db.Column(db.Integer, db.ForeignKey('ClassSlot.ClassSlotId'))
+    MembershipRecordId = db.Column(db.Integer, db.ForeignKey('MembershipRecord.MembershipRecordId'))
     User = db.relationship('User', backref=db.backref('Booking', cascade='all, delete-orphan'))
     ClassSlot = db.relationship('ClassSlot', backref=db.backref('Booking', cascade='all, delete-orphan'))
+    MembershipRecord = db.relationship('MembershipRecord', backref=db.backref('Booking', cascade='all, delete-orphan'))
 
     def json(self):
         return {
@@ -270,7 +272,8 @@ class Booking(db.Model):
             "BookingDateTime": self.BookingDateTime,
             "Status": self.Status,
             "UserId": self.UserId,
-            "ClassSlotId": self.ClassSlotId
+            "ClassSlotId": self.ClassSlotId,
+            "MembershipRecordId": self.MembershipRecordId
         }
     
     def jsonWithUserAndClassSlot(self):
@@ -281,6 +284,7 @@ class Booking(db.Model):
             "UserId": self.UserId,
             "ClassSlotId": self.ClassSlotId,
             "User": self.User.json(),
+            "MembershipRecordId": self.MembershipRecordId,
             "ClassSlot": self.ClassSlot.json()
         }
     

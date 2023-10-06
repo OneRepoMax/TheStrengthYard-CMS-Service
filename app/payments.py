@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 import requests
 import json
 from app.auth import get_access_token
-from app.models import MembershipRecord, MembershipLog, Memberships, Payment,  Points
+from app.models import MembershipRecord, MembershipLog, Memberships, Payment, Points
 
 # Function and Route to get all Payments
 @app.route('/payments')
@@ -314,4 +314,3 @@ def disbursePoints(MembershipRecordId):
             )
             db.session.add(newPoints)
             db.session.commit()
-
