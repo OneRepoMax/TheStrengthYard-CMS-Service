@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 import requests
 import json
 from app.auth import get_access_token
-from app.models import MembershipRecord, MembershipLog, Memberships, Payment
+from app.models import MembershipRecord, MembershipLog, Memberships, Payment,  Points
 
 # Function and Route to get all Payments
 @app.route('/payments')
@@ -177,6 +177,9 @@ def recordPayment():
             db.session.add(newPayment)
             db.session.commit()
 
+            # Disburse Points to the User's Membership Record after successful payment
+            disbursePoints(paymentList['MembershipRecordId'])
+
             return ("Payment Successfully Recorded"), 201
 
 # Function to extend the membership after successful payment
@@ -250,3 +253,65 @@ def getPaymentsHistoryByMembershipRecordId(MembershipRecordId):
             "error": True
         }
     ), 404
+
+# Function to disburse Points to the User's Membership Record after successful payment
+def disbursePoints(MembershipRecordId):
+    # First, get the Membership Record using the MembershipRecordId
+    membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=MembershipRecordId).first()
+
+    # Then, get the Membership using the MembershipId
+    membership = Memberships.query.filter_by(MembershipTypeId=membershipRecord.MembershipTypeId).first()
+
+    # Then, get the complete history of the Membership Record's Points
+    pointsList = Points.query.filter_by(MembershipRecordId=MembershipRecordId).all()
+
+    # Check if it is a monthly or yearly membership
+    if membership.Type == "Monthly":
+        # If it is a monthly membership, check if there are any previous Points history.  
+        if len(pointsList):
+            latestPoints = Points.query.filter_by(MembershipRecordId=MembershipRecordId).order_by(Points.PointsId.desc()).first()
+            # If the latest Points record's PointsStartDate and PointsEndDate is equal to the MembershipRecord's StartDate and EndDate respectively, we change the Status of this Points record to "Paid", and create a new Points record for the next month, with a balance of 12 points and Status of "Not Paid".
+            if latestPoints.PointsStartDate == membershipRecord.StartDate and latestPoints.PointsEndDate == membershipRecord.EndDate:
+                latestPoints.Status = "Paid"
+                newPoints = Points(
+                    PointsStartDate=membershipRecord.StartDate + relativedelta(months=1),
+                    PointsEndDate=membershipRecord.EndDate + relativedelta(months=1),
+                    Balance=12,
+                    Status="Not Paid",
+                    MembershipRecordId=MembershipRecordId
+                )
+                db.session.add(newPoints)
+                db.session.commit()
+        # Else if there are no previous Points history, we create 2 new Points records, one for the current month, and one for the next month, with a balance of 12 points for both. For the current month, we set the Status to "Paid", and for the next month, we set the Status to "Not Paid".
+        else:
+            newPoints = Points(
+                PointsStartDate=membershipRecord.StartDate,
+                PointsEndDate=membershipRecord.EndDate,
+                Balance=12,
+                Status="Paid",
+                MembershipRecordId=MembershipRecordId
+            )
+            db.session.add(newPoints)
+            db.session.commit()
+            newPoints = Points(
+                PointsStartDate=membershipRecord.StartDate + relativedelta(months=1),
+                PointsEndDate=membershipRecord.EndDate + relativedelta(months=1),
+                Balance=12,
+                Status="Not Paid",
+                MembershipRecordId=MembershipRecordId
+            )
+            db.session.add(newPoints)
+            db.session.commit()
+    elif membership.Type == "Yearly":
+        # If it is a yearly membership, we create 12 new Points records to reflect the Membership Record's StartDate and EndDate, one for each month, with a balance of 12 points for each. For each month, we set the Status to "Paid".
+        for i in range(12):
+            newPoints = Points(
+                PointsStartDate=membershipRecord.StartDate + relativedelta(months=i),
+                PointsEndDate=membershipRecord.StartDate + relativedelta(months=i+1),
+                Balance=12,
+                Status="Paid",
+                MembershipRecordId=MembershipRecordId
+            )
+            db.session.add(newPoints)
+            db.session.commit()
+
