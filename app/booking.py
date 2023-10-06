@@ -334,7 +334,16 @@ def getBookingByID(id: int):
         ), 200
     return "There are no such booking with Booking ID: " + str(id), 406
 
-
+# Function and Route to get all Bookings by Class Slot ID
+@app.route("/booking/classSlot/<int:id>")
+def getAllBookingsByClassSlotID(id: int):
+    bookingList = Booking.query.filter_by(ClassSlotId=id).all()
+    # Return all bookings with the given class slot ID, if not found, return 406
+    if len(bookingList):
+        return jsonify(
+            [b.json() for b in bookingList]
+        ), 200
+    return "There are no such bookings with Class Slot ID: " + str(id), 406
     
 
 
