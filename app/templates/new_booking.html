@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation - The Strength Yard</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4;">
+    <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; background-color: #ffffff; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);">
+        <tr>
+            <td align="center" bgcolor="#4caf50" style="padding: 40px 0;">
+                <h1 style="color: #ffffff;">Booking Confirmed at <span style="font-weight: bold;">The Strength Yard</span></h1>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 40px 30px;">
+                <p>Hi {{ user_first_name }} {{ user_last_name }},</p>
+                <p>Your booking at <span style="font-weight: bold;">The Strength Yard</span> has been confirmed! Here are the details:</p>
+                <ul>
+                    <li><strong>Booking ID:</strong> {{ booking_id }}</li>
+                    <li><strong>Booking Date & Time:</strong> {{ booking_date_time }}</li>
+                    <li><strong>Class:</strong> {{ class_name }}</li>
+                    <li><strong>Class Date & Time:</strong> {{ class_start_time }}</li>
+                    <li><strong>Duration:</strong> {{ duration }} minutes</li>
+                    <li><strong>Points Balance:</strong> {{ points_balance }}</li>
+                </ul>
+                <p>We look forward to having you at our class. If you have any questions or need to make changes, please don't hesitate to contact us.</p>
+                <p>See you at The Strength Yard!</p>
+                <p>Best regards,<br>The Strength Yard Team</p>
+            </td>
+        </tr>
+        <tr>
+            <td align="center" bgcolor="#eeeeee" style="padding: 20px;">
+                <p style="color: #888888;">© 2023 The Strength Yard. All rights reserved.</p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

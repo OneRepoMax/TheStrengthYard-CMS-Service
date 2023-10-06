@@ -1,8 +1,11 @@
 from app import app, db
-from flask import jsonify, request
+from flask import jsonify, request, url_for, render_template
 from datetime import datetime, timedelta
 import requests, json
 from app.models import MembershipRecord, Class, ClassSlot, Booking, User, Points
+from app.token import confirm_token, generate_token
+from app.email import send_email
+from app.user import verifyEmail
 
 # Function and Route to Create a new Class
 @app.route("/class", methods=['POST'])
@@ -269,6 +272,21 @@ def createNewBooking():
             # Add updated selectedClassSlot to database
             db.session.add(selectedClassSlot)
             db.session.commit()
+
+            # Send an email notification to the user and gym owner
+            user = User.query.filter_by(UserId=userId).first()
+            gymOwner = "tsy.fyp.2023@gmail.com"
+
+
+            token = generate_token(gymOwner)
+            confirm_url = url_for("verifyEmail", token=token, _external=True)
+
+            # Use new_booking.html template to generate the email content, with the following variables:
+            # user_first_name, user_last_name, booking_id, booking_date_time, class_name, class_start_time, points_balance, duration, confirm_url
+            html = render_template("/new_booking.html", user_first_name=user.FirstName, user_last_name=user.LastName, booking_id=newBooking.BookingId, booking_date_time=newBooking.BookingDateTime, class_name=selectedClass.ClassName, class_start_time=selectedClassSlot.StartTime, points_balance=selectedPoints.Balance, duration=selectedClassSlot.Duration ,confirm_url=confirm_url)
+
+            subject = "New Booking Confirmation - " + user.FirstName + " " + user.LastName
+            send_email(gymOwner, subject, html)
 
             return jsonify(
                 newBooking.json()
