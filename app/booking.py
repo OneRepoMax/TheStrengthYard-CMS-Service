@@ -179,6 +179,17 @@ def getAllClassSlotByClassID(id: int):
         ), 200
     return "There are no such class slots with Class ID: " + str(id), 406
 
+# Function and Route to get a specific Class Slot by Class Slot ID
+@app.route("/classSlot/<int:id>")
+def getClassSlotByID(id: int):
+    classSlot = ClassSlot.query.filter_by(ClassSlotId=id).first()
+    # Return the class slot with the given class slot ID, if not found, return 406
+    if classSlot:
+        return jsonify(
+            classSlot.json()
+        ), 200
+    return "There are no such class slot with Class Slot ID: " + str(id), 406
+
 # Function and Route to delete a given list of ClassSlots
 @app.route("/classSlot", methods=['DELETE'])
 def deleteClassSlots():
@@ -277,7 +288,6 @@ def createNewBooking():
             user = User.query.filter_by(UserId=userId).first()
             gymOwner = "tsy.fyp.2023@gmail.com"
 
-
             token = generate_token(gymOwner)
             confirm_url = url_for("verifyEmail", token=token, _external=True)
 
@@ -296,7 +306,33 @@ def createNewBooking():
     else:
         return "The class is full", 406
 
+# Function and Route to get ALL Bookings
+@app.route("/booking")
+def getAllBookings():
+    bookingList = Booking.query.all()
+    return jsonify([b.json() for b in bookingList]), 200
 
+# Function and Route to get all Bookings by User ID
+@app.route("/booking/user/<int:id>")
+def getAllBookingsByUserID(id: int):
+    bookingList = Booking.query.filter_by(UserId=id).all()
+    # Return all bookings with the given user ID, if not found, return 406
+    if len(bookingList):
+        return jsonify(
+            [b.json() for b in bookingList]
+        ), 200
+    return "There are no such bookings with User ID: " + str(id), 406
+
+# Function and Route to get a specific Booking by Booking ID
+@app.route("/booking/<int:id>")
+def getBookingByID(id: int):
+    booking = Booking.query.filter_by(BookingId=id).first()
+    # Return the booking with the given booking ID, if not found, return 406
+    if booking:
+        return jsonify(
+            booking.json()
+        ), 200
+    return "There are no such booking with Booking ID: " + str(id), 406
 
 
     
