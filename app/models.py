@@ -45,6 +45,7 @@ class User(db.Model):
             "Gender": self.Gender,
             "UserType": self.UserType,
             "DisplayPicture": self.DisplayPicture,
+            "Verified": self.Verified
         }
 
 class IndemnityForm(db.Model):
