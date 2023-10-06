@@ -162,7 +162,7 @@ def resetPassword():
             subject = "Reset Your Password"
             send_email(user.EmailAddress, subject, html)
             
-            return jsonify(user.json()), 200
+            return jsonify(user.jsonMinInfo()), 200
         
         return "User with email address " + data["EmailAddress"] + " not found.", 404
     except Exception as e:

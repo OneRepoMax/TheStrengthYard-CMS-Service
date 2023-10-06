@@ -23,7 +23,7 @@ def login():
     user = User.query.filter_by(EmailAddress=email).first()
 
     if user and check_password_hash(user.Password, password):
-        return jsonify(user.json())
+        return jsonify(user.jsonMinInfo())
     else:
         return "Invalid user credentials", 401
 

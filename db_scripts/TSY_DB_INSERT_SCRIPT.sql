@@ -118,3 +118,12 @@ INSERT INTO `ClassSlot` VALUES
 INSERT INTO `Points` VALUES 
 (6000, 2, '2023-09-20', '2023-10-20', 12, 'Paid'),
 (6001, 2, '2023-10-20', '2023-11-20', 12, 'Not Paid');
+
+
+-- -----------------------------------------------------
+-- Inserting Sample Data into Table `tsy_db`.`Schedule`
+-- -----------------------------------------------------
+INSERT INTO `Schedule` VALUES 
+(3000, 'August 2023 Schedule', 'Updated Schedule for Progressive Strength Class August 2023', '2023-10-20', "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", 2),
+(3001, 'Test Schedule Post', 'This is just a test post showing how schedule works. Powerlifting today to get stronger!', '2023-10-21', "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", 2),
+(3002, 'Test Post for TSY Schedule Post', 'This is just a test post showing how schedule works. Powerlifting with TSY to get stronger!', '2023-10-22', "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", 2);

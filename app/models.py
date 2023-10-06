@@ -35,6 +35,17 @@ class User(db.Model):
             "DisplayPicture": self.DisplayPicture,
             "Verified": self.Verified
         }
+    
+    def jsonMinInfo(self):
+        return {
+            "UserId": self.UserId,
+            "EmailAddress": self.EmailAddress,
+            "FirstName": self.FirstName,
+            "LastName": self.LastName,
+            "Gender": self.Gender,
+            "UserType": self.UserType,
+            "DisplayPicture": self.DisplayPicture,
+        }
 
 class IndemnityForm(db.Model):
     __tablename__ = 'IndemnityForm'
@@ -314,6 +325,39 @@ class Points(db.Model):
             "Balance": self.Balance,
             "Status": self.Status,
             "MembershipRecord": self.MembershipRecord.json()
+        }
+
+
+class Schedule(db.Model):
+    __tablename__ = 'Schedule'
+
+    ScheduleId = db.Column(db.Integer, primary_key=True)
+    UserId = db.Column(db.Integer, db.ForeignKey('User.UserId'))
+    PublishDate = db.Column(db.Date)
+    Title = db.Column(db.String)
+    Description = db.Column(db.String)
+    ImgUrl = db.Column(db.String)
+
+    User = db.relationship('User', backref=db.backref('Schedule', cascade='all, delete-orphan'))
+
+    def json(self):
+        return {
+            "ScheduleId": self.ScheduleId,
+            "UserId": self.UserId,
+            "PublishDate": self.PublishDate,
+            "Title": self.Title,
+            "Description": self.Description,
+            "ImgUrl": self.ImgUrl
+        }
+    
+    def jsonWithUser(self):
+        return {
+            "ScheduleId": self.ScheduleId,
+            "PublishDate": self.PublishDate,
+            "Title": self.Title,
+            "Description": self.Description,
+            "ImgUrl": self.ImgUrl,
+            "User": self.User.jsonMinInfo()
         }
     
 

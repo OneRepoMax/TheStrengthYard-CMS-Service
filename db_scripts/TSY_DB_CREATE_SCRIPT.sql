@@ -264,7 +264,34 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`IndemnityForm` (
     REFERENCES `tsy_db`.`User` (`UserId`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB AUTO_INCREMENT = 300 DEFAULT CHARACTER SET = utf8mb3;
+ENGINE = InnoDB 
+AUTO_INCREMENT = 300 
+DEFAULT CHARACTER SET = utf8mb3;
+
+-- -----------------------------------------------------
+-- Table `tsy_db`.`ScheduleTable`
+-- -----------------------------------------------------
+
+DROP TABLE IF EXISTS `tsy_db`.`Schedule` ;
+
+CREATE TABLE IF NOT EXISTS `tsy_db`.`User` (
+    `ScheduleId` INT NOT NULL AUTO_INCREMENT,
+    `Title` VARCHAR(255) NOT NULL,
+    `Description` LONGTEXT NOT NULL,
+    `PublishDate` DATE NOT NULL,
+    `ImgUrl` LONGTEXT NOT NULL,
+    `UserId` INT NOT NULL,
+    PRIMARY KEY (`ScheduleId`, `UserId`),
+    INDEX `fk_Schedule_User_idx` (`UserId` ASC) VISIBLE, 
+    CONSTRAINT `fk_Schedule_User`
+        FOREIGN KEY (`UserId`)
+        REFERENCES `tsy_db`.`User` (`UserId`)
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION)
+
+ENGINE = InnoDB
+AUTO_INCREMENT = 3000
+DEFAULT CHARACTER SET = utf8mb3;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
