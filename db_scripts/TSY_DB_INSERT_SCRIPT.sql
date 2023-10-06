@@ -2,7 +2,7 @@
 -- Inserting Sample Data into Table `tsy_db`.`User`
 -- -----------------------------------------------------
 INSERT INTO `User` VALUES 
-(1, 'testuser@tsy.com', 'John', 'Doe', 'M', '1997-05-29', 'Sample Address', 123456, '96116908', 'pbkdf2:sha256:260000$hJm022YX$5cdc10522fe8bdca504ffceff61f8a7822eb3de05b3e29efee100e246c8e804d', 'C', '2023-08-16', "", 1),
+(1, 'testuser@tsy.com', 'Bob', 'Stewart', 'M', '1997-05-29', 'Sample Address', 123456, '96116908', 'pbkdf2:sha256:260000$hJm022YX$5cdc10522fe8bdca504ffceff61f8a7822eb3de05b3e29efee100e246c8e804d', 'C', '2023-08-16', "https://tsy-fyp-user-display-picture.s3.ap-southeast-1.amazonaws.com/ee9c81a6-e7c0-436a-a09d-8be00be9e0a5.gif", 1),
 (2, 'admin@tsy.com', 'John', 'Doe', 'M', '1997-05-29', 'Sample Address', 123456, '96116908', 'pbkdf2:sha256:260000$hJm022YX$5cdc10522fe8bdca504ffceff61f8a7822eb3de05b3e29efee100e246c8e804d', 'A', '2023-08-16', "", 1),
 (3, 'user1@example.com', 'Alex', 'Johnson', 'M', '1990-03-15', '123 Main St', 123456, '98765432', 'pbkdf2:sha256:260000$hJm022YX$5cdc10522fe8bdca504ffceff61f8a7822eb3de05b3e29efee100e246c8e804d', 'C', '2023-08-16', 'https://xsgames.co/randomusers/assets/avatars/male/1.jpg', 1),
 (4, 'user2@example.com', 'Emily', 'Smith', 'F', '1995-07-20', '456 Elm St', 789012, '87654321', 'pbkdf2:sha256:260000$hJm022YX$5cdc10522fe8bdca504ffceff61f8a7822eb3de05b3e29efee100e246c8e804d', 'C', '2023-08-16', 'https://xsgames.co/randomusers/assets/avatars/female/2.jpg', 1),
