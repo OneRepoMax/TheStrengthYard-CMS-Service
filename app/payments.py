@@ -137,6 +137,7 @@ def recordPayment():
         verification = validation.json()
         if (verification['verification_status'] == "SUCCESS"):
             data = request.get_json()
+            print(data)
             transactionID = data['resource']['id']
             subscriptionID = 0
             transactionDate = datetime.now()
@@ -157,7 +158,9 @@ def recordPayment():
             else:
                 # One Time Payments
                 paymentList = MembershipRecord.query.filter_by(PayPalSubscriptionId=transactionID).first()
-            paymentList = paymentList.json()
+            
+            if(paymentList):
+                paymentList = paymentList.json()
 
             newPayment = Payment(
                 PayPalTransactionId = transactionID, ## Take the invoice number
@@ -170,8 +173,8 @@ def recordPayment():
 
             # Check if amount is equal to $70, which is the initial setup fee. If it is not, check if this is the very first payment or not by checking the Payment table using this MembershipRecordId. If it is NOT the first payment, run the extendMembershipRecordDates function to extend the membership by 1 month or 1 year depending on the membership type. Else if it is the first payment, do not extend the membership.
             if amount != "70.00":
-                payment = Payment.query.filter_by(MembershipRecordId=paymentList['MembershipRecordId']).first()
-                if payment:
+                payment = Payment.query.filter_by(MembershipRecordId=paymentList['MembershipRecordId']).count()
+                if (payment > 2):
                     extendMembershipRecordDates(paymentList['MembershipRecordId'])
                 
             db.session.add(newPayment)

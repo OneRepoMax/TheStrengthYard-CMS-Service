@@ -281,7 +281,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 
 DROP TABLE IF EXISTS `tsy_db`.`Schedule` ;
 
-CREATE TABLE IF NOT EXISTS `tsy_db`.`User` (
+CREATE TABLE IF NOT EXISTS `tsy_db`.`Schedule` (
     `ScheduleId` INT NOT NULL AUTO_INCREMENT,
     `Title` VARCHAR(255) NOT NULL,
     `Description` LONGTEXT NOT NULL,
