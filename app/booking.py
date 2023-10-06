@@ -296,6 +296,7 @@ def createNewBooking():
 
             subject = "New Booking Confirmation - " + user.FirstName + " " + user.LastName
             send_email(gymOwner, subject, html)
+            send_email(user.EmailAddress, subject, html)
 
             return jsonify(
                 newBooking.json()
@@ -392,7 +393,7 @@ def cancelBookingByID(id: int):
             emailMessage = "Your booking has been cancelled. Since the cancellation is not more than 12 hours before the class, you will not be refunded any points. Your current points balance from  is " + str(selectedPoints.Balance) + "."
 
             token = generate_token(gymOwner)
-            html = render_template("/cancel_booking.html", user_first_name=user.FirstName, user_last_name=user.LastName, booking_id=bookingExists.BookingId, booking_date_time=bookingExists.BookingDateTime, class_name=selectedClassSlot.Class.ClassName, class_start_time=selectedClassSlot.StartTime, class_day= selectedClassSlot.Day, duration=selectedClassSlot.Duration, message=emailMessage, points_refunded=0)
+            html = render_template("/cancel_booking.html", user_first_name=user.FirstName, user_last_name=user.LastName, booking_id=bookingExists.BookingId, booking_date_time=bookingExists.BookingDateTime, class_name=selectedClassSlot.Class.ClassName, class_start_time=selectedClassSlot.StartTime, class_day= selectedClassSlot.Day, duration=selectedClassSlot.Duration, message=emailMessage, points_refunded=0, points_balance=selectedPoints.Balance)
 
             subject = "Booking Cancellation - " + user.FirstName + " " + user.LastName
             send_email(gymOwner, subject, html)
@@ -415,7 +416,7 @@ def cancelBookingByID(id: int):
             emailMessage = "Your booking has been cancelled. You have been refunded 1 point. Your current points balance is " + str(selectedPoints.Balance) + "."
 
             token = generate_token(gymOwner)
-            html = render_template("/cancel_booking.html", user_first_name=user.FirstName, user_last_name=user.LastName, booking_id=bookingExists.BookingId, booking_date_time=bookingExists.BookingDateTime, class_name=selectedClassSlot.Class.ClassName, class_start_time=selectedClassSlot.StartTime, class_day= selectedClassSlot.Day, duration=selectedClassSlot.Duration, message=emailMessage, points_refunded=1)
+            html = render_template("/cancel_booking.html", user_first_name=user.FirstName, user_last_name=user.LastName, booking_id=bookingExists.BookingId, booking_date_time=bookingExists.BookingDateTime, class_name=selectedClassSlot.Class.ClassName, class_start_time=selectedClassSlot.StartTime, class_day= selectedClassSlot.Day, duration=selectedClassSlot.Duration, message=emailMessage, points_refunded=1, points_balance=selectedPoints.Balance)
 
             subject = "Booking Cancellation - " + user.FirstName + " " + user.LastName
 
