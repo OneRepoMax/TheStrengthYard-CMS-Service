@@ -1,5 +1,6 @@
 from app import app, db
 from flask import jsonify, request, url_for, render_template
+from datetime import datetime
 from app.models import Schedule
 
 # Function and Route for getting All Schedule in the DB
@@ -26,7 +27,6 @@ def createSchedule():
     Sample Request
     {
         "UserId": 2,
-        "PublishDate": "1945-01-01",
         "Title": "August 2023 Schedule",
         "Description": "Updated Schedule for Progressive Strength Class August 2023",
         "ImgUrl": "sample.jpg"
@@ -36,6 +36,9 @@ def createSchedule():
     data = request.get_json()
 
     try:
+
+        # Add Published Date to data and set to now
+        data["PublishDate"] = datetime.now()
         
         schedule = Schedule(**data)
 
