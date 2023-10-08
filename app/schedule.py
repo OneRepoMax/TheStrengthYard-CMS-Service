@@ -27,7 +27,6 @@ def createSchedule():
     Sample Request
     {
         "UserId": 2,
-        "Title": "August 2023 Schedule",
         "Description": "Updated Schedule for Progressive Strength Class August 2023",
         "ImgUrl": "sample.jpg"
     }
@@ -61,7 +60,6 @@ def updateSchedule():
         "ScheduleID": 1,
         "UserId": 2,
         "PublishDate": "1945-01-01",
-        "Title": "october 2023 Schedule",
         "Description": "Updated Schedule for Progressive Strength Class August 2023",
         "ImgUrl": "sample.jpg"
     }
@@ -75,7 +73,6 @@ def updateSchedule():
         if schedule:
             schedule.UserId = data["UserId"]
             schedule.PublishDate = data["PublishDate"]
-            schedule.Title = data["Title"]
             schedule.Description = data["Description"]
             schedule.ImgUrl = data["ImgUrl"]
             

@@ -342,7 +342,6 @@ class Schedule(db.Model):
     ScheduleId = db.Column(db.Integer, primary_key=True)
     UserId = db.Column(db.Integer, db.ForeignKey('User.UserId'))
     PublishDate = db.Column(db.Date)
-    Title = db.Column(db.String)
     Description = db.Column(db.String)
     ImgUrl = db.Column(db.String)
 
@@ -353,7 +352,6 @@ class Schedule(db.Model):
             "ScheduleId": self.ScheduleId,
             "UserId": self.UserId,
             "PublishDate": self.PublishDate,
-            "Title": self.Title,
             "Description": self.Description,
             "ImgUrl": self.ImgUrl
         }
@@ -362,7 +360,6 @@ class Schedule(db.Model):
         return {
             "ScheduleId": self.ScheduleId,
             "PublishDate": self.PublishDate,
-            "Title": self.Title,
             "Description": self.Description,
             "ImgUrl": self.ImgUrl,
             "User": self.User.jsonMinInfo()
