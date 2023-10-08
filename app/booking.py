@@ -178,6 +178,21 @@ def getAllClassSlotByClassID(id: int):
         ), 200
     return "There are no such class slots with Class ID: " + str(id), 406
 
+# Function and Route to get all Class Slots from TODAY onwards
+@app.route("/classSlot")
+def getAllClassSlot():
+    # Get the current date and time
+    now = datetime.now()
+
+    # Get all class slots from today onwards
+    classSlotList = ClassSlot.query.filter(ClassSlot.StartTime >= now.strftime("%Y-%m-%d %H:%M:%S")).all()
+
+    # Return all class slots from ascending order of start time
+    if len(classSlotList):
+        return jsonify(
+            [c.json() for c in classSlotList]
+        ), 200
+
 # Function and Route to get a specific Class Slot by Class Slot ID
 @app.route("/classSlot/<int:id>")
 def getClassSlotByID(id: int):
