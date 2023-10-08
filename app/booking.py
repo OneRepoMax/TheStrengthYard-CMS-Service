@@ -2,7 +2,7 @@ from app import app, db
 from flask import jsonify, request, url_for, render_template
 from datetime import datetime, timedelta
 import requests, json
-from app.models import MembershipRecord, Class, ClassSlot, Booking, User, Points
+from app.models import MembershipRecord, Class, ClassSlot, Booking, User, Points, Memberships
 from app.email import send_email
 from app.user import verifyEmail
 
@@ -250,7 +250,23 @@ def createNewBooking():
     userId = data.get("UserId")
     classSlotId = data.get("ClassSlotId")
 
-    # First, check if the user already has an existing active booking for the selected class slot. We use the MembershipRecordId and ClassSlotId to check for this
+    # First, check if the user has an active membership record
+    membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=membershipRecordId).first()
+    
+    if not membershipRecord:
+        return "There are no such membership record with ID: " + str(membershipRecordId), 406
+    
+    # Then, using the MembershipTypeId in Membership Record, get the Membership. If the Membership's hasClasses is False, return 406
+    membership = Memberships.query.filter_by(MembershipTypeId=membershipRecord.MembershipTypeId).first()
+    
+    if not membership.hasClasses:
+        return "You do not have a membership that allows you to book classes", 406
+    
+    # Then, check if the user has an active OR "pending payment" membership record
+    if membershipRecord.ActiveStatus != "Active" and membershipRecord.ActiveStatus != "Pending Payment":
+        return "The selected membership record is not active. The status is " + membershipRecord.ActiveStatus, 406
+
+    # Then, check if the user already has an existing active booking for the selected class slot. We use the MembershipRecordId and ClassSlotId to check for this
     existingBooking = Booking.query.filter_by(MembershipRecordId=membershipRecordId).filter_by(ClassSlotId=classSlotId).filter_by(Status="Confirmed").first()
 
     if existingBooking:
