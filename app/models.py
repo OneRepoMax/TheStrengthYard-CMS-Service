@@ -104,6 +104,7 @@ class Memberships(db.Model):
     Picture = db.Column(db.String)
     PayPalPlanId = db.Column(db.String)
     SetupFee = db.Column(db.Float)
+    hasClasses = db.Column(db.Boolean, default=False)
 
     def json(self):
         return {
@@ -115,7 +116,8 @@ class Memberships(db.Model):
             "Description": self.Description,
             "Picture": self.Picture,
             "PayPalPlanId": self.PayPalPlanId,
-            "SetupFee": self.SetupFee
+            "SetupFee": self.SetupFee,
+            "hasClasses": self.hasClasses
         }
     
     def jsonWithUser(self):
@@ -129,6 +131,7 @@ class Memberships(db.Model):
             "Picture": self.Picture,
             "PayPalPlanId": self.PayPalPlanId,
             "SetupFee": self.SetupFee,
+            "hasClasses": self.hasClasses,
             "User": [user.json() for user in self.User]
         }
     

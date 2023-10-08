@@ -176,13 +176,23 @@ def recordPayment():
                 payment = Payment.query.filter_by(MembershipRecordId=paymentList['MembershipRecordId']).count()
                 if (payment > 2):
                     extendMembershipRecordDates(paymentList['MembershipRecordId'])
+
+                # First, check that it is not a one-time payment
+                if(subscriptionID != 0):
+                    # Subscriptions
+                    # Then, get the Membership Record using the MembershipRecordId
+                    membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=paymentList['MembershipRecordId']).first()
+
+                    # Then, get the Membership using the MembershipId
+                    membership = Memberships.query.filter_by(MembershipTypeId=membershipRecord.MembershipTypeId).first()
+
+                    # Check that Membership's hasClasses is true
+                    if membership.hasClasses:
+                        disbursePoints(paymentList['MembershipRecordId'])
                 
             db.session.add(newPayment)
             db.session.commit()
-
-            # Disburse Points to the User's Membership Record after successful payment
-            disbursePoints(paymentList['MembershipRecordId'])
-
+            
             return ("Payment Successfully Recorded"), 201
 
 # Function to extend the membership after successful payment

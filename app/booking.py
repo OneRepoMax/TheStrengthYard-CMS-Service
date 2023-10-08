@@ -192,6 +192,7 @@ def getAllClassSlot():
         return jsonify(
             [c.json() for c in classSlotList]
         ), 200
+    return "There are no class slots from today (" + str(now) + ") onwards", 406
 
 # Function and Route to get a specific Class Slot by Class Slot ID
 @app.route("/classSlot/<int:id>")
@@ -426,7 +427,6 @@ def cancelBookingByID(id: int):
             # Send an email notification to the user and gym owner about the booking cancellation.
             emailMessage = "Your booking has been cancelled. You have been refunded 1 point. Your current points balance is " + str(selectedPoints.Balance) + "."
 
-            token = generate_token(gymOwner)
             html = render_template("/cancel_booking.html", user_first_name=user.FirstName, user_last_name=user.LastName, booking_id=bookingExists.BookingId, booking_date_time=bookingExists.BookingDateTime, class_name=selectedClassSlot.Class.ClassName, class_start_time=selectedClassSlot.StartTime, class_day= selectedClassSlot.Day, duration=selectedClassSlot.Duration, message=emailMessage, points_refunded=1, points_balance=selectedPoints.Balance)
 
             subject = "Booking Cancellation - " + user.FirstName + " " + user.LastName

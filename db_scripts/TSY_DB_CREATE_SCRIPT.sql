@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`Memberships` (
   `Picture` LONGTEXT,
   `PayPalPlanId` LONGTEXT NULL,
   `SetupFee` DOUBLE NULL,
+  `hasClasses` BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY (`MembershipTypeId`))
 ENGINE = InnoDB;
 
