@@ -120,7 +120,7 @@ INSERT INTO `Points` VALUES
 (6001, 2, '2023-10-20', '2023-11-20', 12, 'Not Paid');
 
 -- -----------------------------------------------------
--- Inserting Sample Data into Table `tsy_db`.`Points`
+-- Inserting Sample Data into Table `tsy_db`.`Booking`
 -- -----------------------------------------------------
 INSERT INTO `Booking` VALUES
 (8000, '2023-10-06 22:34:14', 'Confirmed', '100', '5002', '2');
