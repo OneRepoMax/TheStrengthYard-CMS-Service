@@ -205,6 +205,20 @@ def getClassSlotByID(id: int):
         ), 200
     return "There are no such class slot with Class Slot ID: " + str(id), 406
 
+# Function and Route to delete a ClassSlot by ID
+@app.route("/classSlot/<int:id>", methods=['DELETE'])
+def deleteClassSlotByID(id: int):
+    # Check if class exists
+    classExists = ClassSlot.query.filter_by(ClassSlotId=id).first()
+    if not classExists:
+        return "There are no such class with ID: " + str(id), 406
+
+    # Delete class
+    db.session.delete(classExists)
+    db.session.commit()
+
+    return "Class Slot with ID: " + str(id) + " has been deleted.", 200
+
 # Function and Route to delete a given list of ClassSlots
 @app.route("/classSlot", methods=['DELETE'])
 def deleteClassSlots():
