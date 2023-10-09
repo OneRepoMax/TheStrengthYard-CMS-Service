@@ -190,7 +190,7 @@ def getAllClassSlot():
     # Return all class slots from ascending order of start time
     if len(classSlotList):
         return jsonify(
-            [c.json() for c in classSlotList]
+            [c.jsonWithClass() for c in classSlotList]
         ), 200
     return "There are no class slots from today (" + str(now) + ") onwards", 406
 
