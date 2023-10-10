@@ -95,6 +95,44 @@ def updateClassByID(id: int):
         classExists.json()
         ), 200
 
+# Function and Route to update a Class by ID
+@app.route("/classSlot/<int:id>", methods=['PUT'])
+def updateClassSlotByID(id: int):
+    """
+    Sample Request
+    {
+        "Day": "Sunday",
+        "StartTime": "09:00:00",
+        "EndTime": "10:00:00",
+    }
+    """
+    data = request.get_json()
+    day = data.get("Day")
+    startTime = data.get("StartTime")
+    endTime = data.get("EndTime")
+
+    # Check className, description and maximumCapacity are not empty
+    if not day or not startTime or not endTime:
+        return "Invalid class details", 400
+
+    # Check if class exists
+    classExists = ClassSlot.query.filter_by(ClassSlotId=id).first()
+    if not classExists:
+        return "There are no such class with ID: " + str(id), 406
+
+    # Update class
+    classExists.Day = day
+    classExists.StartTime = startTime
+    classExists.EndTime = endTime
+
+    # Add updated class to database
+    db.session.add(classExists)
+    db.session.commit()
+
+    return jsonify(
+        classExists.json()
+        ), 200
+
 # Function and Route to delete a Class by ID
 @app.route("/class/<int:id>", methods=['DELETE'])
 def deleteClassByID(id: int):
@@ -201,7 +239,7 @@ def getClassSlotByID(id: int):
     # Return the class slot with the given class slot ID, if not found, return 406
     if classSlot:
         return jsonify(
-            classSlot.json()
+            classSlot.jsonWithClass()
         ), 200
     return "There are no such class slot with Class Slot ID: " + str(id), 406
 
