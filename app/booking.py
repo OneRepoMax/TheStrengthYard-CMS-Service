@@ -243,6 +243,17 @@ def getClassSlotByID(id: int):
         ), 200
     return "There are no such class slot with Class Slot ID: " + str(id), 406
 
+# Function and Route to get Class Slots by Date
+@app.route("/classSlot/slots/<string:date>")
+def getClassSlotByDate(date: str):
+    classSlotList = ClassSlot.query.filter(ClassSlot.StartTime.between(date + ' 00:00:00', date + ' 23:59:59')).all()
+    # Return the class slot with the given class slot ID, if not found, return 406
+    if len(classSlotList):
+        return jsonify(
+            [c.jsonWithClass() for c in classSlotList]
+        ), 200
+    return "There are no class slots on this date", 406
+
 # Function and Route to delete a ClassSlot by ID
 @app.route("/classSlot/<int:id>", methods=['DELETE'])
 def deleteClassSlotByID(id: int):
