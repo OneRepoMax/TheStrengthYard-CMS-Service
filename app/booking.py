@@ -276,7 +276,7 @@ def deleteClassSlotByID(id: int):
     return "Class Slot with ID: " + str(id) + " has been deleted.", 200
 
 # Function and Route to delete a given list of ClassSlots
-@app.route("/classSlot", methods=['DELETE'])
+@app.route("/classSlot/delete", methods=['POST'])
 def deleteClassSlots():
     """
     Sample Request
