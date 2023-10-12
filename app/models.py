@@ -47,6 +47,18 @@ class User(db.Model):
             "DisplayPicture": self.DisplayPicture,
             "Verified": self.Verified
         }
+    
+    def jsonMinInfoWithIndemnityForm(self):
+        return {
+            "UserId": self.UserId,
+            "EmailAddress": self.EmailAddress,
+            "FirstName": self.FirstName,
+            "LastName": self.LastName,
+            "Gender": self.Gender,
+            "UserType": self.UserType,
+            "DisplayPicture": self.DisplayPicture,
+            "Verified": self.Verified,
+        }
 
 class IndemnityForm(db.Model):
     __tablename__ = 'IndemnityForm'
@@ -291,6 +303,17 @@ class Booking(db.Model):
             "MembershipRecordId": self.MembershipRecordId
         }
     
+    def jsonWithUser(self):
+        return {
+            "BookingId": self.BookingId,
+            "BookingDateTime": self.BookingDateTime,
+            "Status": self.Status,
+            "UserId": self.UserId,
+            "ClassSlotId": self.ClassSlotId,
+            "MembershipRecordId": self.MembershipRecordId,
+            "User": self.User.jsonMinInfo()
+        }
+    
     def jsonWithUserAndClassSlot(self):
         return {
             "BookingId": self.BookingId,
@@ -298,7 +321,7 @@ class Booking(db.Model):
             "Status": self.Status,
             "UserId": self.UserId,
             "ClassSlotId": self.ClassSlotId,
-            "User": self.User.json(),
+            "User": self.User.jsonMinInfo(),
             "MembershipRecordId": self.MembershipRecordId,
             "ClassSlot": self.ClassSlot.json()
         }
