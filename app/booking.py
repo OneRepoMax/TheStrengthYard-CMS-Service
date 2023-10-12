@@ -253,7 +253,7 @@ def getClassSlotByDate(date: str):
     if date > (datetime.now() + timedelta(days=14)).strftime("%Y-%m-%d"):
         return "You can only view class slots up to 2 weeks from today", 406
 
-    classSlotList = ClassSlot.query.filter(ClassSlot.StartTime.between(date + ' 00:00:00', date + ' 23:59:59')).all()
+    classSlotList = ClassSlot.query.filter(ClassSlot.StartTime.between(date + ' 00:00:00', date + ' 23:59:59')).order_by(ClassSlot.StartTime).all()
     # Return the class slot with the given class slot ID, if not found, return 406
     if len(classSlotList):
         return jsonify(
