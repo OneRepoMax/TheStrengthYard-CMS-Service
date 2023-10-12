@@ -27,9 +27,10 @@ INSERT INTO `User` VALUES
 -- -----------------------------------------------------
 -- Inserting Sample Data into Table `tsy_db`.`IndemnityForm`
 -- -----------------------------------------------------
-INSERT INTO `IndemnityForm` VALUES
+INSERT INTO `tsy_db`.`IndemnityForm` VALUES
 (300, "Search Engine, Friend's Recommendation, Walking Pass, Google Maps, Facebook Adverts, Google Adverts, Other", "Heart Problems, Pain in Chest when exercising/not exercising, Low Blood Pressure/High Blood Pressure, Any breathing difficulties or asthma, Diabetes, Fainting spells, Joint problems, Epilepsy, Currently on medication, Significant illness/Operations, None, Other","I had a heart operation back in 2008 and my knees are very weak. I am also on medication for my heart. I also have fainting spells once in a while.", 1, 1, 1),
-(301, "Search Engine, Friend's Recommendation, Walking Pass, Google Maps, Facebook Adverts, Google Adverts, Other", "Heart Problems, Pain in Chest when exercising/not exercising, Low Blood Pressure/High Blood Pressure, Any breathing difficulties or asthma, Diabetes, Fainting spells, Joint problems, Epilepsy, Currently on medication, Significant illness/Operations, None, Other","I had a heart operation back in 2008 and my knees are very weak. I am also on medication for my heart. I also have fainting spells once in a while.", 1, 1, 102);
+(301, "Search Engine, Friend's Recommendation, Walking Pass, Google Maps, Facebook Adverts, Google Adverts, Other", "Heart Problems, Pain in Chest when exercising/not exercising, Low Blood Pressure/High Blood Pressure, Any breathing difficulties or asthma, Diabetes, Fainting spells, Joint problems, Epilepsy, Currently on medication, Significant illness/Operations, None, Other","I had a heart operation back in 2008 and my knees are very weak. I am also on medication for my heart. I also have fainting spells once in a while.", 1, 1, 102),
+(302, "Search Engine, Friend's Recommendation, Walking Pass, Google Maps, Facebook Adverts, Google Adverts, Other", "Heart Problems, Pain in Chest when exercising/not exercising, Low Blood Pressure/High Blood Pressure, Any breathing difficulties or asthma, Diabetes, Fainting spells, Joint problems, Epilepsy, Currently on medication, Significant illness/Operations, None, Other","I had a heart operation back in 2008 and my knees are very weak. I am also on medication for my heart. I also have fainting spells once in a while.", 1, 1, 100);
 
 
 -- -----------------------------------------------------

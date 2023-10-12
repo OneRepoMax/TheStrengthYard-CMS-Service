@@ -47,18 +47,6 @@ class User(db.Model):
             "DisplayPicture": self.DisplayPicture,
             "Verified": self.Verified
         }
-    
-    def jsonMinInfoWithIndemnityForm(self):
-        return {
-            "UserId": self.UserId,
-            "EmailAddress": self.EmailAddress,
-            "FirstName": self.FirstName,
-            "LastName": self.LastName,
-            "Gender": self.Gender,
-            "UserType": self.UserType,
-            "DisplayPicture": self.DisplayPicture,
-            "Verified": self.Verified,
-        }
 
 class IndemnityForm(db.Model):
     __tablename__ = 'IndemnityForm'
