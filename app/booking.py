@@ -253,14 +253,12 @@ def getClassSlotByDate(date: str):
     if date > (datetime.now() + timedelta(days=14)).strftime("%Y-%m-%d"):
         return "You can only view class slots up to 2 weeks from today", 406
 
-    classSlotList = ClassSlot.query.filter(ClassSlot.StartTime.between(date + ' 00:00:00', date + ' 23:59:59')).order_by(ClassSlot.StartTime).all()
-    # Return the class slot with the given class slot ID, if not found, return 406
+    # Get the current DateTime
+    now = datetime.now()
+    print(now)
 
-    # Get the current Date and Time now. If the class slot's start time is before the current date and time, remove it from the list
-    now = datetime.now().strftime("%H:%M:%S")
-    for classSlot in classSlotList:
-        if classSlot.StartTime.strftime("%Y-%m-%d %H:%M:%S") < datetime.now().strftime("%Y-%m-%d %H:%M:%S"):
-            classSlotList.remove(classSlot)
+    # Get all Class Slots from DB that match the given date, and is after the current date and time (now)
+    classSlotList = ClassSlot.query.filter(ClassSlot.StartTime.between(date + ' 00:00:00', date + ' 23:59:59')).filter(ClassSlot.StartTime >= now.strftime("%Y-%m-%d %H:%M:%S")).order_by(ClassSlot.StartTime).all()
 
     if len(classSlotList):
         return jsonify(
