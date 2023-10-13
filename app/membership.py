@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import requests, json
 from os import environ
 from app.auth import get_access_token
-from app.models import Memberships, MembershipRecord, MembershipLog, User
+from app.models import Memberships, MembershipRecord, MembershipLog, User, MembershipClassMapping, Class
 
 client_id = environ.get('PAYPAL_CLIENT_ID')
 client_secret = environ.get('PAYPAL_CLIENT_SECRET')
@@ -967,8 +967,92 @@ def getMembershipLogsByUserID(id: int):
             "data": []
         }
     ), 406
-        
-            
+
+# Function and Route to create a new MembershipClassMapping
+@app.route("/membershipclassmapping", methods=['POST'])
+def createMembershipClassMapping():
+    """
+    Sample Request
+    {
+        "MembershipTypeId": 7,
+        "ClassId": 301
+    }
+    """
+    data = request.get_json()
+
+    try:
+        # Check if the Membership Type exists first
+        SelectedMembershipType = Memberships.query.filter_by(MembershipTypeId=data["MembershipTypeId"]).first()
+        if not SelectedMembershipType:
+            return jsonify(
+                    "Membership Type with ID: " + str(data["MembershipTypeId"]) + " does not exist."
+            ), 406
+        # Check if the Class exists first
+        SelectedClass = Class.query.filter_by(ClassId=data["ClassId"]).first()
+        if not SelectedClass:
+            return jsonify(
+                "Class with ID: " + str(data["ClassId"]) + " does not exist."
+            ), 407
+        # Check if the MembershipClassMapping already exists
+        ExistingMembershipClassMapping = MembershipClassMapping.query.filter_by(MembershipTypeId=data["MembershipTypeId"], ClassId=data["ClassId"]).first()
+        if ExistingMembershipClassMapping:
+            return jsonify(
+                "Membership Type with ID: " + str(data["MembershipTypeId"]) + " already has an existing Class with ID: " + str(data["ClassId"])
+            ), 408
+        # Create the new MembershipClassMapping and add into the DB
+        membershipClassMapping = MembershipClassMapping(**data)
+        db.session.add(membershipClassMapping)
+        db.session.commit()
+        return jsonify(
+            data
+        ), 200
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(
+            "An error occurred while creating the new Membership Class Mapping. " + str(e)
+        ), 410
+    
+# Function and Route to get all MembershipClassMappings
+@app.route("/membershipclassmapping")
+def getAllMembershipClassMappings():
+    membershipClassMappingList = MembershipClassMapping.query.all()
+    if len(membershipClassMappingList):
+        return jsonify(
+            [membershipClassMapping.jsonWithMembershipAndClass() for membershipClassMapping in membershipClassMappingList]
+        ), 200
+    return jsonify("There are no Membership Class Mappings."), 200
+
+# Function and Route to Delete a MembershipClassMapping by ID
+@app.route("/membershipclassmapping/<int:id>", methods=['DELETE'])
+def deleteMembershipClassMapping(id: int):
+    try:
+        membershipClassMapping = MembershipClassMapping.query.filter_by(MembershipClassMappingId=id).first()
+        if membershipClassMapping:
+            db.session.delete(membershipClassMapping)
+            db.session.commit()
+            return jsonify(
+                "Membership Class Mapping with ID: " + str(id) + " has been deleted."
+            ), 200
+        return jsonify(
+            {
+                "code": 406,
+                "error": False,
+                "message": "There are no such membership class mapping with ID: " + str(id)
+            }
+        ), 406
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(
+            {
+                "code": 406,
+                "error": True,
+                "message": "An error occurred while deleting the Membership Class Mapping. " + str(e)
+            }
+        ), 406
+
+
+
 
             
             

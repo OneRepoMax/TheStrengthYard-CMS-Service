@@ -2,7 +2,7 @@ from app import app, db
 from flask import jsonify, request, url_for, render_template
 from datetime import datetime, timedelta
 import requests, json
-from app.models import MembershipRecord, Class, ClassSlot, Booking, User, Points, Memberships
+from app.models import MembershipRecord, Class, ClassSlot, Booking, User, Points, Memberships, MembershipClassMapping
 from app.email import send_email
 from app.user import verifyEmail
 
@@ -336,6 +336,16 @@ def createNewBooking():
     
     if not membership.hasClasses:
         return "You do not have a membership that allows you to book classes", 406
+    
+    # Get the Class using the ClassSlotId
+    classSlot = ClassSlot.query.filter_by(ClassSlotId=classSlotId).first()
+    selectedClass = Class.query.filter_by(ClassId=classSlot.ClassId).first()
+
+    # Use MembershipClassMapping to check if the user's membership type allows the user to book the selected class
+    membershipClassMapping = MembershipClassMapping.query.filter_by(MembershipTypeId=membershipRecord.MembershipTypeId).filter_by(ClassId=selectedClass.ClassId).first()
+
+    if not membershipClassMapping:
+        return "Your membership does not allow you to book this class", 406
     
     # Then, check if the user has an active OR "pending payment" membership record
     if membershipRecord.ActiveStatus != "Active" and membershipRecord.ActiveStatus != "Pending Payment":
