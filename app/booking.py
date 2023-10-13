@@ -255,6 +255,13 @@ def getClassSlotByDate(date: str):
 
     classSlotList = ClassSlot.query.filter(ClassSlot.StartTime.between(date + ' 00:00:00', date + ' 23:59:59')).order_by(ClassSlot.StartTime).all()
     # Return the class slot with the given class slot ID, if not found, return 406
+
+    # Get the current Time now. Loop through the classSlotList, if the class slot's start time is less than the current time, remove it from the list
+    now = datetime.now().strftime("%H:%M:%S")
+    for classSlot in classSlotList:
+        if classSlot.StartTime.strftime("%H:%M:%S") < now:
+            classSlotList.remove(classSlot)
+
     if len(classSlotList):
         return jsonify(
             [c.jsonWithClass() for c in classSlotList]
