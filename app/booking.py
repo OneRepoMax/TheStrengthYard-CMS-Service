@@ -489,6 +489,10 @@ def cancelBookingByID(id: int):
         # Using the selectedClassSlot's StartTime, we retrive the corresponding Points row from the Points table in which the selectedClassSlot's StartTime is between the PointsStartDate and PointsEndDate
         selectedPoints = Points.query.filter(Points.PointsStartDate <= selectedClassSlot.StartTime).filter(Points.PointsEndDate >= selectedClassSlot.StartTime).first()
 
+        # If the selectedPoints is not found, return 406
+        if not selectedPoints:
+            return "There are no valid points record for the selected class slot to refund the points", 406
+
         # Since there is a 12 hour cancellation policy, we check the current date time and the class slot's start time to see if it is more than 12 hours apart. 
         # Get the current date time
         now = datetime.now()
@@ -514,10 +518,6 @@ def cancelBookingByID(id: int):
 
             return "Your booking has been cancelled. You will not be refunded any points.", 200
         else:
-            # If the selectedPoints is not found, return 406
-            if not selectedPoints:
-                return "There are no valid points record for the selected class slot to refund the points", 406
-
             # If selectedPoints is found, update the selectedPoints Balance by adding 1
             selectedPoints.Balance += 1
 
