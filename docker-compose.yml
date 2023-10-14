@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  backend:
+    build:
+      context: ./TheStrengthYard-CMS-Service
+      args:
+        - SECURITY_PASSWORD_SALT=$SECURITY_PASSWORD_SALT
+        - EMAIL_USER=$EMAIL_USER
+        - EMAIL_PASSWORD=$EMAIL_PASSWORD
+        - PAYPAL_CLIENT_ID=$PAYPAL_CLIENT_ID
+        - PAYPAL_CLIENT_SECRET=$PAYPAL_CLIENT_SECRET
+        - OPENAI_API_KEY=$OPENAI_API_KEY
+        - LANGCHAIN_API_KEY=$LANGCHAIN_API_KEY
+        - DB_PORT=$DB_PORT
+        - DB_HOSTNAME=$DB_HOSTNAME
+        - DB_USERNAME=$DB_USERNAME
+        - DB_PASSWORD=$DB_PASSWORD
+        - DB_NAME=$DB_NAME
+    ports:
+      - "5000:5000"  # Map container port 5000 to host port 5000
+    restart: always
+    env_file:
+      - .env
+    
