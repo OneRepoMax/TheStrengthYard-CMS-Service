@@ -2,7 +2,7 @@ from app import app, db
 from flask import jsonify, request, url_for, render_template
 from datetime import datetime, timedelta
 import requests, json
-from app.models import MembershipRecord, Class, ClassSlot, Booking, User, Points, Memberships
+from app.models import MembershipRecord, Class, ClassSlot, Booking, User, Points, Memberships, MembershipClassMapping
 from app.email import send_email
 from app.user import verifyEmail
 
@@ -253,14 +253,12 @@ def getClassSlotByDate(date: str):
     if date > (datetime.now() + timedelta(days=14)).strftime("%Y-%m-%d"):
         return "You can only view class slots up to 2 weeks from today", 406
 
-    classSlotList = ClassSlot.query.filter(ClassSlot.StartTime.between(date + ' 00:00:00', date + ' 23:59:59')).order_by(ClassSlot.StartTime).all()
-    # Return the class slot with the given class slot ID, if not found, return 406
+    # Get the current DateTime
+    now = datetime.now()
+    print(now)
 
-    # Get the current Time now. Loop through the classSlotList, if the class slot's start time is less than the current time, remove it from the list
-    now = datetime.now().strftime("%H:%M:%S")
-    for classSlot in classSlotList:
-        if classSlot.StartTime.strftime("%H:%M:%S") < now:
-            classSlotList.remove(classSlot)
+    # Get all Class Slots from DB that match the given date, and is after the current date and time (now)
+    classSlotList = ClassSlot.query.filter(ClassSlot.StartTime.between(date + ' 00:00:00', date + ' 23:59:59')).filter(ClassSlot.StartTime >= now.strftime("%Y-%m-%d %H:%M:%S")).order_by(ClassSlot.StartTime).all()
 
     if len(classSlotList):
         return jsonify(
@@ -339,6 +337,16 @@ def createNewBooking():
     if not membership.hasClasses:
         return "You do not have a membership that allows you to book classes", 406
     
+    # Get the Class using the ClassSlotId
+    classSlot = ClassSlot.query.filter_by(ClassSlotId=classSlotId).first()
+    selectedClass = Class.query.filter_by(ClassId=classSlot.ClassId).first()
+
+    # Use MembershipClassMapping to check if the user's membership type allows the user to book the selected class
+    membershipClassMapping = MembershipClassMapping.query.filter_by(MembershipTypeId=membershipRecord.MembershipTypeId).filter_by(ClassId=selectedClass.ClassId).first()
+
+    if not membershipClassMapping:
+        return "Your membership does not allow you to book this class", 406
+    
     # Then, check if the user has an active OR "pending payment" membership record
     if membershipRecord.ActiveStatus != "Active" and membershipRecord.ActiveStatus != "Pending Payment":
         return "The selected membership record is not active. The status is " + membershipRecord.ActiveStatus, 406
@@ -416,7 +424,7 @@ def createNewBooking():
 @app.route("/booking")
 def getAllBookings():
     bookingList = Booking.query.all()
-    return jsonify([b.jsonWithUser() for b in bookingList]), 200
+    return jsonify([b.jsonWithUserAndClassSlot() for b in bookingList]), 200
 
 # Function and Route to get all Bookings by User ID
 @app.route("/booking/user/<int:id>")
@@ -425,7 +433,7 @@ def getAllBookingsByUserID(id: int):
     # Return all bookings with the given user ID, if not found, return 406
     if len(bookingList):
         return jsonify(
-            [b.jsonWithUser() for b in bookingList]
+            [b.jsonWithUserAndClassSlot() for b in bookingList]
         ), 200
     return "There are no such bookings with User ID: " + str(id), 406
 
@@ -481,6 +489,10 @@ def cancelBookingByID(id: int):
         # Using the selectedClassSlot's StartTime, we retrive the corresponding Points row from the Points table in which the selectedClassSlot's StartTime is between the PointsStartDate and PointsEndDate
         selectedPoints = Points.query.filter(Points.PointsStartDate <= selectedClassSlot.StartTime).filter(Points.PointsEndDate >= selectedClassSlot.StartTime).first()
 
+        # If the selectedPoints is not found, return 406
+        if not selectedPoints:
+            return "There are no valid points record for the selected class slot to refund the points", 406
+
         # Since there is a 12 hour cancellation policy, we check the current date time and the class slot's start time to see if it is more than 12 hours apart. 
         # Get the current date time
         now = datetime.now()
@@ -506,10 +518,6 @@ def cancelBookingByID(id: int):
 
             return "Your booking has been cancelled. You will not be refunded any points.", 200
         else:
-            # If the selectedPoints is not found, return 406
-            if not selectedPoints:
-                return "There are no valid points record for the selected class slot to refund the points", 406
-
             # If selectedPoints is found, update the selectedPoints Balance by adding 1
             selectedPoints.Balance += 1
 

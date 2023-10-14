@@ -43,7 +43,7 @@ INSERT INTO `memberships` VALUES
 (4, 'Yearly', "Public", 1800, 'Progressive Strength Class Membership (Student)', "Students can enjoy a full year of fitness with this membership. Attend our Progressive Strength Class sessions and work towards a healthier lifestyle throughout the academic year.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", "P-9K282057GE548025UMUECU6I", 70, TRUE),
 (5, 'Monthly', "Public", 90, 'Open Gym Membership', "Embrace a consistent fitness routine with our Open Gym Membership. Enjoy a full year of access to our gym, allowing you to stay active and work towards your fitness goals.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", "P-28V320045U278380RMUA3XOI", 70, FALSE),
 (6, 'Yearly', "Public", 900, 'Open Gym Membership', "Embrace a consistent fitness routine with our Open Gym Membership. Enjoy a full year of access to our gym, allowing you to stay active and work towards your fitness goals.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", "P-57K47766M4645771LMUECVWY", 70, FALSE),
-(7, 'One-Time', "Public", 260, 'Beginner Olympic Weightlifting Course', "Discover the world of Olympic weightlifting with our Beginner Course. This one-time fee covers the cost of the course, where you'll learn the fundamentals of safe and effective weightlifting.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", NULL, 0, FALSE),
+(7, 'One-Time', "Public", 260, 'Beginner Olympic Weightlifting Course', "Discover the world of Olympic weightlifting with our Beginner Course. This one-time fee covers the cost of the course, where you'll learn the fundamentals of safe and effective weightlifting.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", NULL, 0, TRUE),
 (8, 'One-Time', "Public", 150, 'Barbell Fundamentals Course', "Master the art of working with barbells through our Fundamentals Course. This one-time fee grants you access to the course, where you'll learn essential techniques and principles.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", NULL, 0, FALSE),
 (9, 'Monthly', "Private", 250, 'Progressive Strength Class Membership (Standard) discounted', "Get access to our Progressive Strength Class and enjoy a well-rounded fitness experience. This membership includes monthly sessions to help you build strength and improve your overall fitness.", "https://tsy-admin-bucket.s3.ap-southeast-1.amazonaws.com/AEC1ADBF-6A40-4150-BC9E-169496C3E737-1022-0000175AF0BEA8F0.JPG", "P-3Y5474454G139761KMUA2YTA", 70, FALSE);
 
@@ -52,7 +52,7 @@ INSERT INTO `memberships` VALUES
 -- -----------------------------------------------------
 INSERT INTO `MembershipRecord` VALUES 
 (1, "I-AYW50U49PVHR", 100, 5, '2023-09-17', '2023-10-17', 'Active', NULL),
-(2, "I-4HNBN7BYS9R1", 100, 1, '2023-09-20', '2023-10-20', 'Active', NULL),
+(2, "I-4HNBN7BYS9R1", 1, 1, '2023-09-20', '2023-10-20', 'Active', NULL),
 (3, "I-BW42BRSB56P0", 3, 5, '2023-09-19', '2023-10-19', 'Active', NULL);
 -- (3, 43, 2, '2023-01-01', '2024-01-01', 'Active', NULL),
 -- (4, 102, 1, '2023-07-02', '2023-09-14', 'Active', NULL);
@@ -104,6 +104,16 @@ INSERT INTO `Payment` VALUES
 INSERT INTO `Class` VALUES
 (300, 'Progressive Strength Class', 'Make progress towards your strength goals with our Progressive Strength Class.', 8),
 (301, 'Olympic Barbell Class', 'Learn the basics of Weightlifting safely with our Olympic Barbell Class.', 5);
+
+-- -----------------------------------------------------
+-- Inserting Sample Data into Table `tsy_db`.`MembershipClassMapping`
+-- -----------------------------------------------------
+INSERT INTO `MembershipClassMapping` VALUES
+(400, 1, 300),
+(401, 2, 300),
+(402, 3, 300),
+(403, 4, 300),
+(404, 9, 300);
 
 -- -----------------------------------------------------
 -- Inserting Sample Data into Table `tsy_db`.`ClassSlot`

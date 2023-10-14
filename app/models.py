@@ -171,7 +171,7 @@ class MembershipRecord(db.Model):
             "EndDate": self.EndDate,
             "ActiveStatus": self.ActiveStatus,
             "StatusRemarks": self.StatusRemarks,
-            "User": self.User.json(),
+            "User": self.User.jsonMinInfo(),
             "Membership": self.Membership.json()
         }
     
@@ -232,7 +232,32 @@ class Class(db.Model):
             "Description": self.Description,
             "MaximumCapacity": self.MaximumCapacity
         }
+
+class MembershipClassMapping(db.Model):
+    __tablename__ = 'MembershipClassMapping'
+
+    MembershipClassMappingId = db.Column(db.Integer, primary_key=True)
+    MembershipTypeId = db.Column(db.Integer, db.ForeignKey('Memberships.MembershipTypeId'))
+    ClassId = db.Column(db.Integer, db.ForeignKey('Class.ClassId'))
+    Memberships = db.relationship('Memberships', backref=db.backref('MembershipClassMapping', cascade='all, delete-orphan'))
+    Class = db.relationship('Class', backref=db.backref('MembershipClassMapping', cascade='all, delete-orphan'))
+
+    def json(self):
+        return {
+            "MembershipClassMappingId": self.MembershipClassMappingId,
+            "MembershipTypeId": self.MembershipTypeId,
+            "ClassId": self.ClassId
+        }
     
+    def jsonWithMembershipAndClass(self):
+        return {
+            "MembershipClassMappingId": self.MembershipClassMappingId,
+            "MembershipTypeId": self.MembershipTypeId,
+            "ClassId": self.ClassId,
+            "Membership": self.Memberships.json(),
+            "Class": self.Class.json()
+        }
+
 class ClassSlot(db.Model):
     __tablename__ = 'ClassSlot'
 

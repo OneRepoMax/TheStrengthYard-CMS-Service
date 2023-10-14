@@ -47,7 +47,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- -----------------------------------------------------
 -- Table `tsy_db`.`Memberships`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `tsy_db`.`Memberships` ;
+DROP TABLE IF EXISTS `tsy_db`.`Memberships`;
 
 CREATE TABLE IF NOT EXISTS `tsy_db`.`Memberships` (
   `MembershipTypeId` INT NOT NULL AUTO_INCREMENT,
@@ -132,6 +132,30 @@ CREATE TABLE IF NOT EXISTS `tsy_db`.`Class` (
 AUTO_INCREMENT = 300
 ENGINE = InnoDB;
 
+-- -----------------------------------------------------
+-- Table `tsy_db`.`MembershipClassMapping`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `tsy_db`.`MembershipClassMapping`;
+
+CREATE TABLE IF NOT EXISTS `tsy_db`.`MembershipClassMapping` (
+`MembershipClassMappingId` INT NOT NULL AUTO_INCREMENT,
+`MembershipTypeId` INT NOT NULL,
+`ClassId` INT NOT NULL,
+PRIMARY KEY (`MembershipClassMappingId`),
+INDEX `fk_MembershipClassMapping_Memberships1_idx` (`MembershipTypeId` ASC) VISIBLE,
+INDEX `fk_MembershipClassMapping_Class1_idx` (`ClassId` ASC) VISIBLE,
+CONSTRAINT `fk_MembershipClassMapping_Memberships1`
+    FOREIGN KEY (`MembershipTypeId`)
+    REFERENCES `tsy_db`.`Memberships` (`MembershipTypeId`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+CONSTRAINT `fk_MembershipClassMapping_Class1`
+    FOREIGN KEY (`ClassId`)
+    REFERENCES `tsy_db`.`Class` (`ClassId`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+AUTO_INCREMENT = 400
+ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `tsy_db`.`ClassSlot`
