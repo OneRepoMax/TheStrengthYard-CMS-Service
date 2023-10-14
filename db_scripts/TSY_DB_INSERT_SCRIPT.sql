@@ -52,7 +52,7 @@ INSERT INTO `memberships` VALUES
 -- -----------------------------------------------------
 INSERT INTO `MembershipRecord` VALUES 
 (1, "I-AYW50U49PVHR", 100, 5, '2023-09-17', '2023-10-17', 'Active', NULL),
-(2, "I-4HNBN7BYS9R1", 100, 1, '2023-09-20', '2023-10-20', 'Active', NULL),
+(2, "I-4HNBN7BYS9R1", 1, 1, '2023-09-20', '2023-10-20', 'Active', NULL),
 (3, "I-BW42BRSB56P0", 3, 5, '2023-09-19', '2023-10-19', 'Active', NULL);
 -- (3, 43, 2, '2023-01-01', '2024-01-01', 'Active', NULL),
 -- (4, 102, 1, '2023-07-02', '2023-09-14', 'Active', NULL);

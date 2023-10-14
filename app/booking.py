@@ -424,7 +424,7 @@ def createNewBooking():
 @app.route("/booking")
 def getAllBookings():
     bookingList = Booking.query.all()
-    return jsonify([b.jsonWithUser() for b in bookingList]), 200
+    return jsonify([b.jsonWithUserAndClassSlot() for b in bookingList]), 200
 
 # Function and Route to get all Bookings by User ID
 @app.route("/booking/user/<int:id>")
@@ -433,7 +433,7 @@ def getAllBookingsByUserID(id: int):
     # Return all bookings with the given user ID, if not found, return 406
     if len(bookingList):
         return jsonify(
-            [b.jsonWithUser() for b in bookingList]
+            [b.jsonWithUserAndClassSlot() for b in bookingList]
         ), 200
     return "There are no such bookings with User ID: " + str(id), 406
 
