@@ -335,7 +335,7 @@ class Booking(db.Model):
             "ClassSlotId": self.ClassSlotId,
             "User": self.User.jsonMinInfo(),
             "MembershipRecordId": self.MembershipRecordId,
-            "ClassSlot": self.ClassSlot.json()
+            "ClassSlot": self.ClassSlot.jsonWithClass()
         }
     
     def jsonWithUserAndClassAndClassSlot(self):
