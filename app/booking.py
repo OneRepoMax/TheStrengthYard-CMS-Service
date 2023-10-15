@@ -479,8 +479,8 @@ def cancelBookingByID(id: int):
         # Retrieve the class slot with the given class slot ID
         selectedClassSlot = ClassSlot.query.filter_by(ClassSlotId=bookingExists.ClassSlotId).first()
 
-        # Update the selectedClassSlot CurrentCapacity by adding 1
-        selectedClassSlot.CurrentCapacity += 1
+        # Update the selectedClassSlot CurrentCapacity by minusing 1
+        selectedClassSlot.CurrentCapacity -= 1
 
         # Add updated selectedClassSlot to database
         db.session.add(selectedClassSlot)
@@ -537,6 +537,5 @@ def cancelBookingByID(id: int):
 
             return "Your booking has been cancelled. You have been refunded 1 point.", 200
 
-    
 
     
