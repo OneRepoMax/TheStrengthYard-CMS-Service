@@ -289,7 +289,6 @@ class ClassSlot(db.Model):
             "EndTime": self.EndTime,
             "Duration": self.Duration,
             "CurrentCapacity": self.CurrentCapacity,
-            "ClassId": self.ClassId,
             "Class": self.Class.json()
         }
     
@@ -337,6 +336,17 @@ class Booking(db.Model):
             "User": self.User.jsonMinInfo(),
             "MembershipRecordId": self.MembershipRecordId,
             "ClassSlot": self.ClassSlot.json()
+        }
+    
+    def jsonWithUserAndClassAndClassSlot(self):
+        return {
+            "BookingId": self.BookingId,
+            "BookingDateTime": self.BookingDateTime,
+            "Status": self.Status,
+            "UserId": self.UserId,
+            "User": self.User.jsonMinInfo(),
+            "MembershipRecordId": self.MembershipRecordId,
+            "ClassSlot": self.ClassSlot.jsonWithClass(),
         }
     
 class Points(db.Model):

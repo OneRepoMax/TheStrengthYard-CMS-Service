@@ -455,7 +455,7 @@ def getAllBookingsByClassSlotID(id: int):
     # Return all bookings with the given class slot ID, if not found, return 406
     if len(bookingList):
         return jsonify(
-            [b.jsonWithUserAndClassSlot() for b in bookingList]
+            [b.jsonWithUserAndClassAndClassSlot() for b in bookingList]
         ), 200
     return "There are no such bookings with Class Slot ID: " + str(id), 406
     
