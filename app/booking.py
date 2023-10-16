@@ -540,7 +540,7 @@ def cancelBookingByID(id: int):
 
             return "Your booking has been cancelled. You have been refunded 1 point.", 200
 
-# Function and Route to create a new Booking
+# Function and Route to create a new Booking 2
 @app.route("/booking2", methods=['POST'])
 def createNewBooking2():
     """
