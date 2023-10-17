@@ -6,7 +6,7 @@ on:
       - sprint4/booking_staff
 
 jobs:
-  build:
+  builddeploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -38,25 +38,9 @@ jobs:
         docker tag tsy-iabs-be:latest ${{ secrets.DOCKERHUB_USERNAME }}/tsy-iabs-be:latest
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/tsy-iabs-be:latest
 
-  deploy:
-    runs-on: ubuntu-latest
-
-    needs: build
-
-    steps:
-    - name: Install AWS Elastic Beanstalk CLI
+    - name: Generate Deployment Package
       run: |
-        sudo apt-get update
-        sudo apt-get install -y python3-pip
-        sudo pip3 install awsebcli
-
-    # Create deployment package using the Dockerrun.aws.json file
-    - name: Create deployment package
-      run: |
-        mkdir deploy
-        cp Dockerrun.aws.json deploy/
-        cd deploy
-        zip -r deploy.zip .
+        zip -r deploy.zip Dockerrun.aws.json
     
     # Deploy to existing AWS Elastic Beanstalk environment, called tsy-iabs-env
     - name: Deploy to AWS Elastic Beanstalk
