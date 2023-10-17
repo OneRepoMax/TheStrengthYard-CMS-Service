@@ -1,6 +1,7 @@
 from app import app, db
 from flask import jsonify, request, url_for, render_template
 from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
 from datetime import datetime
 from app.token import confirm_token, generate_token
 from app.email import send_email
@@ -23,7 +24,9 @@ def login():
     user = User.query.filter_by(EmailAddress=email).first()
 
     if user and check_password_hash(user.Password, password):
-        return jsonify(user.jsonMinInfo())
+        token = jwt.encode({'email': email}, app.config['JWT_SECRET_KEY'], algorithm='HS256')
+
+        return jsonify(user.jsonMinInfo(), {'token': token})
     else:
         return "Invalid user credentials", 401
 
