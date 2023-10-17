@@ -50,10 +50,13 @@ jobs:
         sudo apt-get install -y python3-pip
         sudo pip3 install awsebcli
 
-    # Create deployment package using the Dockerrun.aws.json file and .ebextensions folder, 
+    # Create deployment package using the Dockerrun.aws.json file
     - name: Create deployment package
       run: |
-        zip -r deploy.zip Dockerrun.aws.json
+        mkdir deploy
+        cp Dockerrun.aws.json deploy/
+        cd deploy
+        zip -r deploy.zip .
     
     # Deploy to existing AWS Elastic Beanstalk environment, called tsy-iabs-env
     - name: Deploy to AWS Elastic Beanstalk
@@ -63,6 +66,5 @@ jobs:
         aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         application_name: tsy-iabs
         environment_name: tsy-iabs-env
-        version_label: "docker-app-${{ steps.format-time.outputs.replaced }}"
         region: ap-southeast-1
         deployment_package: deploy.zip
