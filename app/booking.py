@@ -649,3 +649,25 @@ def createNewBooking2():
     else:
         return "The class is full", 406
     
+# Function and Route to get Points history by Membership Record ID (For Staff view)
+@app.route("/pointsHistory/<int:id>")
+def getPointsHistoryByMembershipRecordID(id: int):
+    pointsHistoryList = Points.query.filter_by(MembershipRecordId=id).all()
+    # Return all points history with the given membership record ID, if not found, return 406
+    if len(pointsHistoryList):
+        return jsonify(
+            [p.json() for p in pointsHistoryList]
+        ), 200
+    return "There are no such points history with Membership Record ID: " + str(id), 406
+
+# Function and Route to get Points history by Membership Record ID (For User view)
+@app.route("/pointsHistory/user/<int:id>")
+def getPointsHistoryByMembershipRecordIDForUser(id: int):
+    # Get Points list using MembershipRecordId, but Status must be "Paid"
+    pointsHistoryList = Points.query.filter_by(MembershipRecordId=id).filter_by(Status="Paid").all()
+    # Return all points history with the given membership record ID, if not found, return 406
+    if len(pointsHistoryList):
+        return jsonify(
+            [p.json() for p in pointsHistoryList]
+        ), 200
+    return "There are no such points history with Membership Record ID: " + str(id), 406
