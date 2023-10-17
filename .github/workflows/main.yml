@@ -27,7 +27,12 @@ jobs:
       run: docker build -t tsy-iabs-be .
 
     - name: Log in to Docker Hub
-      run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+      # run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+      uses: docker/login-action@v1.8.0
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        logout: true
 
     - name: Push Docker image to Docker Hub
       run: |
@@ -46,15 +51,14 @@ jobs:
         sudo apt-get install -y python3-pip
         sudo pip3 install awsebcli
 
+    # Deploy to existing AWS Elastic Beanstalk environment, called tsy-iabs-env
     - name: Deploy to AWS Elastic Beanstalk
-      uses: aws-actions/configure-aws-credentials@v1
+      uses: einaregilsson/beanstalk-deploy@v15
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
-
-    # Use the Docker image that was just pushed to Docker Hub to deploy to the existing Elastic Beanstalk environment
-    - name: Elastic Beanstalk Deploy
-      run: |
-        eb init tsy-iabs-be -r ap-southeast-1 -p docker
-        eb deploy tsy-iabs-be-env
+        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        application_name: tsy-iabs
+        environment_name: tsy-iabs-env
+        version_label: ${{ github.sha }}
+        region: ap-southeast-1
+        deployment_package: ${{ secrets.DOCKERHUB_USERNAME }}/tsy-iabs-be:latest
