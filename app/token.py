@@ -25,7 +25,6 @@ def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         token = request.headers.get('Authorization')
-        token = token[7:] # Might need this line for postman testing
 
         if not token:
             return jsonify({'message': 'Token is missing'}), 401

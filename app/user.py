@@ -2,7 +2,7 @@ from app import app, db
 from flask import jsonify, request, url_for, render_template
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
-from datetime import datetime
+import datetime
 from app.token import confirm_token, generate_token
 from app.email import send_email
 from app.models import User, IndemnityForm, MembershipRecord, Payment, MembershipLog
@@ -24,9 +24,11 @@ def login():
     user = User.query.filter_by(EmailAddress=email).first()
 
     if user and check_password_hash(user.Password, password):
-        token = jwt.encode({'email': email}, app.config['JWT_SECRET_KEY'], algorithm='HS256')
+        # Set the expiration time (e.g., 1 hour from now)
+        expiration_time = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+        token = jwt.encode({'email': email, 'exp': expiration_time}, app.config['JWT_SECRET_KEY'], algorithm='HS256')
 
-        return jsonify(user.jsonMinInfo(), {'token': token})
+        return jsonify(user.jsonMinInfo(), {'token': token, 'exp': expiration_time})
     else:
         return "Invalid user credentials", 401
 
