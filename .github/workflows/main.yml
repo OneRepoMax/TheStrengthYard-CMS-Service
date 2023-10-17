@@ -55,6 +55,11 @@ jobs:
 
     - name: Elastic Beanstalk Deploy
       run: |
-        eb init -p docker tsy-iabs-be --region ${{ secrets.AWS_REGION }}
-        eb use tsy-iabs-env
-        eb deploy
+        aws elasticbeanstalk create-application-version \
+          --application-name tsy-iabs-be \
+          --version-label $GITHUB_SHA \
+          --source-bundle S3Bucket=elasticbeanstalk-ap-southeast-1-364225951352,S3Key=$GITHUB_SHA
+
+        aws elasticbeanstalk update-environment \
+          --environment-name tsy-iabs-env \
+          --version-label $GITHUB_SHA
