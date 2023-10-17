@@ -430,12 +430,16 @@ def getAllBookings():
 @app.route("/booking/user/<int:id>")
 def getAllBookingsByUserID(id: int):
     bookingList = Booking.query.filter_by(UserId=id).all()
-    # Return all bookings with the given user ID, if not found, return 406
-    if len(bookingList):
+    # If there are no bookings, return 406
+    if not len(bookingList):
+        return "There are no bookings for User ID: " + str(id), 406
+    else:
+        # Sort the booking list by Class Slot Start Time in descending order, so that the latest booking will be at the top
+        bookingList.sort(key=lambda x: x.ClassSlot.StartTime, reverse=True)
         return jsonify(
             [b.jsonWithUserAndClassSlot() for b in bookingList]
         ), 200
-    return "There are no such bookings with User ID: " + str(id), 406
+
 
 # Function and Route to get a specific Booking by Booking ID
 @app.route("/booking/<int:id>")
