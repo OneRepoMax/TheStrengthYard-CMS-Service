@@ -27,7 +27,6 @@ jobs:
       run: docker build -t tsy-iabs-be .
 
     - name: Log in to Docker Hub
-      # run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
       uses: docker/login-action@v1.8.0
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -51,14 +50,30 @@ jobs:
         sudo apt-get install -y python3-pip
         sudo pip3 install awsebcli
 
+    - name: Get Timestamp
+        uses: gerred/actions/current-time@master
+        id: current-time
+
+    - name: Run String Replace
+        uses: frabert/replace-string-action@master
+        id: format-time
+        with:
+          pattern: '[:\.]+'
+          string: "${{ steps.current-time.outputs.time }}"
+          replace-with: '-'
+          flags: 'g'
+
+    - name: Generate Deployment Package
+        run: zip -r deploy.zip * -x "**node_modules**"
+    
     # Deploy to existing AWS Elastic Beanstalk environment, called tsy-iabs-env
     - name: Deploy to AWS Elastic Beanstalk
-      uses: einaregilsson/beanstalk-deploy@v15
+      uses: einaregilsson/beanstalk-deploy@v16
       with:
         aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         application_name: tsy-iabs
         environment_name: tsy-iabs-env
-        version_label: ${{ github.sha }}
+        version_label: "docker-app-${{ steps.format-time.outputs.replaced }}"
         region: ap-southeast-1
-        deployment_package: ${{ secrets.DOCKERHUB_USERNAME }}/tsy-iabs-be:latest
+        deployment_package: deploy.zip
