@@ -53,13 +53,8 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
+    # Use the Docker image that was just pushed to Docker Hub to deploy to the existing Elastic Beanstalk environment
     - name: Elastic Beanstalk Deploy
       run: |
-        aws elasticbeanstalk create-application-version \
-          --application-name tsy-iabs-be \
-          --version-label $GITHUB_SHA \
-          --source-bundle S3Bucket=elasticbeanstalk-ap-southeast-1-364225951352,S3Key=$GITHUB_SHA
-
-        aws elasticbeanstalk update-environment \
-          --environment-name tsy-iabs-env \
-          --version-label $GITHUB_SHA
+        eb init tsy-iabs-be -r ap-southeast-1 -p docker
+        eb deploy tsy-iabs-be-env
