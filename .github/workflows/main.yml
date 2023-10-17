@@ -46,7 +46,6 @@ jobs:
         sudo apt-get install -y python3-pip
         sudo pip3 install awsebcli
 
-    steps:
     - name: Deploy to AWS Elastic Beanstalk
       uses: aws-actions/configure-aws-credentials@v1
       with:
