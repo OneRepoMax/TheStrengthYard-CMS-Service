@@ -66,6 +66,11 @@ jobs:
         version_label: "docker-app-${{ steps.format-time.outputs.replaced }}"
         region: ap-southeast-1
         deployment_package: deploy.zip
+    
+    - name: Install AWS Elastic Beanstalk CLI
+      run: |
+        pip install --upgrade awsebcli
+        eb --version
 
     - name: Set Environment Variables
       env:
