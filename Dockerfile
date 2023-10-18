@@ -38,3 +38,5 @@ ENV EMAIL_PASSWORD=$EMAIL_PASSWORD
 
 # Run the app
 CMD [ "python", "./run.py" ]
+
+EXPOSE 5000

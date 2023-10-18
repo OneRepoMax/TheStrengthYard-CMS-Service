@@ -430,12 +430,16 @@ def getAllBookings():
 @app.route("/booking/user/<int:id>")
 def getAllBookingsByUserID(id: int):
     bookingList = Booking.query.filter_by(UserId=id).all()
-    # Return all bookings with the given user ID, if not found, return 406
-    if len(bookingList):
+    # If there are no bookings, return 406
+    if not len(bookingList):
+        return "There are no bookings for User ID: " + str(id), 406
+    else:
+        # Sort the booking list by Class Slot Start Time in descending order, so that the latest booking will be at the top
+        bookingList.sort(key=lambda x: x.ClassSlot.StartTime, reverse=True)
         return jsonify(
             [b.jsonWithUserAndClassSlot() for b in bookingList]
         ), 200
-    return "There are no such bookings with User ID: " + str(id), 406
+
 
 # Function and Route to get a specific Booking by Booking ID
 @app.route("/booking/<int:id>")
@@ -486,8 +490,11 @@ def cancelBookingByID(id: int):
         db.session.add(selectedClassSlot)
         db.session.commit()
 
-        # Using the selectedClassSlot's StartTime, we retrive the corresponding Points row from the Points table in which the selectedClassSlot's StartTime is between the PointsStartDate and PointsEndDate
-        selectedPoints = Points.query.filter(Points.PointsStartDate <= selectedClassSlot.StartTime).filter(Points.PointsEndDate >= selectedClassSlot.StartTime).first()
+        # Get the MembershipRecordId from the bookingExists
+        membershipRecordId = bookingExists.MembershipRecordId
+
+        # Using the selectedClassSlot's StartTime, we retrive the corresponding Points row from the Points table in which the selectedClassSlot's StartTime is between the PointsStartDate and PointsEndDate. The Points row should also match the MembershipRecordId being used above
+        selectedPoints = Points.query.filter(Points.PointsStartDate <= selectedClassSlot.StartTime).filter(Points.PointsEndDate >= selectedClassSlot.StartTime).filter_by(MembershipRecordId=membershipRecordId).first()
 
         # If the selectedPoints is not found, return 406
         if not selectedPoints:
@@ -537,5 +544,130 @@ def cancelBookingByID(id: int):
 
             return "Your booking has been cancelled. You have been refunded 1 point.", 200
 
+# Function and Route to create a new Booking 2
+@app.route("/booking2", methods=['POST'])
+def createNewBooking2():
+    """
+    Sample Request
+    {
+        "UserId": 1,
+        "ClassSlotId": 5002
+        }
+    """
+    data = request.get_json()
+    userId = data.get("UserId")
+    classSlotId = data.get("ClassSlotId")
 
+    # First, get the Class using the ClassSlotId
+    selectedClassSlot = ClassSlot.query.filter_by(ClassSlotId=classSlotId).first()
+    selectedClass = Class.query.filter_by(ClassId=selectedClassSlot.ClassId).first()
     
+    # Next, using the selectedClass, search the MembershipClassMapping table to get a list of MembershipTypeId that allows the user to book the selected class
+    membershipClassMappingList = MembershipClassMapping.query.filter_by(ClassId=selectedClass.ClassId).all()
+
+    print(f"\nThe MembershipClassMapping List is: {membershipClassMappingList}\n")
+
+    # Extract all of the MembershipTypeIds from the membershipClassMappingList
+    membershipTypeIdList = [m.MembershipTypeId for m in membershipClassMappingList]
+
+    # Next, using the userId, get the MembershipRecord that belongs to the user using these search criterias:
+    # ActiveStatus must be "Active" or "Pending Payment"
+    # MembershipTypeId must be in the list of MembershipTypeId (membershipTypeIdList) that allows the user to book the selected class
+    membershipRecord = MembershipRecord.query.filter_by(UserId=userId).filter(MembershipRecord.ActiveStatus.in_(["Active", "Pending Payment"])).filter(MembershipRecord.MembershipTypeId.in_(membershipTypeIdList)).first()
+
+    # If there are no such membership records, return 406
+    if not membershipRecord:
+        return "You do not have an active membership that allows you to book this class", 406
+    else:
+        print(f"\nThe MembershipRecord is: {membershipRecord.json()}\n")
+
+    # Get the MembershipRecordId from the membershipRecord
+    membershipRecordId = membershipRecord.MembershipRecordId
+    print(f"\nThe MembershipRecordId is: {membershipRecordId}\n")
+
+    # Then, check if the user already has an existing active booking for the selected class slot. We use the MembershipRecordId and ClassSlotId to check for this
+    existingBooking = Booking.query.filter_by(UserId=userId).filter_by(ClassSlotId=classSlotId).filter_by(Status="Confirmed").first()
+
+    if existingBooking:
+        return "You already have an existing active booking for the selected class slot", 406
+
+    # Check if the class slot's current capacity is less than the class's maximum capacity
+    if selectedClassSlot.CurrentCapacity < selectedClass.MaximumCapacity:
+        # Using the selectedClassSlot's StartTime, we retrive the corresponding Points row from the Points table in which the selectedClassSlot's StartTime is between the PointsStartDate and PointsEndDate. The Points row should also match the MembershipRecordId being used above
+        selectedPoints = Points.query.filter(Points.PointsStartDate <= selectedClassSlot.StartTime).filter(Points.PointsEndDate >= selectedClassSlot.StartTime).filter_by(MembershipRecordId=membershipRecordId).first()
+
+        # If the selectedPoints is not found, return 406
+        if not selectedPoints:
+            return "There are no valid points record for the selected class slot to make the booking", 406
+        
+        # If selectedPoints is found, check that the Balance is more than 0. If it is, we can proceed to create the booking and deduct one point from this selectedPoints Balance
+        if selectedPoints.Balance > 0:
+            # Create new booking
+            newBooking = Booking(
+                BookingDateTime = datetime.now(),
+                Status = "Confirmed", # Default status is "Confirmed"
+                UserId=userId,
+                ClassSlotId=classSlotId,
+                MembershipRecordId=membershipRecordId
+            )
+
+            # Add new booking to database
+            db.session.add(newBooking)
+            db.session.commit()
+
+            # Update the selectedPoints Balance by deducting 1
+            selectedPoints.Balance -= 1
+
+            # Add updated selectedPoints to database
+            db.session.add(selectedPoints)
+            db.session.commit()
+
+            # Update the selectedClassSlot CurrentCapacity by adding 1
+            selectedClassSlot.CurrentCapacity += 1
+
+            # Add updated selectedClassSlot to database
+            db.session.add(selectedClassSlot)
+            db.session.commit()
+
+            # Send an email notification to the user and gym owner
+            user = User.query.filter_by(UserId=userId).first()
+            gymOwner = "tsy.fyp.2023@gmail.com"
+
+            # Use new_booking.html template to generate the email content, with the following variables:
+            # user_first_name, user_last_name, booking_id, booking_date_time, class_name, class_start_time, points_balance, duration, confirm_url
+            html = render_template("/new_booking.html", user_first_name=user.FirstName, user_last_name=user.LastName, booking_id=newBooking.BookingId, booking_date_time=newBooking.BookingDateTime, class_name=selectedClass.ClassName, class_start_time=selectedClassSlot.StartTime, points_balance=selectedPoints.Balance, duration=selectedClassSlot.Duration, class_day=selectedClassSlot.Day)
+
+            subject = "New Booking Confirmation - " + user.FirstName + " " + user.LastName
+            send_email(gymOwner, subject, html)
+            send_email(user.EmailAddress, subject, html)
+
+            return jsonify(
+                newBooking.json()
+                ), 201
+        else:
+            return "You do not have enough points to make the booking", 406  
+    else:
+        return "The class is full", 406
+    
+# Function and Route to get Points history by Membership Record ID (For Staff view)
+@app.route("/pointsHistory/<int:id>")
+def getPointsHistoryByMembershipRecordID(id: int):
+    pointsHistoryList = Points.query.filter_by(MembershipRecordId=id).all()
+    # Return all points history with the given membership record ID, if not found, return 406
+    if len(pointsHistoryList):
+        return jsonify(
+            [p.json() for p in pointsHistoryList]
+        ), 200
+    return "There are no such points history with Membership Record ID: " + str(id), 406
+
+# Function and Route to get Points history by Membership Record ID (For User view)
+@app.route("/pointsHistory/user/<int:id>")
+def getPointsHistoryByMembershipRecordIDForUser(id: int):
+    # Get Points list using MembershipRecordId, but Status must be "Paid"
+    pointsHistoryList = Points.query.filter_by(MembershipRecordId=id).filter_by(Status="Paid").all()
+    # Return all points history with the given membership record ID, if not found, return 406
+    if len(pointsHistoryList):
+        return jsonify(
+            [p.json() for p in pointsHistoryList]
+        ), 200
+    return "There are no such points history with Membership Record ID: " + str(id), 406
