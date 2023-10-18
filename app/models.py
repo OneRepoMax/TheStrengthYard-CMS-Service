@@ -43,6 +43,7 @@ class User(db.Model):
             "FirstName": self.FirstName,
             "LastName": self.LastName,
             "Gender": self.Gender,
+            "ContactNo": self.ContactNo,
             "UserType": self.UserType,
             "DisplayPicture": self.DisplayPicture,
             "Verified": self.Verified
