@@ -72,6 +72,14 @@ jobs:
         pip install --upgrade awsebcli
         eb --version
 
+    - name: Initialize Elastic Beanstalk environment
+      run: |
+        eb init -r ap-southeast-1 -p "docker" tsy-iabs-env
+        eb use tsy-iabs-env
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
     - name: Set Environment Variables
       env:
         DB_HOSTNAME: ${{ secrets.DB_HOSTNAME }}
