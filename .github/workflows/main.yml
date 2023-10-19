@@ -19,7 +19,7 @@ jobs:
         python-version: 3.8
 
     - name: Install dependencies
-      run: |
+      run: |2
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
@@ -67,46 +67,3 @@ jobs:
         region: ap-southeast-1
         deployment_package: deploy.zip
     
-    - name: Install AWS Elastic Beanstalk CLI
-      run: |
-        pip install --upgrade awsebcli
-        eb --version
-
-    - name: Initialize Elastic Beanstalk environment
-      run: |
-        eb init -r ap-southeast-1 -p "docker" tsy-iabs-env
-        eb use tsy-iabs-env
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-    - name: Set Environment Variables
-      env:
-        DB_HOSTNAME: ${{ secrets.DB_HOSTNAME }}
-        DB_USERNAME: ${{ secrets.DB_USERNAME }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        DB_PORT: ${{ secrets.DB_PORT }}
-        DB_NAME: ${{ secrets.DB_NAME }}
-        AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        PAYPAL_CLIENT_ID: ${{ secrets.PAYPAL_CLIENT_ID }}
-        PAYPAL_CLIENT_SECRET: ${{ secrets.PAYPAL_CLIENT_SECRET }}
-        SECURITY_PASSWORD_SALT: ${{ secrets.SECURITY_PASSWORD_SALT }}
-        EMAIL_USER: ${{ secrets.EMAIL_USER }}
-        EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      run: |
-        eb setenv \
-            DB_HOSTNAME=$DB_HOSTNAME \
-            DB_USERNAME=$DB_USERNAME \
-            DB_PASSWORD=$DB_PASSWORD \
-            DB_PORT=$DB_PORT \
-            DB_NAME=$DB_NAME \
-            AWS_ACCESS_KEY=$AWS_ACCESS_KEY \
-            AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
-            PAYPAL_CLIENT_ID=$PAYPAL_CLIENT_ID \
-            PAYPAL_CLIENT_SECRET=$PAYPAL_CLIENT_SECRET \
-            SECURITY_PASSWORD_SALT=$SECURITY_PASSWORD_SALT \
-            EMAIL_USER=$EMAIL_USER \
-            EMAIL_PASSWORD=$EMAIL_PASSWORD \
-            OPENAI_API_KEY=$OPENAI_API_KEY \
