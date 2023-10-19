@@ -57,7 +57,7 @@ jobs:
     
     # Deploy to existing AWS Elastic Beanstalk environment, called tsy-iabs-env
     - name: Deploy to AWS Elastic Beanstalk
-      uses: einaregilsson/beanstalk-deploy@v16
+      uses: einaregilsson/beanstalk-deploy@v21
       with:
         aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -95,7 +95,6 @@ jobs:
         EMAIL_USER: ${{ secrets.EMAIL_USER }}
         EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
       run: |
         eb setenv \
             DB_HOSTNAME=$DB_HOSTNAME \
@@ -111,4 +110,3 @@ jobs:
             EMAIL_USER=$EMAIL_USER \
             EMAIL_PASSWORD=$EMAIL_PASSWORD \
             OPENAI_API_KEY=$OPENAI_API_KEY \
-            LANGCHAIN_API_KEY=$LANGCHAIN_API_KEY
