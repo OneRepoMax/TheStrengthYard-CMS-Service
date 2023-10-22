@@ -24,6 +24,7 @@ def login():
     user = User.query.filter_by(EmailAddress=email).first()
 
     if user and check_password_hash(user.Password, password):
+        # Generate the JWT token
         # Set the expiration time (e.g., 1 hour from now)
         expiration_time = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
         token = jwt.encode({'email': email, 'exp': expiration_time}, app.config['JWT_SECRET_KEY'], algorithm='HS256')

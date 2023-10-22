@@ -21,6 +21,7 @@ def confirm_token(token, expiration=3600):
     except Exception:
         return False
 
+## Token based authentication
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
