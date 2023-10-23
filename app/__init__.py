@@ -16,7 +16,13 @@ DB_PASSWORD = environ.get('DB_PASSWORD')
 DB_PORT = environ.get("DB_PORT")
 DB_NAME = environ.get('DB_NAME')
 
+print(f"\nThe DB_HOSTNAME is {DB_HOSTNAME}\n The DB_USERNAME is {DB_USERNAME}\n The DB_PASSWORD is {DB_PASSWORD}\n The DB_PORT is {DB_PORT}\n The DB_NAME is {DB_NAME}\n")
+
 app = Flask(__name__)
+
+@app.route("/")
+def index():
+    return "TSY-IABS Backend Service API has been succesfully connected!"
 
 CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+mysqlconnector://" + DB_USERNAME + ":" + DB_PASSWORD + "@" + DB_HOSTNAME + ":" + DB_PORT + "/" + DB_NAME

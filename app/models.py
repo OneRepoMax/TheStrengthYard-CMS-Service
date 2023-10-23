@@ -43,6 +43,10 @@ class User(db.Model):
             "FirstName": self.FirstName,
             "LastName": self.LastName,
             "Gender": self.Gender,
+            "HomeAddress": self.HomeAddress,
+            "PostalCode": self.PostalCode,
+            "DateOfBirth": self.DateOfBirth,
+            "ContactNo": self.ContactNo,
             "UserType": self.UserType,
             "DisplayPicture": self.DisplayPicture,
             "Verified": self.Verified
@@ -289,7 +293,6 @@ class ClassSlot(db.Model):
             "EndTime": self.EndTime,
             "Duration": self.Duration,
             "CurrentCapacity": self.CurrentCapacity,
-            "ClassId": self.ClassId,
             "Class": self.Class.json()
         }
     
@@ -336,7 +339,18 @@ class Booking(db.Model):
             "ClassSlotId": self.ClassSlotId,
             "User": self.User.jsonMinInfo(),
             "MembershipRecordId": self.MembershipRecordId,
-            "ClassSlot": self.ClassSlot.json()
+            "ClassSlot": self.ClassSlot.jsonWithClass()
+        }
+    
+    def jsonWithUserAndClassAndClassSlot(self):
+        return {
+            "BookingId": self.BookingId,
+            "BookingDateTime": self.BookingDateTime,
+            "Status": self.Status,
+            "UserId": self.UserId,
+            "User": self.User.jsonMinInfo(),
+            "MembershipRecordId": self.MembershipRecordId,
+            "ClassSlot": self.ClassSlot.jsonWithClass(),
         }
     
 class Points(db.Model):
