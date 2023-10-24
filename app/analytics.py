@@ -179,7 +179,8 @@ def getUserDemographics():
             "35-44": 0,
             "45-54": 0,
             "55-64": 0,
-            "65+": 0
+            "65-74": 0,
+            "75+": 0
         }
 
         # Create a dictionary with key value pairs to store the Gender breakdown
@@ -192,7 +193,6 @@ def getUserDemographics():
         # Loop through the allUsers list and derive the age from the DateOfBirth for each User. Then, add the count into the respective Age Group. Also, check the Gender and add the count in the respective gender
         for selectedUser in allUsers:
             # Calculate the age of this User
-            print(selectedUser.DateOfBirth)
             userAge = datetime.now().year - selectedUser.DateOfBirth.year
             
             # Check the age of this User and add the count into the respective Age Group
@@ -208,8 +208,10 @@ def getUserDemographics():
                 totalNumberOfUsersForEachAgeGroup["45-54"] += 1
             elif userAge >= 55 and userAge <= 64:
                 totalNumberOfUsersForEachAgeGroup["55-64"] += 1
-            elif userAge >= 65:
-                totalNumberOfUsersForEachAgeGroup["65+"] += 1
+            elif userAge >= 65 and userAge <= 74:
+                totalNumberOfUsersForEachAgeGroup["65-74"] += 1
+            elif userAge >= 75:
+                totalNumberOfUsersForEachAgeGroup["75+"] += 1
             
             if selectedUser.Gender == "M":
                 genderBreakdown["Male"] += 1
