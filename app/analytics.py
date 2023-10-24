@@ -125,10 +125,7 @@ def getTotalNumberOfBookingsForEachClassInCurrentMonth():
                 totalNumberOfBookingsForAllClasses["Total"] += totalNumberOfBookings
                 totalNumberOfBookingsForAllClasses[className] = totalNumberOfBookings
 
-        # Append the totalNumberOfBookingsForAllClasses dictionary into the list
-        totalNumberOfBookingsForEachClass.append(totalNumberOfBookingsForAllClasses)
-
-        return jsonify(totalNumberOfBookingsForEachClass), 200
+        return jsonify(totalNumberOfBookingsForAllClasses), 200
     except Exception as e:
         return jsonify(
             "An error occurred while retrieving the total number of bookings for each Class. " + str(e)
