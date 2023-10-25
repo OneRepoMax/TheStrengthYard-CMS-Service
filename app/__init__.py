@@ -50,4 +50,5 @@ from .registration import IndemnityForm
 from .payments import Payment
 from .booking import Booking
 from .schedule import Schedule
+from app import analytics
 

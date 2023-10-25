@@ -3,7 +3,7 @@ name: CI/CD Pipeline to deploy TSY-IABS Backend Application to AWS Elastic Beans
 on:
   push:
     branches:
-      - sprint4/booking_staff
+      - main
 
 jobs:
   builddeploy:
