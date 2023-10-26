@@ -24,7 +24,7 @@ def confirm_token(token, expiration=3600):
 ## Token based authentication
 def token_required(f):
     @wraps(f)
-    def decorated(*args, **kwargs):
+    def decorated():
         token = request.headers.get('Authorization')
         token = token[7:]
 
@@ -38,7 +38,7 @@ def token_required(f):
         except jwt.InvalidTokenError:
             return jsonify({'message': 'Invalid token'}), 401
 
-        return f(data, *args, **kwargs)
+        return f(data)
 
     return decorated
 
