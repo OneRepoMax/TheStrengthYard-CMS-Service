@@ -6,6 +6,7 @@ import datetime
 from app.token import confirm_token, generate_token
 from app.email import send_email
 from app.models import User, IndemnityForm, MembershipRecord, Payment, MembershipLog
+from app.token import token_required
 
 @app.route("/user/test")
 def testUser():
@@ -35,7 +36,8 @@ def login():
 
 # Function and Route for getting All Users in the DB
 @app.route("/user")
-def getAllUser():
+@token_required
+def getAllUser(current_user):
     userList = User.query.all()
     
     return jsonify([user.json() for user in userList]), 200
@@ -43,7 +45,8 @@ def getAllUser():
 
 # Function and Route for getting a User by ID
 @app.route("/user/<int:id>")
-def getUserByID(id: int):
+@token_required
+def getUserByID(current_user, id: int):
     userList = User.query.filter_by(UserId=id).all()
     if len(userList):
         return jsonify(
@@ -53,7 +56,8 @@ def getUserByID(id: int):
 
 # Function and Route to Create a new User (USE THIS FOR STAFF 1RATION that does not need indemnity form)
 @app.route("/user", methods=['POST'])
-def createUser():
+@token_required
+def createUser(current_user):
     """
     Sample Request
     {
@@ -149,7 +153,8 @@ def resendVerifyEmail():
     
 # Function and Route to Update a User by ID
 @app.route("/user/<int:id>", methods=['PUT'])
-def updateUser(id: int):
+@token_required
+def updateUser(current_user, id: int):
     """
     Sample Request
     {
@@ -181,7 +186,8 @@ def updateUser(id: int):
     
 #Function and Route to Delete a User by ID
 @app.route("/user/<int:id>", methods=['DELETE'])
-def deleteUser(id: int):
+@token_required
+def deleteUser(current_user, id: int):
     try:
         user = User.query.filter_by(UserId=id).first()
         if user:

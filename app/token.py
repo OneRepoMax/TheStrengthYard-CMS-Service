@@ -24,7 +24,7 @@ def confirm_token(token, expiration=3600):
 ## Token based authentication
 def token_required(f):
     @wraps(f)
-    def decorated():
+    def decorated(*args, **kwargs):
         token = request.headers.get('Authorization')
         token = token[7:]
 
@@ -33,16 +33,17 @@ def token_required(f):
 
         try:
             data = jwt.decode(token, app.config['JWT_SECRET_KEY'], algorithms=['HS256'])
+            current_user = data['email']
         except jwt.ExpiredSignatureError:
             return jsonify({'message': 'Token has expired'}), 401
         except jwt.InvalidTokenError:
             return jsonify({'message': 'Invalid token'}), 401
 
-        return f(data)
+        return f(current_user, *args, **kwargs)
 
     return decorated
 
 @app.route('/protected', methods=['GET'])
 @token_required
-def protected(data):
-    return jsonify({'message': 'This is a protected route', 'email': data['email']}), 200
+def protected(current_user):
+    return jsonify({'message': 'This is a protected route', 'email': current_user}), 200

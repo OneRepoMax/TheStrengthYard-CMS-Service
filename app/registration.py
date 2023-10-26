@@ -113,7 +113,7 @@ def register():
 # Function and Route to get Indemnity Form details by UserId
 @app.route("/indemnityform/<int:UserId>", methods=['GET'])
 @token_required
-def getIndemnityForm(UserId: int):
+def getIndemnityForm(current_user, UserId: int):
     try:
         indemnityForm = IndemnityForm.query.filter_by(UserId=UserId).first()
         if indemnityForm:

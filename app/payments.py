@@ -11,7 +11,7 @@ from app.token import token_required
 # Function and Route to get all Payments
 @app.route('/payments')
 @token_required
-def getPayments():
+def getPayments(current_user):
     paymentList = Payment.query.all()
     if len(paymentList):
         return jsonify(
@@ -30,7 +30,7 @@ def getPayments():
 # Function and Route to get a Payment by PaymentId
 @app.route('/payments/<int:PaymentId>')
 @token_required
-def getPaymentById(PaymentId):
+def getPaymentById(current_user, PaymentId):
     payment = Payment.query.filter_by(PaymentId=PaymentId).first()
     if payment:
         return jsonify(payment.json()), 200
@@ -45,7 +45,7 @@ def getPaymentById(PaymentId):
 # Function and Route to get all Payments by MembershipRecordId
 @app.route('/payments/membershiprecord/<int:MembershipRecordId>')
 @token_required
-def getPaymentsByMembershipRecordId(MembershipRecordId):
+def getPaymentsByMembershipRecordId(current_user, MembershipRecordId):
     paymentList = Payment.query.filter_by(MembershipRecordId=MembershipRecordId).all()
     if len(paymentList):
         return jsonify(
@@ -112,7 +112,7 @@ def refreshMembershipRecords():
 
 # Function and Route for PayPal Webhook to record payments
 @app.route("/recordPayment", methods=['POST'])
-def recordPayment():
+def recordPayment(current_user):
         # # Validate Webhook First
         transmission_id = request.headers.get('PAYPAL-TRANSMISSION-ID')
         transmission_time = request.headers.get('PAYPAL-TRANSMISSION-TIME')
@@ -256,7 +256,7 @@ def extendMembershipRecordDates(MembershipRecordId):
 # Function and Route to get all Payments history by MembershipRecordId
 @app.route('/payments/history/membershiprecord/<int:MembershipRecordId>')
 @token_required
-def getPaymentsHistoryByMembershipRecordId(MembershipRecordId):
+def getPaymentsHistoryByMembershipRecordId(current_user, MembershipRecordId):
     paymentList = Payment.query.filter_by(MembershipRecordId=MembershipRecordId).all()
     if len(paymentList):
         return jsonify(

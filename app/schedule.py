@@ -7,7 +7,7 @@ from app.token import token_required
 # Function and Route for getting All Schedule in the DB
 @app.route("/schedule")
 @token_required
-def getAllSchedule():
+def getAllSchedule(current_user):
     scheduleList = Schedule.query.all()
     
     return jsonify([schedule.jsonWithUser() for schedule in scheduleList]), 200
@@ -16,7 +16,7 @@ def getAllSchedule():
 # Function and Route for getting a Schedule by ID
 @app.route("/schedule/<int:id>")
 @token_required
-def getScheduleByID(id: int):
+def getScheduleByID(current_user, id: int):
     scheduleList = Schedule.query.filter_by(ScheduleId=id).all()
     if len(scheduleList):
         return jsonify([schedule.jsonWithUser() for schedule in scheduleList]), 200
@@ -26,7 +26,7 @@ def getScheduleByID(id: int):
 # Function and Route to create a new schedule
 @app.route("/schedule", methods=['POST'])
 @token_required
-def createSchedule():
+def createSchedule(current_user):
     """
     Sample Request
     {
@@ -57,7 +57,7 @@ def createSchedule():
 #Function and Route to update a schedule
 @app.route("/schedule/<int:id>", methods=['PUT'])
 @token_required
-def updateSchedule():
+def updateSchedule(current_user):
      
     """
     Sample Request
@@ -95,7 +95,7 @@ def updateSchedule():
 # Function and Route to delete a schedule
 @app.route("/schedule/<int:id>", methods=['DELETE'])
 @token_required
-def deleteSchedule(id: int):
+def deleteSchedule(current_user, id: int):
     schedule = Schedule.query.filter_by(ScheduleId=id).first()
     if schedule:
         db.session.delete(schedule)
