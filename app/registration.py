@@ -7,6 +7,7 @@ from app.token import confirm_token, generate_token
 from app.email import send_email
 from app.user import verifyEmail
 from app.models import User, IndemnityForm
+from app.token import token_required
 
 # Function and Route to Register a new User with completed Indemnity Form
 @app.route("/register", methods=['POST'])
@@ -111,6 +112,7 @@ def register():
 
 # Function and Route to get Indemnity Form details by UserId
 @app.route("/indemnityform/<int:UserId>", methods=['GET'])
+@token_required
 def getIndemnityForm(UserId: int):
     try:
         indemnityForm = IndemnityForm.query.filter_by(UserId=UserId).first()

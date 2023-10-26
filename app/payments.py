@@ -6,9 +6,11 @@ import requests
 import json
 from app.auth import get_access_token
 from app.models import MembershipRecord, MembershipLog, Memberships, Payment, Points
+from app.token import token_required
 
 # Function and Route to get all Payments
 @app.route('/payments')
+@token_required
 def getPayments():
     paymentList = Payment.query.all()
     if len(paymentList):
@@ -27,6 +29,7 @@ def getPayments():
 
 # Function and Route to get a Payment by PaymentId
 @app.route('/payments/<int:PaymentId>')
+@token_required
 def getPaymentById(PaymentId):
     payment = Payment.query.filter_by(PaymentId=PaymentId).first()
     if payment:
@@ -41,6 +44,7 @@ def getPaymentById(PaymentId):
 
 # Function and Route to get all Payments by MembershipRecordId
 @app.route('/payments/membershiprecord/<int:MembershipRecordId>')
+@token_required
 def getPaymentsByMembershipRecordId(MembershipRecordId):
     paymentList = Payment.query.filter_by(MembershipRecordId=MembershipRecordId).all()
     if len(paymentList):
@@ -251,6 +255,7 @@ def extendMembershipRecordDates(MembershipRecordId):
 
 # Function and Route to get all Payments history by MembershipRecordId
 @app.route('/payments/history/membershiprecord/<int:MembershipRecordId>')
+@token_required
 def getPaymentsHistoryByMembershipRecordId(MembershipRecordId):
     paymentList = Payment.query.filter_by(MembershipRecordId=MembershipRecordId).all()
     if len(paymentList):
