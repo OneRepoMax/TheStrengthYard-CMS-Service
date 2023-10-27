@@ -43,6 +43,7 @@ mail = Mail(app)
 
 app.config['SECURITY_PASSWORD_SALT'] = environ.get("SECURITY_PASSWORD_SALT", default="very-important")
 app.config['SECRET_KEY'] = 'fdkjshfhjsdfdskfdsfdcbsjdkfdsdf'
+app.config['JWT_SECRET_KEY'] = environ.get("JWT_SECRET_KEY")
 
 from .user import User
 from .membership import Memberships

@@ -5,17 +5,20 @@ import requests, json
 from os import environ
 from app.auth import get_access_token
 from app.models import Memberships, MembershipRecord, MembershipLog, User, MembershipClassMapping, Class
+from app.token import token_required
 
 client_id = environ.get('PAYPAL_CLIENT_ID')
 client_secret = environ.get('PAYPAL_CLIENT_SECRET')
 
 @app.route("/memberships/test")
-def testMembership():
+@token_required
+def testMembership(current_user):
     return "membership route is working"
 
 # Function and Route for getting All Memberships in the DB
 @app.route("/memberships")
-def getAllMemberships():
+@token_required
+def getAllMemberships(current_user):
     membershipList = Memberships.query.all()
     if len(membershipList):
         return jsonify(
@@ -27,7 +30,8 @@ def getAllMemberships():
 
 # Function and Route to get all Memberships that are 'Public' under Visibility attribute (For Users to see)
 @app.route("/memberships/public")
-def getAllPublicMemberships():
+@token_required
+def getAllPublicMemberships(current_user):
     membershipList = Memberships.query.filter_by(Visibility="Public").all()
     if len(membershipList):
         return jsonify(
@@ -44,7 +48,8 @@ def getAllPublicMemberships():
 
 # Function and Route for getting a Membership by ID
 @app.route("/memberships/<int:id>")
-def getMembershipByID(id: int):
+@token_required
+def getMembershipByID(current_user, id: int):
     membershipList = Memberships.query.filter_by(MembershipTypeId=id).all()
     if len(membershipList):
         return jsonify(
@@ -60,7 +65,8 @@ def getMembershipByID(id: int):
 
 # Function and Route to Create a new Membership (With PayPal Integration)
 @app.route("/memberships", methods=['POST'])
-def createMembership():
+@token_required
+def createMembership(current_user):
     """
     Sample Request
     {
@@ -183,7 +189,8 @@ def createMembership():
 
 # Function and Route to Get all Memberships (Products) in PayPal
 @app.route("/memberships/paypal")
-def getAllMembershipsPayPal():
+@token_required
+def getAllMembershipsPayPal(current_user):
     # Use the access token to make the API call
     access_token = get_access_token()
 
@@ -217,7 +224,8 @@ def getAllMembershipsPayPal():
     
 # Function and Route to list all Plans (Memberships) in PayPal
 @app.route("/memberships/paypal/plans")
-def getAllPlansPayPal():
+@token_required
+def getAllPlansPayPal(current_user):
     # Use the access token to make the API call
     access_token = get_access_token()
 
@@ -254,7 +262,8 @@ def getAllPlansPayPal():
 
 # Function and Route to Update a Membership by ID
 @app.route("/memberships/<int:id>", methods=['PUT'])
-def updateMembership(id: int):
+@token_required
+def updateMembership(current_user, id: int):
     """
     Sample Request
     {
@@ -294,7 +303,8 @@ def updateMembership(id: int):
 
 #Function and Route to Delete a Membership by ID
 @app.route("/memberships/<int:id>", methods=['DELETE'])
-def deleteMembership(id: int):
+@token_required
+def deleteMembership(current_user, id: int):
     try:
         membership = Memberships.query.filter_by(MembershipTypeId=id).first()
         print(membership.json())
@@ -352,7 +362,8 @@ def deleteMembership(id: int):
 
 #Function and Route to get the Membership for every User
 @app.route("/membershiprecord")
-def getAllMembershipRecords():
+@token_required
+def getAllMembershipRecords(current_user):
     membershipRecordList = MembershipRecord.query.all()
     if len(membershipRecordList):
         return jsonify(
@@ -369,7 +380,8 @@ def getAllMembershipRecords():
 
 # Function and Route to get the all Membership Records by individual User ID
 @app.route("/membershiprecord/<int:id>")
-def getMembershipRecordsByID(id: int):
+@token_required
+def getMembershipRecordsByID(current_user, id: int):
     membershipRecordList = MembershipRecord.query.filter_by(UserId=id).all()
     if len(membershipRecordList):
         return jsonify(
@@ -385,7 +397,8 @@ def getMembershipRecordsByID(id: int):
 
 # Function and Route to get all Membership Records by Membership Type ID
 @app.route("/membershiprecord/membership/<int:id>")
-def getMembershipRecordsByMembershipID(id: int):
+@token_required
+def getMembershipRecordsByMembershipID(current_user, id: int):
     membershipRecordList = MembershipRecord.query.filter_by(MembershipTypeId=id).all()
     if len(membershipRecordList):
         return jsonify(
@@ -402,7 +415,8 @@ def getMembershipRecordsByMembershipID(id: int):
 
 # Function and Route to get a specific Membership Record by MembershipRecordId
 @app.route("/membershiprecord/record/<int:id>")
-def getMembershipRecordByRecordID(id: int):
+@token_required
+def getMembershipRecordByRecordID(current_user, id: int):
     membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=id).first()
     if membershipRecord:
         return jsonify(
@@ -419,7 +433,8 @@ def getMembershipRecordByRecordID(id: int):
 
 #Function and Route to create a new Membership Record
 @app.route("/membershiprecord", methods=['POST'])
-def createMembershipRecord():
+@token_required
+def createMembershipRecord(current_user):
     """
     Sample Request
     {
@@ -494,7 +509,8 @@ def createMembershipRecord():
     
 # Function and Route to Update a Membership Record by ID
 @app.route("/membershiprecord/<int:id>", methods=['PUT'])
-def updateMembershipRecord(id: int):
+@token_required
+def updateMembershipRecord(current_user, id: int):
     """
     Sample Request
     {
@@ -536,7 +552,8 @@ def updateMembershipRecord(id: int):
     
 # Function and Route to Delete a Membership Record by ID
 @app.route("/membershiprecord/<int:id>", methods=['DELETE'])
-def deleteMembershipRecord(id: int):
+@token_required
+def deleteMembershipRecord(current_user, id: int):
     try:
         # Check if the Membership Record exists first
         membershipRecord = MembershipRecord.query.filter_by(MembershipRecordId=id).first()
@@ -596,7 +613,8 @@ def deleteMembershipRecord(id: int):
     
 # Function and Route to create a new Membership Log
 @app.route("/membershiplog", methods=['POST'])
-def createMembershipLog():
+@token_required
+def createMembershipLog(current_user):
     """
     Sample PAUSE Request
     {
@@ -833,7 +851,8 @@ def createMembershipLog():
     
 # Function and Route to get all Membership Logs by Membership Record ID
 @app.route("/membershiplog/<int:id>")
-def getMembershipLogsByMembershipRecordID(id: int):
+@token_required
+def getMembershipLogsByMembershipRecordID(current_user, id: int):
     membershipLogList = MembershipLog.query.filter_by(MembershipRecordId=id).all()
     if len(membershipLogList):
         return jsonify(
@@ -850,7 +869,8 @@ def getMembershipLogsByMembershipRecordID(id: int):
 
 # Function and Route to get a specific Membership Log by MembershipLogId
 @app.route("/membershiplog/log/<int:id>")
-def getMembershipLogByLogID(id: int):
+@token_required
+def getMembershipLogByLogID(current_user, id: int):
     membershipLog = MembershipLog.query.filter_by(MembershipLogId=id).first()
     if membershipLog:
         return jsonify(
@@ -867,7 +887,8 @@ def getMembershipLogByLogID(id: int):
 
 # Function and Route to Delete a specific Membership Log by MembershipLogId
 @app.route("/membershiplog/<int:id>", methods=['DELETE'])
-def deleteMembershipLog(id: int):
+@token_required
+def deleteMembershipLog(current_user, id: int):
     try:
         membershipLog = MembershipLog.query.filter_by(MembershipLogId=id).first()
         if membershipLog:
@@ -895,7 +916,8 @@ def deleteMembershipLog(id: int):
 
 # Function and Route to get Membership Records based on the Active Status filter
 @app.route("/membershiprecord/filter", methods=['POST'])
-def getMembershipRecordsByFilter():
+@token_required
+def getMembershipRecordsByFilter(current_user):
     """
     SAMPLE REQUEST for "Active" Status
     {
@@ -932,7 +954,8 @@ def getMembershipRecordsByFilter():
 
 # Function and Route to get all Membership Logs across all Membership Records from the User Id
 @app.route("/membershiplog/user/<int:id>")
-def getMembershipLogsByUserID(id: int):
+@token_required
+def getMembershipLogsByUserID(current_user, id: int):
     # Get all Membership Records of the given User Id
     membershipRecordList = MembershipRecord.query.filter_by(UserId=id).all()
     print(membershipRecordList)
@@ -970,7 +993,8 @@ def getMembershipLogsByUserID(id: int):
 
 # Function and Route to create a new MembershipClassMapping
 @app.route("/membershipclassmapping", methods=['POST'])
-def createMembershipClassMapping():
+@token_required
+def createMembershipClassMapping(current_user):
     """
     Sample Request
     {
@@ -1015,7 +1039,8 @@ def createMembershipClassMapping():
     
 # Function and Route to get all MembershipClassMappings
 @app.route("/membershipclassmapping")
-def getAllMembershipClassMappings():
+@token_required
+def getAllMembershipClassMappings(current_user):
     membershipClassMappingList = MembershipClassMapping.query.all()
     if len(membershipClassMappingList):
         return jsonify(
@@ -1025,7 +1050,8 @@ def getAllMembershipClassMappings():
 
 # Function and Route to Delete a MembershipClassMapping by ID
 @app.route("/membershipclassmapping/<int:id>", methods=['DELETE'])
-def deleteMembershipClassMapping(id: int):
+@token_required
+def deleteMembershipClassMapping(current_user, id: int):
     try:
         membershipClassMapping = MembershipClassMapping.query.filter_by(MembershipClassMappingId=id).first()
         if membershipClassMapping:

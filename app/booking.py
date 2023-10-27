@@ -5,10 +5,12 @@ import requests, json
 from app.models import MembershipRecord, Class, ClassSlot, Booking, User, Points, Memberships, MembershipClassMapping
 from app.email import send_email
 from app.user import verifyEmail
+from app.token import token_required
 
 # Function and Route to Create a new Class
 @app.route("/class", methods=['POST'])
-def createClass():
+@token_required
+def createClass(current_user):
     """
     Sample Request
     {
@@ -43,13 +45,15 @@ def createClass():
 
 # Function and Route to get all Classes
 @app.route("/class")
-def getAllClass():
+@token_required
+def getAllClass(current_user):
     classList = Class.query.all()
     return jsonify([c.json() for c in classList]), 200
 
 # Function and Route to get a Class by ID
 @app.route("/class/<int:id>")
-def getClassByID(id: int):
+@token_required
+def getClassByID(current_user, id: int):
     classList = Class.query.filter_by(ClassId=id).all()
     if len(classList):
         return jsonify(
@@ -59,7 +63,8 @@ def getClassByID(id: int):
 
 # Function and Route to update a Class by ID
 @app.route("/class/<int:id>", methods=['PUT'])
-def updateClassByID(id: int):
+@token_required
+def updateClassByID(current_user, id: int):
     """
     Sample Request
     {
@@ -97,7 +102,8 @@ def updateClassByID(id: int):
 
 # Function and Route to update a Class Slot by ID
 @app.route("/classSlot/<int:id>", methods=['PUT'])
-def updateClassSlotByID(id: int):
+@token_required
+def updateClassSlotByID(current_user, id: int):
     """
     Sample Request
     {
@@ -135,7 +141,8 @@ def updateClassSlotByID(id: int):
 
 # Function and Route to delete a Class by ID
 @app.route("/class/<int:id>", methods=['DELETE'])
-def deleteClassByID(id: int):
+@token_required
+def deleteClassByID(current_user, id: int):
     # Check if class exists
     classExists = Class.query.filter_by(ClassId=id).first()
     if not classExists:
@@ -149,7 +156,8 @@ def deleteClassByID(id: int):
 
 # Function and Route to create new Class Slots by Class ID
 @app.route("/class/<int:id>/classSlot", methods=['POST'])
-def createClassSlotByClassID(id: int):
+@token_required
+def createClassSlotByClassID(current_user, id: int):
     """
     Sample Request
     {
@@ -207,7 +215,8 @@ def createClassSlotByClassID(id: int):
 
 # Function and Route to get all Class Slots by Class ID
 @app.route("/class/<int:id>/classSlot")
-def getAllClassSlotByClassID(id: int):
+@token_required
+def getAllClassSlotByClassID(current_user, id: int):
     classSlotList = ClassSlot.query.filter_by(ClassId=id).all()
     # Return all class slots with the given class ID, if not found, return 406
     if len(classSlotList):
@@ -218,7 +227,8 @@ def getAllClassSlotByClassID(id: int):
 
 # Function and Route to get all Class Slots from TODAY onwards
 @app.route("/classSlot")
-def getAllClassSlot():
+@token_required
+def getAllClassSlot(current_user):
     # Get the current date and time
     now = datetime.now()
 
@@ -234,7 +244,8 @@ def getAllClassSlot():
 
 # Function and Route to get a specific Class Slot by Class Slot ID
 @app.route("/classSlot/<int:id>")
-def getClassSlotByID(id: int):
+@token_required
+def getClassSlotByID(current_user, id: int):
     classSlot = ClassSlot.query.filter_by(ClassSlotId=id).first()
     # Return the class slot with the given class slot ID, if not found, return 406
     if classSlot:
@@ -245,7 +256,8 @@ def getClassSlotByID(id: int):
 
 # Function and Route to get Class Slots by Date
 @app.route("/classSlot/slots/<string:date>")
-def getClassSlotByDate(date: str):
+@token_required
+def getClassSlotByDate(current_user, date: str):
     # Get today's date
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -268,7 +280,8 @@ def getClassSlotByDate(date: str):
 
 # Function and Route to delete a ClassSlot by ID
 @app.route("/classSlot/<int:id>", methods=['DELETE'])
-def deleteClassSlotByID(id: int):
+@token_required
+def deleteClassSlotByID(current_user, id: int):
     # Check if class exists
     classExists = ClassSlot.query.filter_by(ClassSlotId=id).first()
     if not classExists:
@@ -282,7 +295,8 @@ def deleteClassSlotByID(id: int):
 
 # Function and Route to delete a given list of ClassSlots
 @app.route("/classSlot/delete", methods=['POST'])
-def deleteClassSlots():
+@token_required
+def deleteClassSlots(current_user):
     """
     Sample Request
     {
@@ -311,7 +325,8 @@ def deleteClassSlots():
 
 # Function and Route to create a new Booking
 @app.route("/booking", methods=['POST'])
-def createNewBooking():
+@token_required
+def createNewBooking(current_user):
     """
     Sample Request
     {
@@ -422,13 +437,15 @@ def createNewBooking():
 
 # Function and Route to get ALL Bookings
 @app.route("/booking")
-def getAllBookings():
+@token_required
+def getAllBookings(current_user):
     bookingList = Booking.query.all()
     return jsonify([b.jsonWithUserAndClassSlot() for b in bookingList]), 200
 
 # Function and Route to get all Bookings by User ID
 @app.route("/booking/user/<int:id>")
-def getAllBookingsByUserID(id: int):
+@token_required
+def getAllBookingsByUserID(current_user, id: int):
     bookingList = Booking.query.filter_by(UserId=id).all()
     # If there are no bookings, return 406
     if not len(bookingList):
@@ -443,7 +460,8 @@ def getAllBookingsByUserID(id: int):
 
 # Function and Route to get a specific Booking by Booking ID
 @app.route("/booking/<int:id>")
-def getBookingByID(id: int):
+@token_required
+def getBookingByID(current_user, id: int):
     booking = Booking.query.filter_by(BookingId=id).first()
     # Return the booking with the given booking ID, if not found, return 406
     if booking:
@@ -454,7 +472,8 @@ def getBookingByID(id: int):
 
 # Function and Route to get all Bookings by Class Slot ID
 @app.route("/booking/classSlot/<int:id>")
-def getAllBookingsByClassSlotID(id: int):
+@token_required
+def getAllBookingsByClassSlotID(current_user, id: int):
     bookingList = Booking.query.filter_by(ClassSlotId=id).all()
     # Return all bookings with the given class slot ID, if not found, return 406
     if len(bookingList):
@@ -465,7 +484,8 @@ def getAllBookingsByClassSlotID(id: int):
     
 # Function and Route to cancel a Booking by Booking ID
 @app.route("/booking/cancel/<int:id>")
-def cancelBookingByID(id: int):
+@token_required
+def cancelBookingByID(current_user, id: int):
     # Check if booking exists
     bookingExists = Booking.query.filter_by(BookingId=id).first()
     if not bookingExists:
@@ -546,7 +566,8 @@ def cancelBookingByID(id: int):
 
 # Function and Route to create a new Booking 2
 @app.route("/booking2", methods=['POST'])
-def createNewBooking2():
+@token_required
+def createNewBooking2(current_user):
     """
     Sample Request
     {
@@ -651,7 +672,8 @@ def createNewBooking2():
     
 # Function and Route to get Points history by Membership Record ID (For Staff view)
 @app.route("/pointsHistory/<int:id>")
-def getPointsHistoryByMembershipRecordID(id: int):
+@token_required
+def getPointsHistoryByMembershipRecordID(current_user, id: int):
     pointsHistoryList = Points.query.filter_by(MembershipRecordId=id).all()
     # Return all points history with the given membership record ID, if not found, return 406
     if len(pointsHistoryList):
@@ -662,7 +684,8 @@ def getPointsHistoryByMembershipRecordID(id: int):
 
 # Function and Route to get Points history by Membership Record ID (For User view)
 @app.route("/pointsHistory/user/<int:id>")
-def getPointsHistoryByMembershipRecordIDForUser(id: int):
+@token_required
+def getPointsHistoryByMembershipRecordIDForUser(current_user, id: int):
     # Get Points list using MembershipRecordId, but Status must be "Paid"
     pointsHistoryList = Points.query.filter_by(MembershipRecordId=id).filter_by(Status="Paid").all()
     # Return all points history with the given membership record ID, if not found, return 406
