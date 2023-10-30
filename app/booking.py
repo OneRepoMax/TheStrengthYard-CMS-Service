@@ -164,18 +164,18 @@ def createClassSlotByClassID(current_user, id: int):
         "Day": "Sunday",
         "StartTime": "09:00:00",
         "EndTime": "10:00:00",
+        "StartingFrom": "2023-11-01",
         "RecurringUntil": "2023-12-31"
     }
     """
     data = request.get_json()
-    # Get the current date and time
-    now = datetime.now()
 
     # Get the day, start time, end time and recurring until from the request
     day = data.get("Day")
     startTime = data.get("StartTime")
     endTime = data.get("EndTime")
     recurringUntil = data.get("RecurringUntil")
+    startingFrom = data.get("StartingFrom")
     
     # Compute the duration in minutes (integer) by subtracting the given end time with the given start time
     duration = int(endTime[:2]) * 60 + int(endTime[3:5]) - int(startTime[:2]) * 60 - int(startTime[3:5])
@@ -183,31 +183,30 @@ def createClassSlotByClassID(current_user, id: int):
     # Create empty list to store the created class slots which is to be returned later
     classSlotList = []
 
-    # Using the current date and time, we create multiple class slots (based on the given day, start time, end time) until the given recurring until date, and add them to the database
-    while now.strftime("%Y-%m-%d") <= recurringUntil:
-        # Check if the current day is the same as the given day
-        if now.strftime("%A") == day:
+    # Using the given startingFrom date, we create multiple class slots (based on the given day, start time, end time) until the given recurring until date, and add them to the database
+    while startingFrom <= recurringUntil:
+        # If the given day is the same as the startingFrom date's day, we create a new class slot
+        if day == datetime.strptime(startingFrom, "%Y-%m-%d").strftime("%A"):
             # Create new class slot
             newClassSlot = ClassSlot(
-                ClassId=id,
                 Day=day,
-                # StartTime is the current date and time with the given start time
-                StartTime=now.strftime("%Y-%m-%d") + " " + startTime,
-                # EndTime is the current date and time with the given end time
-                EndTime=now.strftime("%Y-%m-%d") + " " + endTime,
+                StartTime=startingFrom + ' ' + startTime,
+                EndTime=startingFrom + ' ' + endTime,
                 Duration=duration,
-                CurrentCapacity=0
+                CurrentCapacity=0,
+                ClassId=id
             )
-        
+
             # Add new class slot to database
             db.session.add(newClassSlot)
             db.session.commit()
 
-            # Add new class slot to the list
+            # Add new class slot to classSlotList
             classSlotList.append(newClassSlot.json())
 
-        # Increment the current date by 1 day
-        now += timedelta(days=1)
+        # Increment the startingFrom date by 1 day
+        startingFrom = datetime.strptime(startingFrom, "%Y-%m-%d").date() + timedelta(days=1)
+        startingFrom = startingFrom.strftime("%Y-%m-%d")
 
     return jsonify(
         classSlotList
@@ -442,14 +441,19 @@ def getAllBookings(current_user):
     bookingList = Booking.query.all()
     return jsonify([b.jsonWithUserAndClassSlot() for b in bookingList]), 200
 
-# Function and Route to get all Bookings by User ID
+# Function and Route to get all upcoming Bookings by User ID
 @app.route("/booking/user/<int:id>")
 @token_required
 def getAllBookingsByUserID(current_user, id: int):
-    bookingList = Booking.query.filter_by(UserId=id).all()
+    # Get today's date
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    # Get all of the User's bookings from today onwards by using the given user ID
+    bookingList = Booking.query.filter_by(UserId=id).filter(Booking.BookingDateTime >= today + ' 00:00:00').all()
+
     # If there are no bookings, return 406
     if not len(bookingList):
-        return "There are no bookings for User ID: " + str(id), 406
+        return "There are no upcoming bookings for User ID: " + str(id), 406
     else:
         # Sort the booking list by Class Slot Start Time in descending order, so that the latest booking will be at the top
         bookingList.sort(key=lambda x: x.ClassSlot.StartTime, reverse=True)
@@ -457,6 +461,43 @@ def getAllBookingsByUserID(current_user, id: int):
             [b.jsonWithUserAndClassSlot() for b in bookingList]
         ), 200
 
+# Function and Route to get all PAST Bookings by User ID
+@app.route("/booking/user/past/<int:id>")
+@token_required
+def getAllPastBookingsByUserID(current_user, id: int):
+    # Get today's date
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    # Get all of the User's bookings from today onwards by using the given user ID. The Status of the Booking must be "Confirmed"
+    bookingList = Booking.query.filter_by(UserId=id).filter(Booking.BookingDateTime < today + ' 00:00:00').filter_by(Status="Confirmed").all()
+
+    # If there are no bookings, return 406
+    if not len(bookingList):
+        return "There are past no bookings for User ID: " + str(id), 406
+    else:
+        # Sort the booking list by Class Slot Start Time in descending order, so that the latest booking will be at the top
+        bookingList.sort(key=lambda x: x.ClassSlot.StartTime, reverse=True)
+        return jsonify(
+            [b.jsonWithUserAndClassSlot() for b in bookingList]
+        ), 200
+    
+# Function and Route to get all CANCELLED Bookings by User ID
+@app.route("/booking/user/cancelled/<int:id>")
+@token_required
+def getAllCancelledBookingsByUserID(current_user, id: int):
+    # Get all of the User's bookings that has status "Cancelled" by using the given user ID
+    bookingList = Booking.query.filter_by(UserId=id).filter_by(Status="Cancelled").all()
+
+    # If there are no bookings, return 406
+    if not len(bookingList):
+        return "There are no cancelled bookings for User ID: " + str(id), 406
+    else:
+        # Sort the booking list by Class Slot Start Time in descending order, so that the latest booking will be at the top
+        bookingList.sort(key=lambda x: x.ClassSlot.StartTime, reverse=True)
+        return jsonify(
+            [b.jsonWithUserAndClassSlot() for b in bookingList]
+        ), 200
+    
 
 # Function and Route to get a specific Booking by Booking ID
 @app.route("/booking/<int:id>")
