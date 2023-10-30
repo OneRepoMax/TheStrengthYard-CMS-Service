@@ -581,7 +581,7 @@ def cancelBookingByID(current_user, id: int):
         now = datetime.now()
 
         # Get the class slot's start time
-        sgclassSlotStartTime = selectedClassSlot.StartTime
+        classSlotStartTime = selectedClassSlot.StartTime
 
         # Compute the difference between the current date time and the class slot's start time
         difference = classSlotStartTime - now
