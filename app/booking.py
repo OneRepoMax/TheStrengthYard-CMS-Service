@@ -6,7 +6,6 @@ from app.models import MembershipRecord, Class, ClassSlot, Booking, User, Points
 from app.email import send_email
 from app.user import verifyEmail
 from app.token import token_required
-from app.timezone import sg_tz_dateformat
 
 # Function and Route to Create a new Class
 @app.route("/class", methods=['POST'])
@@ -456,18 +455,11 @@ def getAllBookingsByUserID(current_user, id: int):
     if not len(bookingList):
         return "There are no upcoming bookings for User ID: " + str(id), 406
     else:
-         # Sort the booking list by Class Slot Start Time in descending order, so that the latest booking will be at the top
+        # Sort the booking list by Class Slot Start Time in descending order, so that the latest booking will be at the top
         bookingList.sort(key=lambda x: x.ClassSlot.StartTime, reverse=True)
-        
-        # Create a JSON-friendly dictionary with dates formatted in GMT+8
-        response_data = [b.jsonWithUserAndClassSlot() for b in bookingList]
-
-        for entry in response_data:
-            entry["BookingDateTime"] = sg_tz_dateformat(entry["BookingDateTime"])
-            entry["ClassSlot"]["StartTime"] = sg_tz_dateformat(entry["ClassSlot"]["StartTime"])
-            entry["ClassSlot"]["EndTime"] = sg_tz_dateformat(entry["ClassSlot"]["EndTime"])
-        
-        return jsonify(response_data), 200
+        return jsonify(
+            [b.jsonWithUserAndClassSlot() for b in bookingList]
+        ), 200
 
 # Function and Route to get all PAST Bookings by User ID
 @app.route("/booking/user/past/<int:id>")
@@ -485,13 +477,9 @@ def getAllPastBookingsByUserID(current_user, id: int):
     else:
         # Sort the booking list by Class Slot Start Time in descending order, so that the latest booking will be at the top
         bookingList.sort(key=lambda x: x.ClassSlot.StartTime, reverse=True)
-        response_data = [b.jsonWithUserAndClassSlot() for b in bookingList]
-        for entry in response_data:
-            entry["BookingDateTime"] = sg_tz_dateformat(entry["BookingDateTime"])
-            entry["ClassSlot"]["StartTime"] = sg_tz_dateformat(entry["ClassSlot"]["StartTime"])
-            entry["ClassSlot"]["EndTime"] = sg_tz_dateformat(entry["ClassSlot"]["EndTime"])
-
-        return jsonify(response_data), 200
+        return jsonify(
+            [b.jsonWithUserAndClassSlot() for b in bookingList]
+        ), 200
     
 # Function and Route to get all CANCELLED Bookings by User ID
 @app.route("/booking/user/cancelled/<int:id>")
@@ -506,13 +494,10 @@ def getAllCancelledBookingsByUserID(current_user, id: int):
     else:
         # Sort the booking list by Class Slot Start Time in descending order, so that the latest booking will be at the top
         bookingList.sort(key=lambda x: x.ClassSlot.StartTime, reverse=True)
-        response_data = [b.jsonWithUserAndClassSlot() for b in bookingList]
-        for entry in response_data:
-            entry["BookingDateTime"] = sg_tz_dateformat(entry["BookingDateTime"])
-            entry["ClassSlot"]["StartTime"] = sg_tz_dateformat(entry["ClassSlot"]["StartTime"])
-            entry["ClassSlot"]["EndTime"] = sg_tz_dateformat(entry["ClassSlot"]["EndTime"])
-
-        return jsonify(response_data), 200
+        return jsonify(
+            [b.jsonWithUserAndClassSlot() for b in bookingList]
+        ), 200
+    
 
 # Function and Route to get a specific Booking by Booking ID
 @app.route("/booking/<int:id>")
