@@ -72,7 +72,7 @@ def refreshMembershipRecords():
 
     # Using this membershipRecordList, for each Membership Record, check if the membership record has expired by using the current date and the Membership Record's End Date. 
     for membershipRecord in membershipRecordList:
-        # If Membership Record's Active Status is NOT "Expired" or "Terminated", skip this Membership Record
+        # If Membership Record's Active Status is NOT "Expired" or "Terminated", we continue to check if the Membership Record has expired
         if membershipRecord.ActiveStatus != "Expired" and membershipRecord.ActiveStatus != "Terminated":
             # IF Membership Record's End Date is more than 3 days before the current date, then first check the latest Payment made for this Membership Record. 
             # !!!(This is used when the user have not made payment even after the 3 days grace period)!!! 
