@@ -112,7 +112,7 @@ def refreshMembershipRecords():
 
 # Function and Route for PayPal Webhook to record payments
 @app.route("/recordPayment", methods=['POST'])
-def recordPayment(current_user):
+def recordPayment():
         # # Validate Webhook First
         transmission_id = request.headers.get('PAYPAL-TRANSMISSION-ID')
         transmission_time = request.headers.get('PAYPAL-TRANSMISSION-TIME')
