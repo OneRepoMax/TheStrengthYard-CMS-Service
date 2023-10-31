@@ -277,7 +277,7 @@ def getClassSlotByDate(current_user, date: str):
         ), 200
     return "There are no class slots on this date", 406
 
-# Function and Route to delete a ClassSlot by ID
+# Function and Route to CANCEL a ClassSlot by ID, and send email notifications to all users who have booked the class slot, and refund their points
 @app.route("/classSlot/<int:id>", methods=['DELETE'])
 @token_required
 def deleteClassSlotByID(current_user, id: int):
@@ -286,11 +286,57 @@ def deleteClassSlotByID(current_user, id: int):
     if not classExists:
         return "There are no such class with ID: " + str(id), 406
 
-    # Delete class
+    # Get all Bookings with the given ClassSlotId
+    bookingList = Booking.query.filter_by(ClassSlotId=id).all()
+
+    # If there are bookings, we need to refund the user's points and send them an email notification
+    if len(bookingList):
+        # For each booking, we need to refund the user's points and send them an email notification
+        for booking in bookingList:
+            # If the status of this booking is "Confirmed", we proceed with the function
+            if booking.Status == "Confirmed":
+                # Update the booking status to "Cancelled"
+                booking.Status = "Cancelled"
+
+                # Add updated booking to database
+                db.session.add(booking)
+                db.session.commit()
+
+                # Get the MembershipRecordId from the booking
+                membershipRecordId = booking.MembershipRecordId
+
+                # Using the selectedClassSlot's StartTime, we retrive the corresponding Points row from the Points table in which the selectedClassSlot's StartTime is between the PointsStartDate and PointsEndDate. The Points row should also match the MembershipRecordId being used above
+                selectedPoints = Points.query.filter(Points.PointsStartDate <= classExists.StartTime).filter(Points.PointsEndDate >= classExists.StartTime).filter_by(MembershipRecordId=membershipRecordId).first()
+
+                # If the selectedPoints is not found, return 406
+                if not selectedPoints:
+                    return "There are no valid points record for the selected class slot to refund the points", 406
+
+                # If selectedPoints is found, update the selectedPoints Balance by adding 1
+                selectedPoints.Balance += 1
+
+                # Add updated selectedPoints to database
+                db.session.add(selectedPoints)
+                db.session.commit()
+
+                # Send an email notification to the user and gym owner about the booking cancellation.
+                user = User.query.filter_by(UserId=booking.UserId).first()
+                gymOwner = "tsy.fyp.2023@gmail.com"
+
+                emailMessage = "Our apologies, we had to cancel this class due to unforeseen circumstances, thus your booking has been cancelled. You have been refunded 1 point. Your current points balance is " + str(selectedPoints.Balance) + "."
+
+                html = render_template("/cancel_booking.html", user_first_name=user.FirstName, user_last_name=user.LastName, booking_id=booking.BookingId, booking_date_time=booking.BookingDateTime, class_name=classExists.Class.ClassName, class_start_time=classExists.StartTime, class_day= classExists.Day, duration=classExists.Duration, message=emailMessage, points_refunded=1, points_balance=selectedPoints.Balance)
+
+                subject = "[NOTICE] Class Has Been Cancelled!"
+
+                send_email(gymOwner, subject, html)
+                send_email(user.EmailAddress, subject, html)
+
+    # Delete class slot
     db.session.delete(classExists)
     db.session.commit()
 
-    return "Class Slot with ID: " + str(id) + " has been deleted.", 200
+    return "Class Slot with ID: " + str(id) + " has been deleted. All users who had an existing booking for this Class Slot has been notified by email and points has been refunded to them.", 200
 
 # Function and Route to delete a given list of ClassSlots
 @app.route("/classSlot/delete", methods=['POST'])
