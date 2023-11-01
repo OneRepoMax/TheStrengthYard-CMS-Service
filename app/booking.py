@@ -487,22 +487,25 @@ def getAllBookings(current_user):
     bookingList = Booking.query.all()
     return jsonify([b.jsonWithUserAndClassSlot() for b in bookingList]), 200
 
-# Function and Route to get all upcoming Bookings by User ID
+# Function and Route to get all UPCOMING Bookings by User ID
 @app.route("/booking/user/<int:id>")
 @token_required
 def getAllBookingsByUserID(current_user, id: int):
-    # Get today's date
-    today = datetime.now().strftime("%Y-%m-%d")
+    # Retrieve a list of ClassSlot IDs that are from today onwards based on the ClassSlot's StartTime and current date time
+    classSlotList = ClassSlot.query.filter(ClassSlot.StartTime >= datetime.now().strftime("%Y-%m-%d %H:%M:%S")).all()
 
-    # Get all of the User's bookings from today onwards by using the given user ID
-    bookingList = Booking.query.filter_by(UserId=id).filter(Booking.BookingDateTime >= today + ' 00:00:00').all()
+    # Extract all of the ClassSlot IDs from the classSlotList
+    classSlotIdList = [c.ClassSlotId for c in classSlotList]
+
+    # Get all of the User's bookings using the given User Id, and the status of the Booking must be "Confirmed". The ClassSlotId must be in the list of ClassSlot IDs (classSlotIdList) that are from today onwards
+    bookingList = Booking.query.filter_by(UserId=id).filter(Booking.ClassSlotId.in_(classSlotIdList)).filter_by(Status="Confirmed").all()
 
     # If there are no bookings, return 406
     if not len(bookingList):
         return "There are no upcoming bookings for User ID: " + str(id), 406
     else:
-        # Sort the booking list by Class Slot Start Time in descending order, so that the latest booking will be at the top
-        bookingList.sort(key=lambda x: x.ClassSlot.StartTime, reverse=True)
+        # Sort the booking list by Class Slot Start Time in ascending order, so that the first few bookings will be at the top
+        bookingList.sort(key=lambda x: x.ClassSlot.StartTime, reverse=False)
         return jsonify(
             [b.jsonWithUserAndClassSlot() for b in bookingList]
         ), 200
@@ -511,11 +514,14 @@ def getAllBookingsByUserID(current_user, id: int):
 @app.route("/booking/user/past/<int:id>")
 @token_required
 def getAllPastBookingsByUserID(current_user, id: int):
-    # Get today's date
-    today = datetime.now().strftime("%Y-%m-%d")
+    # Retrieve a list of ClassSlots that are before today based on the ClassSlot's StartTime and current date time
+    classSlotList = ClassSlot.query.filter(ClassSlot.StartTime < datetime.now().strftime("%Y-%m-%d %H:%M:%S")).all()
 
-    # Get all of the User's bookings from today onwards by using the given user ID. The Status of the Booking must be "Confirmed"
-    bookingList = Booking.query.filter_by(UserId=id).filter(Booking.BookingDateTime < today + ' 00:00:00').filter_by(Status="Confirmed").all()
+    # Extract all of the ClassSlot IDs from the classSlotList
+    classSlotIdList = [c.ClassSlotId for c in classSlotList]
+
+    # Get all of the User's bookings from today onwards by using the given user ID. The Status of the Booking must be "Confirmed", and the ClassSlotId must be in the list of ClassSlot IDs (classSlotIdList) that are before today
+    bookingList = Booking.query.filter_by(UserId=id).filter(Booking.ClassSlotId.in_(classSlotIdList)).filter_by(Status="Confirmed").all()
 
     # If there are no bookings, return 406
     if not len(bookingList):
@@ -543,7 +549,6 @@ def getAllCancelledBookingsByUserID(current_user, id: int):
         return jsonify(
             [b.jsonWithUserAndClassSlot() for b in bookingList]
         ), 200
-    
 
 # Function and Route to get a specific Booking by Booking ID
 @app.route("/booking/<int:id>")
