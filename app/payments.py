@@ -72,39 +72,40 @@ def refreshMembershipRecords():
 
     # Using this membershipRecordList, for each Membership Record, check if the membership record has expired by using the current date and the Membership Record's End Date. 
     for membershipRecord in membershipRecordList:
-        # IF Membership Record's End Date is more than 3 days before the current date, then first check the latest Payment made for this Membership Record. 
-        # !!!(This is used when the user have not made payment even after the 3 days grace period)!!! 
-        if membershipRecord.EndDate < currentDate - timedelta(days=3):
-            latestPayment = Payment.query.filter_by(MembershipRecordId=membershipRecord.MembershipRecordId).order_by(Payment.TransactionDate.desc()).first()
-            # Change the MembershipRecord's ActiveStatus to "Expired" and StatusRemarks to "Payment Overdue - Membership Expired on dd/mm/yyyy" if the latest Payment's Transaction Date is more than 3 days before the Membership Record's End Date
-            if latestPayment.TransactionDate < membershipRecord.EndDate - timedelta(days=3):
+        # If Membership Record's Active Status is NOT "Expired" or "Terminated", we continue to check if the Membership Record has expired
+        if membershipRecord.ActiveStatus != "Expired" and membershipRecord.ActiveStatus != "Terminated":
+            # IF Membership Record's End Date is more than 3 days before the current date, then first check the latest Payment made for this Membership Record. 
+            # !!!(This is used when the user have not made payment even after the 3 days grace period)!!! 
+            if membershipRecord.EndDate < currentDate - timedelta(days=3):
+                latestPayment = Payment.query.filter_by(MembershipRecordId=membershipRecord.MembershipRecordId).order_by(Payment.TransactionDate.desc()).first()
+                # Change the MembershipRecord's ActiveStatus to "Expired" and StatusRemarks to "Payment Overdue - Membership Expired on dd/mm/yyyy" if the latest Payment's Transaction Date is more than 3 days before the Membership Record's End Date
+                if latestPayment.TransactionDate < membershipRecord.EndDate - timedelta(days=3):
+                    membershipRecord.ActiveStatus = "Expired"
+                    membershipRecord.StatusRemarks = "Payment Overdue - Membership Expired on {}".format(membershipRecord.EndDate.strftime("%d/%m/%Y"))
+                    db.session.commit()
+                    # Create a new Membership Log with "Expired - Payment Overdue" status, and a description of "Membership record expired on dd/mm/yyyy - payment overdue" where dd/mm/yyyy is the Membership Record's End Date
+                    membershipLog = MembershipLog(
+                        Date=currentDate,
+                        Description="Membership record expired on {} - payment overdue".format(membershipRecord.EndDate.strftime("%d/%m/%Y")),
+                        ActionType="Expired - Payment Overdue",
+                        MembershipRecordId=membershipRecord.MembershipRecordId
+                    )
+                    db.session.add(membershipLog)
+                    db.session.commit()
+            # Else if the Membership Record's End Date is the same or before the current date, update the MembershipRecord's ActiveStatus to "Expired", and StatusRemarks to "Pending Payment - Please make payment by dd/mm/yyyy to renew" where dd/mm/yyyy is 3 days after the Membership Record's End Date 
+            # !!!(This is used to give the user a 3 day grace period to make payment)!!!
+            elif membershipRecord.EndDate <= currentDate:
                 membershipRecord.ActiveStatus = "Expired"
-                membershipRecord.StatusRemarks = "Payment Overdue - Membership Expired on {}".format(membershipRecord.EndDate.strftime("%d/%m/%Y"))
+                membershipRecord.StatusRemarks = "Pending Payment - Please make payment by {} to renew".format((membershipRecord.EndDate + timedelta(days=3)).strftime("%d/%m/%Y"))
+
                 db.session.commit()
-                # Create a new Membership Log with "Expired - Payment Overdue" status, and a description of "Membership record expired on dd/mm/yyyy - payment overdue" where dd/mm/yyyy is the Membership Record's End Date
-                membershipLog = MembershipLog(
-                    Date=currentDate,
-                    Description="Membership record expired on {} - payment overdue".format(membershipRecord.EndDate.strftime("%d/%m/%Y")),
-                    ActionType="Expired - Payment Overdue",
-                    MembershipRecordId=membershipRecord.MembershipRecordId
-                )
-                db.session.add(membershipLog)
+
+            # Else if the Membership Record is about to expire in 7 days (by using the current date and the Membership Record's End Date), update the MembershipRecord's StatusRemarks to "Membership Expiring - Please make payment by dd/mm/yyyy to renew" where dd/mm/yyyy is the Membership Record's End Date
+            # !!!(This is used to give the user an early reminder to make payment before membership expires)!!!
+            elif membershipRecord.EndDate <= currentDate + timedelta(days=7):
+                membershipRecord.StatusRemarks = "Membership Expiring - Please make payment by {} to renew".format(membershipRecord.EndDate.strftime("%d/%m/%Y"))
                 db.session.commit()
-        # Else if the Membership Record's End Date is the same or before the current date, update the MembershipRecord's ActiveStatus to "Expired", and StatusRemarks to "Pending Payment - Please make payment by dd/mm/yyyy to renew" where dd/mm/yyyy is 3 days after the Membership Record's End Date 
-        # !!!(This is used to give the user a 3 day grace period to make payment)!!!
-        elif membershipRecord.EndDate <= currentDate:
-            membershipRecord.ActiveStatus = "Expired"
-            membershipRecord.StatusRemarks = "Pending Payment - Please make payment by {} to renew".format((membershipRecord.EndDate + timedelta(days=3)).strftime("%d/%m/%Y"))
 
-            db.session.commit()
-
-        # Else if the Membership Record is about to expire in 7 days (by using the current date and the Membership Record's End Date), update the MembershipRecord's StatusRemarks to "Membership Expiring - Please make payment by dd/mm/yyyy to renew" where dd/mm/yyyy is the Membership Record's End Date
-        # !!!(This is used to give the user an early reminder to make payment before membership expires)!!!
-        elif membershipRecord.EndDate <= currentDate + timedelta(days=7):
-            membershipRecord.StatusRemarks = "Membership Expiring - Please make payment by {} to renew".format(membershipRecord.EndDate.strftime("%d/%m/%Y"))
-            db.session.commit()
-
-        
     # Return a success message
     return (
         "Membership Records have been refreshed."

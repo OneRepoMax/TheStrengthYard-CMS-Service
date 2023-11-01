@@ -1077,7 +1077,18 @@ def deleteMembershipClassMapping(current_user, id: int):
             }
         ), 406
 
-
+# Function and Route to get all MembershipClassMappings by Class Id
+@app.route("/membershipclassmapping/class/<int:id>")
+@token_required
+def getMembershipClassMappingsByClassID(current_user, id: int):
+    membershipClassMappingList = MembershipClassMapping.query.filter_by(ClassId=id).all()
+    if len(membershipClassMappingList):
+        return jsonify(
+            [membershipClassMapping.jsonWithMembershipAndClass() for membershipClassMapping in membershipClassMappingList]
+        ), 200
+    return jsonify(
+            "There are no existing membership class mappings with Class ID: " + str(id)
+    ), 406
 
 
             

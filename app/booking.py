@@ -1,6 +1,7 @@
 from app import app, db
 from flask import jsonify, request, url_for, render_template
 from datetime import datetime, timedelta
+from sqlalchemy import text
 import requests, json
 from app.models import MembershipRecord, Class, ClassSlot, Booking, User, Points, Memberships, MembershipClassMapping
 from app.email import send_email
@@ -164,18 +165,18 @@ def createClassSlotByClassID(current_user, id: int):
         "Day": "Sunday",
         "StartTime": "09:00:00",
         "EndTime": "10:00:00",
+        "StartingFrom": "2023-11-01",
         "RecurringUntil": "2023-12-31"
     }
     """
     data = request.get_json()
-    # Get the current date and time
-    now = datetime.now()
 
     # Get the day, start time, end time and recurring until from the request
     day = data.get("Day")
     startTime = data.get("StartTime")
     endTime = data.get("EndTime")
     recurringUntil = data.get("RecurringUntil")
+    startingFrom = data.get("StartingFrom")
     
     # Compute the duration in minutes (integer) by subtracting the given end time with the given start time
     duration = int(endTime[:2]) * 60 + int(endTime[3:5]) - int(startTime[:2]) * 60 - int(startTime[3:5])
@@ -183,31 +184,30 @@ def createClassSlotByClassID(current_user, id: int):
     # Create empty list to store the created class slots which is to be returned later
     classSlotList = []
 
-    # Using the current date and time, we create multiple class slots (based on the given day, start time, end time) until the given recurring until date, and add them to the database
-    while now.strftime("%Y-%m-%d") <= recurringUntil:
-        # Check if the current day is the same as the given day
-        if now.strftime("%A") == day:
+    # Using the given startingFrom date, we create multiple class slots (based on the given day, start time, end time) until the given recurring until date, and add them to the database
+    while startingFrom <= recurringUntil:
+        # If the given day is the same as the startingFrom date's day, we create a new class slot
+        if day == datetime.strptime(startingFrom, "%Y-%m-%d").strftime("%A"):
             # Create new class slot
             newClassSlot = ClassSlot(
-                ClassId=id,
                 Day=day,
-                # StartTime is the current date and time with the given start time
-                StartTime=now.strftime("%Y-%m-%d") + " " + startTime,
-                # EndTime is the current date and time with the given end time
-                EndTime=now.strftime("%Y-%m-%d") + " " + endTime,
+                StartTime=startingFrom + ' ' + startTime,
+                EndTime=startingFrom + ' ' + endTime,
                 Duration=duration,
-                CurrentCapacity=0
+                CurrentCapacity=0,
+                ClassId=id
             )
-        
+
             # Add new class slot to database
             db.session.add(newClassSlot)
             db.session.commit()
 
-            # Add new class slot to the list
+            # Add new class slot to classSlotList
             classSlotList.append(newClassSlot.json())
 
-        # Increment the current date by 1 day
-        now += timedelta(days=1)
+        # Increment the startingFrom date by 1 day
+        startingFrom = datetime.strptime(startingFrom, "%Y-%m-%d").date() + timedelta(days=1)
+        startingFrom = startingFrom.strftime("%Y-%m-%d")
 
     return jsonify(
         classSlotList
@@ -278,7 +278,7 @@ def getClassSlotByDate(current_user, date: str):
         ), 200
     return "There are no class slots on this date", 406
 
-# Function and Route to delete a ClassSlot by ID
+# Function and Route to CANCEL a ClassSlot by ID, and send email notifications to all users who have booked the class slot, and refund their points
 @app.route("/classSlot/<int:id>", methods=['DELETE'])
 @token_required
 def deleteClassSlotByID(current_user, id: int):
@@ -287,11 +287,57 @@ def deleteClassSlotByID(current_user, id: int):
     if not classExists:
         return "There are no such class with ID: " + str(id), 406
 
-    # Delete class
+    # Get all Bookings with the given ClassSlotId
+    bookingList = Booking.query.filter_by(ClassSlotId=id).all()
+
+    # If there are bookings, we need to refund the user's points and send them an email notification
+    if len(bookingList):
+        # For each booking, we need to refund the user's points and send them an email notification
+        for booking in bookingList:
+            # If the status of this booking is "Confirmed", we proceed with the function
+            if booking.Status == "Confirmed":
+                # Update the booking status to "Cancelled"
+                booking.Status = "Cancelled"
+
+                # Add updated booking to database
+                db.session.add(booking)
+                db.session.commit()
+
+                # Get the MembershipRecordId from the booking
+                membershipRecordId = booking.MembershipRecordId
+
+                # Using the selectedClassSlot's StartTime, we retrive the corresponding Points row from the Points table in which the selectedClassSlot's StartTime is between the PointsStartDate and PointsEndDate. The Points row should also match the MembershipRecordId being used above
+                selectedPoints = Points.query.filter(Points.PointsStartDate <= classExists.StartTime).filter(Points.PointsEndDate >= classExists.StartTime).filter_by(MembershipRecordId=membershipRecordId).first()
+
+                # If the selectedPoints is not found, return 406
+                if not selectedPoints:
+                    return "There are no valid points record for the selected class slot to refund the points", 406
+
+                # If selectedPoints is found, update the selectedPoints Balance by adding 1
+                selectedPoints.Balance += 1
+
+                # Add updated selectedPoints to database
+                db.session.add(selectedPoints)
+                db.session.commit()
+
+                # Send an email notification to the user and gym owner about the booking cancellation.
+                user = User.query.filter_by(UserId=booking.UserId).first()
+                gymOwner = "tsy.fyp.2023@gmail.com"
+
+                emailMessage = "Our apologies, we had to cancel this class due to unforeseen circumstances, thus your booking has been cancelled. You have been refunded 1 point. Your current points balance is " + str(selectedPoints.Balance) + "."
+
+                html = render_template("/cancel_booking.html", user_first_name=user.FirstName, user_last_name=user.LastName, booking_id=booking.BookingId, booking_date_time=booking.BookingDateTime, class_name=classExists.Class.ClassName, class_start_time=classExists.StartTime, class_day= classExists.Day, duration=classExists.Duration, message=emailMessage, points_refunded=1, points_balance=selectedPoints.Balance)
+
+                subject = "[NOTICE] Class Has Been Cancelled!"
+
+                send_email(gymOwner, subject, html)
+                send_email(user.EmailAddress, subject, html)
+
+    # Delete class slot
     db.session.delete(classExists)
     db.session.commit()
 
-    return "Class Slot with ID: " + str(id) + " has been deleted.", 200
+    return "Class Slot with ID: " + str(id) + " has been deleted. All users who had an existing booking for this Class Slot has been notified by email and points has been refunded to them.", 200
 
 # Function and Route to delete a given list of ClassSlots
 @app.route("/classSlot/delete", methods=['POST'])
@@ -442,21 +488,68 @@ def getAllBookings(current_user):
     bookingList = Booking.query.all()
     return jsonify([b.jsonWithUserAndClassSlot() for b in bookingList]), 200
 
-# Function and Route to get all Bookings by User ID
+# Function and Route to get all UPCOMING Bookings by User ID
 @app.route("/booking/user/<int:id>")
 @token_required
 def getAllBookingsByUserID(current_user, id: int):
-    bookingList = Booking.query.filter_by(UserId=id).all()
+    # Retrieve a list of ClassSlot IDs that are from today onwards based on the ClassSlot's StartTime and current date time
+    classSlotList = ClassSlot.query.filter(ClassSlot.StartTime >= datetime.now().strftime("%Y-%m-%d %H:%M:%S")).all()
+
+    # Extract all of the ClassSlot IDs from the classSlotList
+    classSlotIdList = [c.ClassSlotId for c in classSlotList]
+
+    # Get all of the User's bookings using the given User Id, and the status of the Booking must be "Confirmed". The ClassSlotId must be in the list of ClassSlot IDs (classSlotIdList) that are from today onwards
+    bookingList = Booking.query.filter_by(UserId=id).filter(Booking.ClassSlotId.in_(classSlotIdList)).filter_by(Status="Confirmed").all()
+
     # If there are no bookings, return 406
     if not len(bookingList):
-        return "There are no bookings for User ID: " + str(id), 406
+        return "There are no upcoming bookings for User ID: " + str(id), 406
+    else:
+        # Sort the booking list by Class Slot Start Time in ascending order, so that the first few bookings will be at the top
+        bookingList.sort(key=lambda x: x.ClassSlot.StartTime, reverse=False)
+        return jsonify(
+            [b.jsonWithUserAndClassSlot() for b in bookingList]
+        ), 200
+
+# Function and Route to get all PAST Bookings by User ID
+@app.route("/booking/user/past/<int:id>")
+@token_required
+def getAllPastBookingsByUserID(current_user, id: int):
+    # Retrieve a list of ClassSlots that are before today based on the ClassSlot's StartTime and current date time
+    classSlotList = ClassSlot.query.filter(ClassSlot.StartTime < datetime.now().strftime("%Y-%m-%d %H:%M:%S")).all()
+
+    # Extract all of the ClassSlot IDs from the classSlotList
+    classSlotIdList = [c.ClassSlotId for c in classSlotList]
+
+    # Get all of the User's bookings from today onwards by using the given user ID. The Status of the Booking must be "Confirmed", and the ClassSlotId must be in the list of ClassSlot IDs (classSlotIdList) that are before today
+    bookingList = Booking.query.filter_by(UserId=id).filter(Booking.ClassSlotId.in_(classSlotIdList)).filter_by(Status="Confirmed").all()
+
+    # If there are no bookings, return 406
+    if not len(bookingList):
+        return "There are past no bookings for User ID: " + str(id), 406
     else:
         # Sort the booking list by Class Slot Start Time in descending order, so that the latest booking will be at the top
         bookingList.sort(key=lambda x: x.ClassSlot.StartTime, reverse=True)
         return jsonify(
             [b.jsonWithUserAndClassSlot() for b in bookingList]
         ), 200
+    
+# Function and Route to get all CANCELLED Bookings by User ID
+@app.route("/booking/user/cancelled/<int:id>")
+@token_required
+def getAllCancelledBookingsByUserID(current_user, id: int):
+    # Get all of the User's bookings that has status "Cancelled" by using the given user ID
+    bookingList = Booking.query.filter_by(UserId=id).filter_by(Status="Cancelled").all()
 
+    # If there are no bookings, return 406
+    if not len(bookingList):
+        return "There are no cancelled bookings for User ID: " + str(id), 406
+    else:
+        # Sort the booking list by Class Slot Start Time in descending order, so that the latest booking will be at the top
+        bookingList.sort(key=lambda x: x.ClassSlot.StartTime, reverse=True)
+        return jsonify(
+            [b.jsonWithUserAndClassSlot() for b in bookingList]
+        ), 200
 
 # Function and Route to get a specific Booking by Booking ID
 @app.route("/booking/<int:id>")
@@ -476,9 +569,21 @@ def getBookingByID(current_user, id: int):
 def getAllBookingsByClassSlotID(current_user, id: int):
     bookingList = Booking.query.filter_by(ClassSlotId=id).all()
     # Return all bookings with the given class slot ID, if not found, return 406
+    stmt = text("SELECT b.BookingId, b.BookingDateTime, b.Status, b.UserId, b.ClassSlotID, b.MembershipRecordId, firstBooking.ClassSlotId as FirstClassId FROM Booking as b, (SELECT  UserID, FirstClass, ClassSlotId FROM (SELECT `b1`.`UserId` AS `UserId`, MIN(`ClassSlot`.`StartTime`) AS `FirstClass` FROM (`Booking` `b1` JOIN `ClassSlot`) WHERE ((`b1`.`ClassSlotId` = `ClassSlot`.`ClassSlotId`)AND (`b1`.`Status` = 'Confirmed'))GROUP BY `b1`.`UserId`) as FirstClass, ClassSlot where FirstClass = StartTime) as firstBooking where b.ClassSlotID = :classSlotId and b.UserId = firstBooking.UserId and b.Status = 'Confirmed' and b.ClassSlotId = firstBooking.ClassSlotId;")
+    stmt = stmt.bindparams(classSlotId=id)
+    firstBookingList = db.session.execute(stmt).fetchall()
+
+    ## Find those users who have their first class on the selected class slot and return them as a list
+    usersHavingFirstClass = []
+    if len(firstBookingList):  
+        for booking in firstBookingList:
+            if booking[4] == booking[6]:  
+                usersHavingFirstClass.append(booking[3])
+
     if len(bookingList):
         return jsonify(
-            [b.jsonWithUserAndClassAndClassSlot() for b in bookingList]
+            [b.jsonWithUserAndClassAndClassSlot() for b in bookingList],
+            {'usersHavingFirstClass' : usersHavingFirstClass}
         ), 200
     return "There are no such bookings with Class Slot ID: " + str(id), 406
     

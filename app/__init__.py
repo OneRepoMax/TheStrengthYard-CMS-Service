@@ -5,6 +5,7 @@ from os import environ
 from dotenv import load_dotenv
 from flask_mail import Mail
 
+
 load_dotenv()
 
 user = environ.get('user') or "placeholderuser"
