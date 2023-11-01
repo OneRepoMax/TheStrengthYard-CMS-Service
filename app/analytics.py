@@ -1,6 +1,7 @@
 from app import app, db
 from flask import jsonify, request
 from datetime import datetime, timedelta
+from sqlalchemy import text
 import requests, json
 from os import environ
 from app.auth import get_access_token
@@ -228,8 +229,52 @@ def getUserDemographics():
             "An error occurred while retrieving the User Demographics. " + str(e)
         ), 404
     
+## Returns unique bookings for the current month
+@app.route("/analytics/uniquemonthlybookings", methods=['GET'])
+def monthlyBookings():
+    try:
+        # Get the current month
+        currentMonth = datetime.now().month
 
+        # Get the current year
+        currentYear = datetime.now().year
 
+        stmt = text("SELECT count(distinct(UserId)) as 'UniqueClients' FROM tsy_db.Booking where month(BookingDateTime) = :month and year(BookingDateTime) = :year and Status = 'Confirmed';")
+        stmt = stmt.bindparams(month=currentMonth, year=currentYear)
+        uniqueBookings = db.session.execute(stmt).fetchone()
+        print(uniqueBookings)
+        return jsonify(
+            {
+                "Unique Bookings this month": uniqueBookings[0]
+            }), 200
+
+    except Exception as e:
+        return jsonify(
+            "An error occurred while retrieving the total number of unique bookings for this month. " + str(e)
+        ), 404
         
+## Returns unique bookings for the current month
+@app.route("/analytics/peakTimings/<int:classId>", methods=['GET'])
+def peakTimings(classId):
+    try:
+        # Get the current month
+        currentMonth = datetime.now().month
+
+        # Get the current year
+        currentYear = datetime.now().year
+
+        stmt = text("SELECT day, hour(StartTime), sum(CurrentCapacity) as 'Bookings_This_Month' FROM tsy_db.ClassSlot where month(StartTime) = :month and year(StartTime) = :year and ClassId = :classId group by day, hour(StartTime) order by sum(CurrentCapacity) desc;")
+        stmt = stmt.bindparams(month=currentMonth, year=currentYear, classId=classId)
+        timeSlots = db.session.execute(stmt).fetchall()
+        print(timeSlots)
+        return jsonify(
+            {
+                "Time Slots": [dict(row) for row in timeSlots]
+            }), 200
+
+    except Exception as e:
+        return jsonify(
+            "An error occurred while retrieving the total number of unique bookings for this month. " + str(e)
+        ), 404
 
 
