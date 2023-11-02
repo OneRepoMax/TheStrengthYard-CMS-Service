@@ -263,7 +263,7 @@ def peakTimings(classId):
         # Get the current year
         currentYear = datetime.now().year
 
-        stmt = text("SELECT day, hour(StartTime), sum(CurrentCapacity) as 'Bookings_This_Month' FROM tsy_db.ClassSlot where month(StartTime) = :month and year(StartTime) = :year and ClassId = :classId group by day, hour(StartTime) order by sum(CurrentCapacity) desc;")
+        stmt = text("SELECT day, hour(StartTime) as 'StartTime', sum(CurrentCapacity) as 'Bookings_This_Month' FROM tsy_db.ClassSlot where month(StartTime) = :month and year(StartTime) = :year and ClassId = :classId group by day, hour(StartTime) order by sum(CurrentCapacity) desc;")
         stmt = stmt.bindparams(month=currentMonth, year=currentYear, classId=classId)
         timeSlots = db.session.execute(stmt).fetchall()
         db.session.close()
