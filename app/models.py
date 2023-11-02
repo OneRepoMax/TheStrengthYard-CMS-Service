@@ -363,7 +363,6 @@ class Booking(db.Model):
         previous_confirmed_bookings_count = Booking.query.filter(
             Booking.UserId == user.UserId,
             Booking.Status == "Confirmed",
-            Booking.BookingId < booking.BookingId
         ).count()
         return previous_confirmed_bookings_count == 0
     
