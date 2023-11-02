@@ -353,7 +353,8 @@ class Booking(db.Model):
             "Status": self.Status,
             "User": self.User.jsonMinInfo(),
             "MembershipRecord": self.MembershipRecord.jsonWithMembership(),
-            "ClassSlot": self.ClassSlot.jsonWithClass(),
+            "ClassSlot": self.ClassSlot.json(),
+            "Class": self.ClassSlot.Class.json(),
             "FirstClass": first_class  # Include the "FirstClass" as a boolean
         }
     
@@ -363,7 +364,6 @@ class Booking(db.Model):
         previous_confirmed_bookings_count = Booking.query.filter(
             Booking.UserId == user.UserId,
             Booking.Status == "Confirmed",
-            Booking.BookingId < booking.BookingId
         ).count()
         return previous_confirmed_bookings_count == 0
     
