@@ -242,7 +242,7 @@ def monthlyBookings():
         stmt = text("SELECT count(distinct(UserId)) as 'UniqueClients' FROM tsy_db.Booking where month(BookingDateTime) = :month and year(BookingDateTime) = :year and Status = 'Confirmed';")
         stmt = stmt.bindparams(month=currentMonth, year=currentYear)
         uniqueBookings = db.session.execute(stmt).fetchone()
-        print(uniqueBookings)
+        db.session.close()
         return jsonify(
             {
                 "Unique Bookings this month": uniqueBookings[0]
@@ -266,7 +266,7 @@ def peakTimings(classId):
         stmt = text("SELECT day, hour(StartTime), sum(CurrentCapacity) as 'Bookings_This_Month' FROM tsy_db.ClassSlot where month(StartTime) = :month and year(StartTime) = :year and ClassId = :classId group by day, hour(StartTime) order by sum(CurrentCapacity) desc;")
         stmt = stmt.bindparams(month=currentMonth, year=currentYear, classId=classId)
         timeSlots = db.session.execute(stmt).fetchall()
-        print(timeSlots)
+        db.session.close()
         return jsonify(
             {
                 "Time Slots": [dict(row) for row in timeSlots]
