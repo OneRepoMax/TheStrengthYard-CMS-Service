@@ -352,7 +352,7 @@ class Booking(db.Model):
             "BookingDateTime": self.BookingDateTime,
             "Status": self.Status,
             "User": self.User.jsonMinInfo(),
-            "MembershipRecord": self.MembershipRecord.json(),
+            "MembershipRecord": self.MembershipRecord.jsonWithMembership(),
             "ClassSlot": self.ClassSlot.jsonWithClass(),
             "FirstClass": first_class  # Include the "FirstClass" as a boolean
         }
