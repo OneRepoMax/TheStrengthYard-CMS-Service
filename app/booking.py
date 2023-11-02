@@ -582,7 +582,7 @@ def getAllBookingsByClassSlotID(current_user, id: int):
 
     if len(bookingList):
         return jsonify(
-            [b.jsonWithUserAndClassAndClassSlot() for b in bookingList],
+            [b.jsonComplete() for b in bookingList],
             {'usersHavingFirstClass' : usersHavingFirstClass}
         ), 200
     return "There are no such bookings with Class Slot ID: " + str(id), 406

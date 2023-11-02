@@ -342,14 +342,13 @@ class Booking(db.Model):
             "ClassSlot": self.ClassSlot.jsonWithClass()
         }
     
-    def jsonWithUserAndClassAndClassSlot(self):
+    def jsonComplete(self):
         return {
             "BookingId": self.BookingId,
             "BookingDateTime": self.BookingDateTime,
             "Status": self.Status,
-            "UserId": self.UserId,
             "User": self.User.jsonMinInfo(),
-            "MembershipRecordId": self.MembershipRecordId,
+            "MembershipRecord": self.MembershipRecord.json(),
             "ClassSlot": self.ClassSlot.jsonWithClass(),
         }
     
