@@ -267,10 +267,15 @@ def peakTimings(classId):
         stmt = stmt.bindparams(month=currentMonth, year=currentYear, classId=classId)
         timeSlots = db.session.execute(stmt).fetchall()
         db.session.close()
-        return jsonify(
-            {
-                "Time Slots": [dict(row) for row in timeSlots]
-            }), 200
+        formattedTimeSlots = []
+        for row in timeSlots:
+            formattedTimeSlots.append({
+                "day": row[0],
+                "hour": row[1],
+                "Bookings_This_Month": row[2]
+            })
+
+        return jsonify({"Time Slots": formattedTimeSlots}), 200
 
     except Exception as e:
         return jsonify(
