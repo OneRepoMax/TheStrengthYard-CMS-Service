@@ -579,8 +579,8 @@ def getAllBookingsByClassSlotID(current_user, id: int):
         for booking in firstBookingList:
                 usersHavingFirstClass.append(booking[3])
     
-    jsonThing = [b.jsonComplete() for b in bookingList]
-    for booking in jsonThing:
+    bookings = [b.jsonComplete() for b in bookingList]
+    for booking in bookings:
         if booking['User']['UserId'] in usersHavingFirstClass and booking['Status'] == 'Confirmed':
             booking['FirstClass'] = True
         else:
@@ -588,7 +588,7 @@ def getAllBookingsByClassSlotID(current_user, id: int):
 
     if len(bookingList):
         return jsonify(
-            jsonThing
+            bookings
             # {'usersHavingFirstClass' : usersHavingFirstClass}
         ), 200
     return "There are no such bookings with Class Slot ID: " + str(id), 406
