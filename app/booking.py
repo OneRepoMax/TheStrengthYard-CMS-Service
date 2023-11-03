@@ -565,24 +565,30 @@ def getBookingByID(current_user, id: int):
 
 # Function and Route to get all Bookings by Class Slot ID
 @app.route("/booking/classSlot/<int:id>")
-@token_required
-def getAllBookingsByClassSlotID(current_user, id: int):
+#@token_required
+def getAllBookingsByClassSlotID(id: int):
     bookingList = Booking.query.filter_by(ClassSlotId=id).all()
     # Return all bookings with the given class slot ID, if not found, return 406
-    # stmt = text("SELECT b.BookingId, b.BookingDateTime, b.Status, b.UserId, b.ClassSlotID, b.MembershipRecordId, firstBooking.ClassSlotId as FirstClassId FROM Booking as b, (SELECT  UserID, FirstClass, ClassSlotId FROM (SELECT `b1`.`UserId` AS `UserId`, MIN(`ClassSlot`.`StartTime`) AS `FirstClass` FROM (`Booking` `b1` JOIN `ClassSlot`) WHERE ((`b1`.`ClassSlotId` = `ClassSlot`.`ClassSlotId`)AND (`b1`.`Status` = 'Confirmed'))GROUP BY `b1`.`UserId`) as FirstClass, ClassSlot where FirstClass = StartTime) as firstBooking where b.ClassSlotID = :classSlotId and b.UserId = firstBooking.UserId and b.Status = 'Confirmed' and b.ClassSlotId = firstBooking.ClassSlotId;")
-    # stmt = stmt.bindparams(classSlotId=id)
-    # firstBookingList = db.session.execute(stmt).fetchall()
+    stmt = text("SELECT b.BookingId, b.BookingDateTime, b.Status, b.UserId, b.ClassSlotID, b.MembershipRecordId, firstBooking.ClassSlotId as FirstClassId FROM Booking as b, (SELECT  UserID, FirstClass, ClassSlotId FROM (SELECT `b1`.`UserId` AS `UserId`, MIN(`ClassSlot`.`StartTime`) AS `FirstClass` FROM (`Booking` `b1` JOIN `ClassSlot`) WHERE ((`b1`.`ClassSlotId` = `ClassSlot`.`ClassSlotId`)AND (`b1`.`Status` = 'Confirmed'))GROUP BY `b1`.`UserId`) as FirstClass, ClassSlot where FirstClass = StartTime) as firstBooking where b.ClassSlotID = :classSlotId and b.UserId = firstBooking.UserId and b.Status = 'Confirmed' and b.ClassSlotId = firstBooking.ClassSlotId;")
+    stmt = stmt.bindparams(classSlotId=id)
+    firstBookingList = db.session.execute(stmt).fetchall()
 
-    ## Find those users who have their first class on the selected class slot and return them as a list
-    # usersHavingFirstClass = []
-    # if len(firstBookingList):  
-    #     for booking in firstBookingList:
-    #         if booking[4] == booking[6]:  
-    #             usersHavingFirstClass.append(booking[3])
+    # Find those users who have their first class on the selected class slot and return them as a list
+    usersHavingFirstClass = []
+    if len(firstBookingList):  
+        for booking in firstBookingList:
+                usersHavingFirstClass.append(booking[3])
+    
+    jsonThing = [b.jsonComplete() for b in bookingList]
+    for booking in jsonThing:
+        if booking['User']['UserId'] in usersHavingFirstClass:
+            booking['FirstClass'] = True
+        else:
+            booking['FirstClass'] = False
 
     if len(bookingList):
         return jsonify(
-            [b.jsonComplete() for b in bookingList]
+            jsonThing
             # {'usersHavingFirstClass' : usersHavingFirstClass}
         ), 200
     return "There are no such bookings with Class Slot ID: " + str(id), 406
