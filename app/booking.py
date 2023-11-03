@@ -565,8 +565,8 @@ def getBookingByID(current_user, id: int):
 
 # Function and Route to get all Bookings by Class Slot ID
 @app.route("/booking/classSlot/<int:id>")
-#@token_required
-def getAllBookingsByClassSlotID(id: int):
+@token_required
+def getAllBookingsByClassSlotID(current_user, id: int):
     bookingList = Booking.query.filter_by(ClassSlotId=id).all()
     # Return all bookings with the given class slot ID, if not found, return 406
     stmt = text("SELECT b.BookingId, b.BookingDateTime, b.Status, b.UserId, b.ClassSlotID, b.MembershipRecordId, firstBooking.ClassSlotId as FirstClassId FROM Booking as b, (SELECT  UserID, FirstClass, ClassSlotId FROM (SELECT `b1`.`UserId` AS `UserId`, MIN(`ClassSlot`.`StartTime`) AS `FirstClass` FROM (`Booking` `b1` JOIN `ClassSlot`) WHERE ((`b1`.`ClassSlotId` = `ClassSlot`.`ClassSlotId`)AND (`b1`.`Status` = 'Confirmed'))GROUP BY `b1`.`UserId`) as FirstClass, ClassSlot where FirstClass = StartTime) as firstBooking where b.ClassSlotID = :classSlotId and b.UserId = firstBooking.UserId and b.Status = 'Confirmed' and b.ClassSlotId = firstBooking.ClassSlotId;")
@@ -581,7 +581,7 @@ def getAllBookingsByClassSlotID(id: int):
     
     jsonThing = [b.jsonComplete() for b in bookingList]
     for booking in jsonThing:
-        if booking['User']['UserId'] in usersHavingFirstClass:
+        if booking['User']['UserId'] in usersHavingFirstClass and booking['Status'] == 'Confirmed':
             booking['FirstClass'] = True
         else:
             booking['FirstClass'] = False
