@@ -242,7 +242,7 @@ def monthlyBookings():
         stmt = text("SELECT count(distinct(UserId)) as 'UniqueClients' FROM tsy_db.Booking where month(BookingDateTime) = :month and year(BookingDateTime) = :year and Status = 'Confirmed';")
         stmt = stmt.bindparams(month=currentMonth, year=currentYear)
         uniqueBookings = db.session.execute(stmt).fetchone()
-        print(uniqueBookings)
+        db.session.close()
         return jsonify(
             {
                 "Unique Bookings this month": uniqueBookings[0]
@@ -263,14 +263,19 @@ def peakTimings(classId):
         # Get the current year
         currentYear = datetime.now().year
 
-        stmt = text("SELECT day, hour(StartTime), sum(CurrentCapacity) as 'Bookings_This_Month' FROM tsy_db.ClassSlot where month(StartTime) = :month and year(StartTime) = :year and ClassId = :classId group by day, hour(StartTime) order by sum(CurrentCapacity) desc;")
+        stmt = text("SELECT day, hour(StartTime) as 'StartTime', sum(CurrentCapacity) as 'Bookings_This_Month' FROM tsy_db.ClassSlot where month(StartTime) = :month and year(StartTime) = :year and ClassId = :classId group by day, hour(StartTime) order by time(StartTime) desc")
         stmt = stmt.bindparams(month=currentMonth, year=currentYear, classId=classId)
         timeSlots = db.session.execute(stmt).fetchall()
-        print(timeSlots)
-        return jsonify(
-            {
-                "Time Slots": [dict(row) for row in timeSlots]
-            }), 200
+        db.session.close()
+        formattedTimeSlots = []
+        for row in timeSlots:
+            formattedTimeSlots.append({
+                "day": row[0],
+                "hour": row[1],
+                "Bookings_This_Month": row[2]
+            })
+
+        return jsonify({"Time Slots": formattedTimeSlots}), 200
 
     except Exception as e:
         return jsonify(

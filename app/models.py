@@ -342,16 +342,29 @@ class Booking(db.Model):
             "ClassSlot": self.ClassSlot.jsonWithClass()
         }
     
-    def jsonWithUserAndClassAndClassSlot(self):
+    def jsonComplete(self):
+
+        # Call helper function
+        first_class = self.is_first_class_attendance(self.User, self)
+
         return {
             "BookingId": self.BookingId,
             "BookingDateTime": self.BookingDateTime,
             "Status": self.Status,
-            "UserId": self.UserId,
             "User": self.User.jsonMinInfo(),
-            "MembershipRecordId": self.MembershipRecordId,
+            "MembershipRecord": self.MembershipRecord.jsonWithMembership(),
             "ClassSlot": self.ClassSlot.jsonWithClass(),
+            "FirstClass": first_class  # Include the "FirstClass" as a boolean
         }
+    
+
+    @staticmethod
+    def is_first_class_attendance(user, booking):
+        previous_confirmed_bookings_count = Booking.query.filter(
+            Booking.UserId == user.UserId,
+            Booking.Status == "Confirmed",
+        ).count()
+        return previous_confirmed_bookings_count == 0
     
 class Points(db.Model):
     __tablename__ = 'Points'
