@@ -467,7 +467,8 @@ def createNewBooking(current_user):
 
             # Use new_booking.html template to generate the email content, with the following variables:
             # user_first_name, user_last_name, booking_id, booking_date_time, class_name, class_start_time, points_balance, duration, confirm_url
-            html = render_template("/new_booking.html", user_first_name=user.FirstName, user_last_name=user.LastName, booking_id=newBooking.BookingId, booking_date_time=newBooking.BookingDateTime, class_name=selectedClass.ClassName, class_start_time=selectedClassSlot.StartTime, points_balance=selectedPoints.Balance, duration=selectedClassSlot.Duration, class_day=selectedClassSlot.Day)
+            html = render_template("/new_booking.html", user_first_name=user.FirstName, user_last_name=user.LastName, 
+            booking_id=newBooking.BookingId, booking_date_time=newBooking.BookingDateTime, class_name=selectedClass.ClassName, class_start_time=selectedClassSlot.StartTime, class_end_time=selectedClassSlot.EndTime, points_balance=selectedPoints.Balance, duration=selectedClassSlot.Duration, class_day=selectedClassSlot.Day)
 
             subject = "New Booking Confirmation - " + user.FirstName + " " + user.LastName
             send_email(gymOwner, subject, html)
