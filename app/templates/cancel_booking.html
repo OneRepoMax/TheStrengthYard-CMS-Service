@@ -6,27 +6,215 @@
     <title>Booking Cancellation - The Strength Yard</title>
 </head>
 <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4;">
-    <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; background-color: #ffffff; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);">
+    <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 1200px; margin: 0 auto; background-color: #ffffff; box-shadow: 0px 4px 10px;">
+
+      
+                          <th style="margin:0px;font-size:16px;font-weight:400;line-height:1.3;padding:0px"><img src="https://the-strength-yard.vercel.app/assets/the-strength-yard-logo-main-fa57238f.svg"
+                              alt="logotype.png" style="clear: both; display: inline-block; outline: 0px; height: 90px; width: 90px; margin-top: 20px;">
+                              
+                            <table style="border-collapse:collapse;padding:0px;vertical-align:top;width:548px;height:auto!important">
+                              <tbody>
+                                <tr style="padding:0px;vertical-align:top">
+                                  <td height="30" style="margin:0px;color:rgb(76, 175, 80);font-size:30px;line-height:30px;padding:0px;vertical-align:top;word-wrap:break-word;border-collapse:collapse"> </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            <h1 style="margin:0px 35px 0px;font-size:36px;line-height:1.3;padding:0px;text-align:left;word-wrap:normal">
+                              Hi {{ user_first_name }} {{ user_last_name }}, your <span style="color:rgb(244, 67, 54)">booking has been cancelled </span></h1>
+        
         <tr>
-            <td align="center" bgcolor="#e91e63" style="padding: 40px 0;">
-                <h1 style="color: #ffffff;">Booking Cancellation at <span style="font-weight: bold;">The Strength Yard</span></h1>
-            </td>
-        </tr>
-        <tr>
-            <td style="padding: 40px 30px;">
-                <p>Hi {{ user_first_name }} {{ user_last_name }},</p>
-                <p>Your booking at <span style="font-weight: bold;">The Strength Yard</span> has been canceled. Here were the details of your booking:</p>
-                <ul>
-                    <li><strong>Booking ID:</strong> {{ booking_id }}</li>
-                    <li><strong>Booking Date & Time:</strong> {{ booking_date_time }}</li>
-                    <li><strong>Class Name:</strong> {{ class_name }}</li>
-                    <li><strong>Class Day:</strong> {{ class_day }}</li>
-                    <li><strong>Class Time:</strong> {{ class_start_time }}</li>
-                    <li><strong>Duration:</strong> {{ duration }}</li>
-                    <li><strong>Points Refunded:</strong> {{ points_refunded }}</li>
-                    <li><strong>Points Balance:</strong> {{ points_balance }}</li>
-                </ul>
-                <p>{{ message }}</p>
+            <td style="padding: 10px 40px 30px;">
+                <p>Your booking at <span style="font-weight: bold;">The Strength Yard</span> has been cancelled. Here were the details of your booking:</p>
+                <h3 style="margin:0px 0px 10px; font-size:21px;line-height:1.3;padding:0px;text-align:left;word-wrap:normal">Your Class Details</h3>
+                
+                <table align="center" style="margin:0px auto;border:2px solid rgb(230,234,238);border-collapse:collapse;padding:20px;text-align:inherit;vertical-align:top;width:506px;height:auto!important;background-position:0px 0px">
+                      <tbody>
+                        <tr style="padding:0px;text-align:left;vertical-align:top">
+                          <td style="margin:0px;font-size:16px;line-height:1.3;padding:0px;vertical-align:top;word-wrap:break-word;border-collapse:collapse">
+                            <table  style="border-collapse:collapse;padding:0px;vertical-align:top;width:544px;height:auto!important">
+                              <tbody>
+                                <tr style="padding:0px;vertical-align:top">
+                                  <th style="margin:0px auto;font-size:16px;font-weight:400;line-height:1.3;padding:0px 0px 10px 30px;width:242px">
+                                    <table style="border-collapse:collapse;padding:0px;vertical-align:top;width:242px;height:auto!important">
+                                      <tbody>
+                                        <tr style="padding:0px;vertical-align:top">
+                                          <th style="margin:0px;font-size:16px;font-weight:400;line-height:1.3;padding:0px">
+                                            <table style="border-collapse:collapse;padding:0px;vertical-align:top;width:242px;height:auto!important">
+                                              <tbody>
+                                                <tr style="padding:0px;vertical-align:top">
+                                                  <td height="30" style="margin:0px;color:rgb(49,54,83);font-size:30px;line-height:30px;padding:0px;vertical-align:top;word-wrap:break-word;border-collapse:collapse">&nbsp;</td>
+                                                </tr>
+                                              </tbody>
+                                            </table>
+                                            <h4 style="margin:0px 0px 5px;line-height:1.3;padding:0px;text-align:left;word-wrap:normal">Name</h4>
+                                            <p style="margin:0px 0px 20px;line-height:1.3;padding:0px;text-align:left">{{ user_first_name }} {{ user_last_name }}</p>
+                                          </th>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </th>
+                                  <th style="margin:0px auto;font-size:16px;font-weight:400;line-height:1.3;padding:0px 30px 10px 0px;width:242px">
+                                    <table style="border-collapse:collapse;padding:0px;vertical-align:top;width:242px;height:auto!important">
+                                      <tbody>
+                                        <tr style="padding:0px;vertical-align:top">
+                                          <th style="margin:0px;font-size:16px;font-weight:400;line-height:1.3;padding:0px">
+                                            <table style="border-collapse:collapse;padding:0px;vertical-align:top;width:242px;height:auto!important">
+                                              <tbody>
+                                                <tr style="padding:0px;vertical-align:top">
+                                                  <td height="30" style="margin:0px;color:rgb(49,54,83);font-size:30px;line-height:30px;padding:0px;vertical-align:top;word-wrap:break-word;border-collapse:collapse">&nbsp;</td>
+                                                </tr>
+                                              </tbody>
+                                            </table>
+                                            <h4 style="margin:0px 0px 5px;line-height:1.3;padding:0px;text-align:left;word-wrap:normal">Class Time</h4>
+                                            <p style="margin:0px 0px 20px;line-height:1.3;padding:0px;text-align:left"> {{ class_start_time }} {{ class_end_time }}</p>
+                                          </th>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </th>
+                                </tr>
+                              </tbody>
+                            </table>
+                            
+                            <table style="border-collapse:collapse;padding:0px;vertical-align:top;width:544px;height:auto!important">
+                              <tbody>
+                                <tr style="padding:0px;vertical-align:top">
+                                  <th style="margin:0px auto;font-size:16px;font-weight:400;line-height:1.3;padding:0px 0px 10px 30px;width:242px">
+                                    <table style="border-collapse:collapse;padding:0px;vertical-align:top;width:242px;height:auto!important">
+                                      <tbody>
+                                        <tr style="padding:0px;vertical-align:top">
+                                          <th style="margin:0px;font-size:16px;font-weight:400;line-height:1.3;padding:0px">
+                                            <h4  style="margin:0px 0px 5px;;line-height:1.3;padding:0px;text-align:left;word-wrap:normal">Class Date</h4>
+                                            <p id="dateDisplay" style="margin:0px 0px 20px;;line-height:1.3;padding:0px;text-align:left">{{ class_start_time.strftime('%Y-%m-%d') }}</p>
+                                          </th>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </th>
+                                  
+                                  <th style="margin:0px auto;font-size:16px;font-weight:400;line-height:1.3;padding:0px 30px 10px 0px;width:242px">
+                                    <table style="border-collapse:collapse;padding:0px;vertical-align:top;width:242px;height:auto!important">
+                                      <tbody>
+                                        <tr style="padding:0px;vertical-align:top">
+                                          <th style="margin:0px;font-size:16px;font-weight:400;line-height:1.3;padding:0px">
+                                            <h4 style="margin:0px 0px 5px;line-height:1.3;padding:0px;text-align:left;word-wrap:normal">Class Day</h4>
+                                            <p style="margin:0px 0px 20px;line-height:1.3;padding:0px;text-align:left">{{ class_day }}</p>
+                                          </th>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </th>
+                                  
+                                </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    
+                    
+
+                <h3 style="margin:10px 0px 10px;font-size:21px;line-height:1.3;padding:0px;text-align:left;word-wrap:normal">Your Cancellation Details</h3>
+
+                <table align="center" style="margin:0px auto;border:2px solid rgb(230,234,238);border-collapse:collapse;padding:20px;text-align:inherit;vertical-align:top;width:506px;height:auto!important;background-position:0px 0px">
+                      <tbody>
+                        <tr style="padding:0px;text-align:left;vertical-align:top">
+                          <td style="margin:0px;font-size:16px;line-height:1.3;padding:0px;vertical-align:top;word-wrap:break-word;border-collapse:collapse">
+                            <table  style="border-collapse:collapse;padding:0px;vertical-align:top;width:544px;height:auto!important">
+                              <tbody>
+                                <tr style="padding:0px;vertical-align:top">
+                                  <th style="margin:0px auto;font-size:16px;font-weight:400;line-height:1.3;padding:0px 0px 10px 30px;width:242px">
+                                    <table style="border-collapse:collapse;padding:0px;vertical-align:top;width:242px;height:auto!important">
+                                      <tbody>
+                                        <tr style="padding:0px;vertical-align:top">
+                                          <th style="margin:0px;font-size:16px;font-weight:400;line-height:1.3;padding:0px">
+                                            <table style="border-collapse:collapse;padding:0px;vertical-align:top;width:242px;height:auto!important">
+                                              <tbody>
+                                                <tr style="padding:0px;vertical-align:top">
+                                                  <td height="30" style="margin:0px;color:rgb(49,54,83);font-size:30px;line-height:30px;padding:0px;vertical-align:top;word-wrap:break-word;border-collapse:collapse">&nbsp;</td>
+                                                </tr>
+                                              </tbody>
+                                            </table>
+                                            <h4 style="margin:0px 0px 5px;line-height:1.3;padding:0px;text-align:left;word-wrap:normal">Booking ID</h4>
+                                            <p style="margin:0px 0px 20px;line-height:1.3;padding:0px;text-align:left">{{ booking_id }}</p>
+                                          </th>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </th>
+                                  <th style="margin:0px auto;font-size:16px;font-weight:400;line-height:1.3;padding:0px 30px 10px 0px;width:242px">
+                                    <table style="border-collapse:collapse;padding:0px;vertical-align:top;width:242px;height:auto!important">
+                                      <tbody>
+                                        <tr style="padding:0px;vertical-align:top">
+                                          <th style="margin:0px;font-size:16px;font-weight:400;line-height:1.3;padding:0px">
+                                            <table style="border-collapse:collapse;padding:0px;vertical-align:top;width:242px;height:auto!important">
+                                              <tbody>
+                                                <tr style="padding:0px;vertical-align:top">
+                                                  <td height="30" style="margin:0px;color:rgb(49,54,83);font-size:30px;line-height:30px;padding:0px;vertical-align:top;word-wrap:break-word;border-collapse:collapse">&nbsp;</td>
+                                                </tr>
+                                              </tbody>
+                                            </table>
+                                            <h4 style="margin:0px 0px 5px;line-height:1.3;padding:0px;text-align:left;word-wrap:normal">Booking Date Time</h4>
+                                            <p style="margin:0px 0px 20px;line-height:1.3;padding:0px;text-align:left">{{ booking_date_time }}</p>
+                                          </th>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </th>
+                                </tr>
+                              </tbody>
+                            </table>
+                            
+                            <tr style="padding:0px;text-align:left;vertical-align:top">
+                          <td style="margin:0px;font-size:16px;line-height:1.3;padding:0px;vertical-align:top;word-wrap:break-word;border-collapse:collapse">
+                            <table  style="border-collapse:collapse;padding:0px;vertical-align:top;width:544px;height:auto!important">
+                              <tbody>
+                                <tr style="padding:0px;vertical-align:top">
+                                  <th style="margin:0px auto;font-size:16px;font-weight:400;line-height:1.3;padding:0px 0px 10px 30px;width:242px">
+                                    <table style="border-collapse:collapse;padding:0px;vertical-align:top;width:242px;height:auto!important">
+                                      <tbody>
+                                        <tr style="padding:0px;vertical-align:top">
+                                          <th style="margin:0px;font-size:16px;font-weight:400;line-height:1.3;padding:0px">
+                                            <table style="border-collapse:collapse;padding:0px;vertical-align:top;width:242px;height:auto!important">
+                                              <tbody>
+                                                <tr style="padding:0px;vertical-align:top">
+                                                </tr>
+                                              </tbody>
+                                            </table>
+                                            <h4 style="margin:0px 0px 5px;line-height:1.3;padding:0px;text-align:left;word-wrap:normal">Points Refunded</h4>
+                                            <p style="margin:0px 0px 20px;line-height:1.3;padding:0px;text-align:left">{{ points_refunded }}</p>
+                                          </th>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </th>
+                                  <th style="margin:0px auto;font-size:16px;font-weight:400;line-height:1.3;padding:0px 30px 10px 0px;width:242px">
+                                    <table style="border-collapse:collapse;padding:0px;vertical-align:top;width:242px;height:auto!important">
+                                      <tbody>
+                                        <tr style="padding:0px;vertical-align:top">
+                                          <th style="margin:0px;font-size:16px;font-weight:400;line-height:1.3;padding:0px">
+                                            <table style="border-collapse:collapse;padding:0px;vertical-align:top;width:242px;height:auto!important">
+                                              <tbody>
+                                                <tr style="padding:0px;vertical-align:top">
+                                                </tr>
+                                              </tbody>
+                                            </table>
+                                            <h4 style="margin:0px 0px 5px;line-height:1.3;padding:0px;text-align:left;word-wrap:normal">Points Balance</h4>
+                                            <p style="margin:0px 0px 20px;line-height:1.3;padding:0px;text-align:left">{{ points_balance }}</p>
+                                          </th>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </th>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                
                 <p>We hope to see you at future classes. If you have any questions or concerns, please feel free to reach out to us.</p>
                 <p>Best regards,<br>The Strength Yard Team</p>
             </td>
@@ -38,4 +226,7 @@
         </tr>
     </table>
 </body>
+<script>
+
+</script>
 </html>
