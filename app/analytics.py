@@ -171,7 +171,7 @@ def getUserDemographics():
 
         # Create a dictionary with key value pairs to store the total number of users for each Age Group
         totalNumberOfUsersForEachAgeGroup = {
-            "13-17": 0,
+            "17 and below": 0,
             "18-24": 0,
             "25-34": 0,
             "35-44": 0,
@@ -190,26 +190,27 @@ def getUserDemographics():
         
         # Loop through the allUsers list and derive the age from the DateOfBirth for each User. Then, add the count into the respective Age Group. Also, check the Gender and add the count in the respective gender
         for selectedUser in allUsers:
-            # Calculate the age of this User
-            userAge = datetime.now().year - selectedUser.DateOfBirth.year
-            
-            # Check the age of this User and add the count into the respective Age Group
-            if userAge >= 13 and userAge <= 17:
-                totalNumberOfUsersForEachAgeGroup["13-17"] += 1
-            elif userAge >= 18 and userAge <= 24:
-                totalNumberOfUsersForEachAgeGroup["18-24"] += 1
-            elif userAge >= 25 and userAge <= 34:
-                totalNumberOfUsersForEachAgeGroup["25-34"] += 1
-            elif userAge >= 35 and userAge <= 44:
-                totalNumberOfUsersForEachAgeGroup["35-44"] += 1
-            elif userAge >= 45 and userAge <= 54:
-                totalNumberOfUsersForEachAgeGroup["45-54"] += 1
-            elif userAge >= 55 and userAge <= 64:
-                totalNumberOfUsersForEachAgeGroup["55-64"] += 1
-            elif userAge >= 65 and userAge <= 74:
-                totalNumberOfUsersForEachAgeGroup["65-74"] += 1
-            elif userAge >= 75:
-                totalNumberOfUsersForEachAgeGroup["75+"] += 1
+            if selectedUser.DateOfBirth != None:
+                # Calculate the age of this User
+                userAge = datetime.now().year - selectedUser.DateOfBirth.year
+
+                # Check the age of this User and add the count into the respective Age Group
+                if userAge <= 17:
+                    totalNumberOfUsersForEachAgeGroup["17 and below"] += 1
+                elif userAge >= 18 and userAge <= 24:
+                    totalNumberOfUsersForEachAgeGroup["18-24"] += 1
+                elif userAge >= 25 and userAge <= 34:
+                    totalNumberOfUsersForEachAgeGroup["25-34"] += 1
+                elif userAge >= 35 and userAge <= 44:
+                    totalNumberOfUsersForEachAgeGroup["35-44"] += 1
+                elif userAge >= 45 and userAge <= 54:
+                    totalNumberOfUsersForEachAgeGroup["45-54"] += 1
+                elif userAge >= 55 and userAge <= 64:
+                    totalNumberOfUsersForEachAgeGroup["55-64"] += 1
+                elif userAge >= 65 and userAge <= 74:
+                    totalNumberOfUsersForEachAgeGroup["65-74"] += 1
+                elif userAge >= 75:
+                    totalNumberOfUsersForEachAgeGroup["75+"] += 1
             
             if selectedUser.Gender == "M":
                 genderBreakdown["Male"] += 1
@@ -218,6 +219,8 @@ def getUserDemographics():
             else:
                 genderBreakdown["Others"] += 1
         
+        print(totalNumberOfUsersForEachAgeGroup)
+        print(genderBreakdown)
         return jsonify(
             {
                 "Age Demographics": totalNumberOfUsersForEachAgeGroup,
