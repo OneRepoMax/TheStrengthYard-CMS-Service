@@ -6,7 +6,7 @@ import datetime
 from app.token import confirm_token, generate_token
 from app.email import send_email
 from app.models import User, IndemnityForm, MembershipRecord, Payment, MembershipLog
-from app.token import token_required
+from app.token import token_required, admin_protected
 
 @app.route("/user/test")
 def testUser():
@@ -28,7 +28,7 @@ def login():
         # Generate the JWT token
         # Set the expiration time (e.g., 1 hour from now)
         expiration_time = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
-        token = jwt.encode({'email': email, 'exp': expiration_time}, app.config['JWT_SECRET_KEY'], algorithm='HS256')
+        token = jwt.encode({'email': email, 'userType':user.UserType , 'exp': expiration_time}, app.config['JWT_SECRET_KEY'], algorithm='HS256')
 
         return jsonify(user.jsonMinInfo(), {'token': token, 'exp': expiration_time})
     else:
@@ -36,7 +36,7 @@ def login():
 
 # Function and Route for getting All Users in the DB
 @app.route("/user")
-@token_required
+@admin_protected
 def getAllUser(current_user):
     userList = User.query.all()
     
@@ -56,7 +56,7 @@ def getUserByID(current_user, id: int):
 
 # Function and Route to Create a new User (USE THIS FOR STAFF 1RATION that does not need indemnity form)
 @app.route("/user", methods=['POST'])
-@token_required
+@admin_protected
 def createUser(current_user):
     """
     Sample Request
@@ -186,7 +186,7 @@ def updateUser(current_user, id: int):
     
 #Function and Route to Delete a User by ID
 @app.route("/user/<int:id>", methods=['DELETE'])
-@token_required
+@admin_protected
 def deleteUser(current_user, id: int):
     try:
         user = User.query.filter_by(UserId=id).first()

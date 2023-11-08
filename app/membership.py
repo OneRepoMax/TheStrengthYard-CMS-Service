@@ -5,7 +5,7 @@ import requests, json
 from os import environ
 from app.auth import get_access_token
 from app.models import Memberships, MembershipRecord, MembershipLog, User, MembershipClassMapping, Class
-from app.token import token_required
+from app.token import token_required, admin_protected
 
 client_id = environ.get('PAYPAL_CLIENT_ID')
 client_secret = environ.get('PAYPAL_CLIENT_SECRET')
@@ -65,7 +65,7 @@ def getMembershipByID(current_user, id: int):
 
 # Function and Route to Create a new Membership (With PayPal Integration)
 @app.route("/memberships", methods=['POST'])
-@token_required
+@admin_protected
 def createMembership(current_user):
     """
     Sample Request
@@ -262,7 +262,7 @@ def getAllPlansPayPal(current_user):
 
 # Function and Route to Update a Membership by ID
 @app.route("/memberships/<int:id>", methods=['PUT'])
-@token_required
+@admin_protected
 def updateMembership(current_user, id: int):
     """
     Sample Request
@@ -303,7 +303,7 @@ def updateMembership(current_user, id: int):
 
 #Function and Route to Delete a Membership by ID
 @app.route("/memberships/<int:id>", methods=['DELETE'])
-@token_required
+@admin_protected
 def deleteMembership(current_user, id: int):
     try:
         membership = Memberships.query.filter_by(MembershipTypeId=id).first()
@@ -509,7 +509,7 @@ def createMembershipRecord(current_user):
     
 # Function and Route to Update a Membership Record by ID
 @app.route("/membershiprecord/<int:id>", methods=['PUT'])
-@token_required
+@admin_protected
 def updateMembershipRecord(current_user, id: int):
     """
     Sample Request
@@ -552,7 +552,7 @@ def updateMembershipRecord(current_user, id: int):
     
 # Function and Route to Delete a Membership Record by ID
 @app.route("/membershiprecord/<int:id>", methods=['DELETE'])
-@token_required
+@admin_protected
 def deleteMembershipRecord(current_user, id: int):
     try:
         # Check if the Membership Record exists first
@@ -613,7 +613,7 @@ def deleteMembershipRecord(current_user, id: int):
     
 # Function and Route to create a new Membership Log
 @app.route("/membershiplog", methods=['POST'])
-@token_required
+@admin_protected
 def createMembershipLog(current_user):
     """
     Sample PAUSE Request
@@ -993,7 +993,7 @@ def getMembershipLogsByUserID(current_user, id: int):
 
 # Function and Route to create a new MembershipClassMapping
 @app.route("/membershipclassmapping", methods=['POST'])
-@token_required
+@admin_protected
 def createMembershipClassMapping(current_user):
     """
     Sample Request
@@ -1050,7 +1050,7 @@ def getAllMembershipClassMappings(current_user):
 
 # Function and Route to Delete a MembershipClassMapping by ID
 @app.route("/membershipclassmapping/<int:id>", methods=['DELETE'])
-@token_required
+@admin_protected
 def deleteMembershipClassMapping(current_user, id: int):
     try:
         membershipClassMapping = MembershipClassMapping.query.filter_by(MembershipClassMappingId=id).first()

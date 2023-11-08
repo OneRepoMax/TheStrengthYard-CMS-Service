@@ -6,11 +6,11 @@ import requests, json
 from app.models import MembershipRecord, Class, ClassSlot, Booking, User, Points, Memberships, MembershipClassMapping
 from app.email import send_email
 from app.user import verifyEmail
-from app.token import token_required
+from app.token import token_required, admin_protected
 
 # Function and Route to Create a new Class
 @app.route("/class", methods=['POST'])
-@token_required
+@admin_protected
 def createClass(current_user):
     """
     Sample Request
@@ -64,7 +64,7 @@ def getClassByID(current_user, id: int):
 
 # Function and Route to update a Class by ID
 @app.route("/class/<int:id>", methods=['PUT'])
-@token_required
+@admin_protected
 def updateClassByID(current_user, id: int):
     """
     Sample Request
@@ -103,7 +103,7 @@ def updateClassByID(current_user, id: int):
 
 # Function and Route to update a Class Slot by ID
 @app.route("/classSlot/<int:id>", methods=['PUT'])
-@token_required
+@admin_protected
 def updateClassSlotByID(current_user, id: int):
     """
     Sample Request
@@ -142,7 +142,7 @@ def updateClassSlotByID(current_user, id: int):
 
 # Function and Route to delete a Class by ID
 @app.route("/class/<int:id>", methods=['DELETE'])
-@token_required
+@admin_protected
 def deleteClassByID(current_user, id: int):
     # Check if class exists
     classExists = Class.query.filter_by(ClassId=id).first()
@@ -157,7 +157,7 @@ def deleteClassByID(current_user, id: int):
 
 # Function and Route to create new Class Slots by Class ID
 @app.route("/class/<int:id>/classSlot", methods=['POST'])
-@token_required
+@admin_protected
 def createClassSlotByClassID(current_user, id: int):
     """
     Sample Request
@@ -280,7 +280,7 @@ def getClassSlotByDate(current_user, date: str):
 
 # Function and Route to CANCEL a ClassSlot by ID, and send email notifications to all users who have booked the class slot, and refund their points
 @app.route("/classSlot/<int:id>", methods=['DELETE'])
-@token_required
+@admin_protected
 def deleteClassSlotByID(current_user, id: int):
     # Check if class exists
     classExists = ClassSlot.query.filter_by(ClassSlotId=id).first()
@@ -341,7 +341,7 @@ def deleteClassSlotByID(current_user, id: int):
 
 # Function and Route to delete a given list of ClassSlots
 @app.route("/classSlot/delete", methods=['POST'])
-@token_required
+@admin_protected
 def deleteClassSlots(current_user):
     """
     Sample Request
@@ -784,7 +784,7 @@ def createNewBooking2(current_user):
     
 # Function and Route to get Points history by Membership Record ID (For Staff view)
 @app.route("/pointsHistory/<int:id>")
-@token_required
+@admin_protected
 def getPointsHistoryByMembershipRecordID(current_user, id: int):
     pointsHistoryList = Points.query.filter_by(MembershipRecordId=id).all()
     # Return all points history with the given membership record ID, if not found, return 406

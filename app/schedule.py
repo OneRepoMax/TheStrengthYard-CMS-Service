@@ -2,7 +2,7 @@ from app import app, db
 from flask import jsonify, request, url_for, render_template
 from datetime import datetime
 from app.models import Schedule
-from app.token import token_required
+from app.token import token_required, admin_protected
 
 # Function and Route for getting All Schedule in the DB
 @app.route("/schedule")
@@ -25,7 +25,7 @@ def getScheduleByID(current_user, id: int):
 
 # Function and Route to create a new schedule
 @app.route("/schedule", methods=['POST'])
-@token_required
+@admin_protected
 def createSchedule(current_user):
     """
     Sample Request
@@ -56,7 +56,7 @@ def createSchedule(current_user):
 
 #Function and Route to update a schedule
 @app.route("/schedule/<int:id>", methods=['PUT'])
-@token_required
+@admin_protected
 def updateSchedule(current_user):
      
     """
@@ -94,7 +94,7 @@ def updateSchedule(current_user):
     
 # Function and Route to delete a schedule
 @app.route("/schedule/<int:id>", methods=['DELETE'])
-@token_required
+@admin_protected
 def deleteSchedule(current_user, id: int):
     schedule = Schedule.query.filter_by(ScheduleId=id).first()
     if schedule:

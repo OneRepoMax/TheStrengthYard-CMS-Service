@@ -6,12 +6,14 @@ import requests, json
 from os import environ
 from app.auth import get_access_token
 from app.models import Memberships, MembershipRecord, MembershipLog, User, MembershipClassMapping, Class, Booking, ClassSlot
+from app.token import admin_protected
 
 # ANALYTICS ROUTES START HERE
 
 # Function and Route to get total count of users in TSY DB
 @app.route("/analytics/totalusers", methods=['GET'])
-def getTotalUsers():
+@admin_protected
+def getTotalUsers(current_user):
     try:
         totalUsers = User.query.count()
         return jsonify(totalUsers), 200
@@ -22,7 +24,8 @@ def getTotalUsers():
     
 # Function and Route to get total number of users in TSY DB with different classifications
 @app.route("/analytics/userbreakdown", methods=['GET'])
-def getTotalUsersWithMembership():
+@admin_protected
+def getTotalUsersWithMembership(current_user):
     # The final outcome should be a list of dictionaries, with each dictionary containing the following, e.g.:
     # ["Total Users in DB": 33, "Total Users with an Active Membership Record": 22, "Total Users without any Membership Record": 11, "Total Users with 'Pending Payment' Membership Records": 2, "Total Users with 'Expired' Membership Records": 3, "Total Users with 'Terminated' Membership Records": 17]
 
@@ -72,7 +75,8 @@ def getTotalUsersWithMembership():
 
 # Function and Route to get total number of new Membership Records created in this current month
 @app.route("/analytics/newmemberships/thismonth", methods=['GET'])
-def getTotalNewMembershipsThisMonth():
+@admin_protected
+def getTotalNewMembershipsThisMonth(current_user):
     try:
         # Get the current month
         currentMonth = datetime.now().month
@@ -91,7 +95,8 @@ def getTotalNewMembershipsThisMonth():
 
 # Function and Route to check for each Class, the total number of bookings made for each Class in this current month
 @app.route("/analytics/totalbookings", methods=['GET'])
-def getTotalNumberOfBookingsForEachClassInCurrentMonth():
+@admin_protected
+def getTotalNumberOfBookingsForEachClassInCurrentMonth(current_user):
     try:
         # Get the current month
         currentMonth = datetime.now().month
@@ -164,7 +169,8 @@ def getTotalNumberOfBookingsForClass(ClassId: int, currentMonth: int, currentYea
 
 # Function and Route to get User Demographics statistics e.g. Age Group and Gender
 @app.route("/analytics/userdemographics", methods=['GET'])
-def getUserDemographics():
+@admin_protected
+def getUserDemographics(current_user):
     try:
         # Get all the Users
         allUsers = User.query.all()
@@ -234,7 +240,8 @@ def getUserDemographics():
     
 ## Returns unique bookings for the current month
 @app.route("/analytics/uniquemonthlybookings", methods=['GET'])
-def monthlyBookings():
+@admin_protected
+def monthlyBookings(current_user):
     try:
         # Get the current month
         currentMonth = datetime.now().month
@@ -258,7 +265,8 @@ def monthlyBookings():
         
 ## Returns unique bookings for the current month
 @app.route("/analytics/peakTimings/<int:classId>", methods=['GET'])
-def peakTimings(classId):
+@admin_protected
+def peakTimings(current_user, classId):
     try:
         # Get the current month
         currentMonth = datetime.now().month
