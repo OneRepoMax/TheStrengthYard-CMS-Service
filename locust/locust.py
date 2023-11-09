@@ -2,7 +2,7 @@ import time
 from locust import HttpUser, task, between
 
 class UserClient(HttpUser):
-    wait_time = between(1, 10)
+    wait_time = between(10, 30)
     host = "https://tsy-iabs.online"
 
     default_headers = {
@@ -25,7 +25,7 @@ class UserClient(HttpUser):
             else:
                 resp.failure("Login failed")
             
-        time.sleep(3)
+        time.sleep(5)
 
     
     @task
