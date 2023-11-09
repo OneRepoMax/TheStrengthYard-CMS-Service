@@ -2,7 +2,7 @@ import time
 from locust import HttpUser, task, between
 
 class UserClient(HttpUser):
-    wait_time = between(10, 30)
+    wait_time = between(5, 15)
     host = "https://tsy-iabs.online"
 
     default_headers = {
@@ -13,6 +13,7 @@ class UserClient(HttpUser):
     }
 
     def on_start(self):
+        time.sleep(5)
         with self.client.post(
             "/login", 
             json={"EmailAddress":"admin@tsy.com", "Password":"12345678"},
@@ -24,7 +25,6 @@ class UserClient(HttpUser):
                 resp.success()
             else:
                 resp.failure("Login failed")
-            
         time.sleep(5)
 
     
@@ -33,6 +33,7 @@ class UserClient(HttpUser):
         with self.client.get(
             "/protected",
             headers=UserClient.default_headers,
+            catch_response=True
         ) as resp:
             if resp.status_code == 200:
                 resp.success()
@@ -44,6 +45,7 @@ class UserClient(HttpUser):
         with self.client.get(
             "/memberships/public",
             headers=UserClient.default_headers,
+            catch_response=True
         ) as resp:
             if resp.status_code == 200:
                 resp.success()
@@ -55,6 +57,7 @@ class UserClient(HttpUser):
         with self.client.get(
             "/classSlot",
             headers=UserClient.default_headers,
+            catch_response=True
         ) as resp:
             if resp.status_code == 200:
                 resp.success()
@@ -66,6 +69,7 @@ class UserClient(HttpUser):
         with self.client.get(
             "/membershiplog/2",
             headers=UserClient.default_headers,
+            catch_response=True
         ) as resp:
             if resp.status_code == 200:
                 resp.success()
@@ -77,6 +81,7 @@ class UserClient(HttpUser):
         with self.client.get(
             "/membershiprecord/1",
             headers=UserClient.default_headers,
+            catch_response=True
         ) as resp:
             if resp.status_code == 200:
                 resp.success()
@@ -88,6 +93,7 @@ class UserClient(HttpUser):
         with self.client.get(
             "/pointsHistory/2",
             headers=UserClient.default_headers,
+            catch_response=True
         ) as resp:
             if resp.status_code == 200:
                 resp.success()
@@ -99,6 +105,7 @@ class UserClient(HttpUser):
         with self.client.get(
             "/payments/history/membershiprecord/2",
             headers=UserClient.default_headers,
+            catch_response=True
         ) as resp:
             if resp.status_code == 200:
                 resp.success()
