@@ -509,7 +509,7 @@ def createMembershipRecord(current_user):
     
 # Function and Route to Update a Membership Record by ID
 @app.route("/membershiprecord/<int:id>", methods=['PUT'])
-@admin_protected
+@token_required
 def updateMembershipRecord(current_user, id: int):
     """
     Sample Request
