@@ -66,4 +66,5 @@ jobs:
         version_label: "docker-app-${{ steps.format-time.outputs.replaced }}"
         region: ap-southeast-1
         deployment_package: deploy.zip
-    
+  
+# Test deployment 03/12/2023
